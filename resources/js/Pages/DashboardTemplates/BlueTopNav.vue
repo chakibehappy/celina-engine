@@ -2,7 +2,7 @@
   <div class="w-full h-full max-w-5xl bg-[#f8fafc] rounded-lg shadow-2xl overflow-hidden flex flex-col text-slate-800">
     <header class="h-16 bg-blue-600 px-6 flex items-center justify-between shadow-lg relative z-50">
       <div class="flex items-center space-x-8">
-        <div class="text-white font-bold tracking-tighter text-xl">APP_LOGO</div>
+        <div class="text-white font-bold tracking-tighter text-xl">CELINA_PRO</div>
         <nav class="flex space-x-6">
           <div v-for="p in pages" :key="p.id" class="relative" v-click-outside="() => closeMenu(p.id)">
             <button 
@@ -40,12 +40,24 @@
         </nav>
       </div>
     </header>
-    <main v-if="activePage.showPage" class="flex-grow p-10">
-      <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-light text-slate-400 mb-6 italic">{{ activePage?.name }}</h1>
-        <div class="bg-white border-2 border-dashed border-blue-100 rounded-2xl h-80 flex items-center justify-center text-blue-200">
-          Canvas: {{ activePage?.slug }}
-        </div>
+
+    <main v-if="activePage?.showPage" class="flex-grow flex flex-col overflow-hidden">
+      
+      <div class="flex-grow overflow-y-auto custom-scroll">
+        <ForgeElement 
+            v-for="el in (activePage.elements || [])" 
+            :key="el.id" 
+            :element="el" 
+            :selectedId="selectedElement"
+            :activePage="activePage"
+            @select="$emit('selectElement', $event)"
+            @updateTree="$emit('recordHistory')"
+            :database="database"
+            :mode="mode"
+          />
+          <div v-if="!activePage.elements?.length" class="h-80 flex items-center justify-center border-2 border-dashed border-blue-100 rounded-2xl text-blue-200 font-mono text-[10px] uppercase tracking-widest">
+            Canvas Empty: {{ activePage?.slug }}
+          </div>
       </div>
     </main>
   </div>
@@ -53,37 +65,32 @@
 
 <script setup>
 import { ref } from 'vue';
-const props = defineProps(['activePage', 'pages', 'activePageId', 'expandedNodes']);
-const emit = defineEmits(['update:activePageId', 'toggleExpand']);
+import ForgeElement from '../components/ForgeElement.vue';
+
+const props = defineProps([
+  'activePage', 'pages', 'activePageId', 'expandedNodes', 
+  'selectedElement', 'database', 'mode'
+]);
+const emit = defineEmits(['update:activePageId', 'toggleExpand', 'selectElement', 'recordHistory']);
 
 const activeMenu = ref(null);
-
 const toggleMenu = (id) => {
   activeMenu.value = activeMenu.value === id ? null : id;
   emit('toggleExpand', id);
 };
-
-const closeMenu = (id) => {
-  if (activeMenu.value === id) activeMenu.value = null;
-};
-
+const closeMenu = (id) => { if (activeMenu.value === id) activeMenu.value = null; };
 const selectPage = (id) => {
   emit('update:activePageId', id);
   activeMenu.value = null;
 };
 
-// Custom directive for auto-close
 const vClickOutside = {
   mounted(el, binding) {
     el.clickOutsideEvent = (event) => {
-      if (!(el === event.target || el.contains(event.target))) {
-        binding.value();
-      }
+      if (!(el === event.target || el.contains(event.target))) binding.value();
     };
     document.addEventListener('click', el.clickOutsideEvent);
   },
-  unmounted(el) {
-    document.removeEventListener('click', el.clickOutsideEvent);
-  },
+  unmounted(el) { document.removeEventListener('click', el.clickOutsideEvent); },
 };
 </script>

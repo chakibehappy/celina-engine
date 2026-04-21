@@ -19,7 +19,6 @@
               <div class="text-[9px] font-black text-indigo-400 uppercase mb-2 px-2 tracking-widest">{{ p.name }}</div>
               <div class="space-y-1">
                 <div v-for="child in p.children" :key="child.id">
-                  
                   <button 
                     @click="child.children.length ? null : $emit('update:activePageId', child.id)"
                     :class="[
@@ -44,7 +43,6 @@
               </div>
             </div>
           </div>
-
           <span v-else class="absolute left-16 px-2 py-1 bg-indigo-600 text-[10px] font-bold rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
             {{ p.name }}
           </span>
@@ -52,29 +50,31 @@
       </nav>
     </aside>
 
-    <main v-if="activePage.showPage" class="flex-grow p-10 bg-[#0f172a]">
-      <div class="mb-12 flex justify-between items-start">
-        <div>
-          <div class="flex items-center space-x-2 mb-2">
-            <div class="h-1 w-1 rounded-full bg-indigo-500 animate-pulse"></div>
-            <span class="text-[9px] font-mono text-indigo-400 uppercase tracking-[0.4em]">Node // {{ activePage?.slug }}</span>
-          </div>
-          <h1 class="text-4xl font-black tracking-tighter uppercase italic">{{ activePage?.name }}</h1>
-        </div>
-        <div class="bg-slate-800/50 border border-slate-700 rounded px-3 py-1 text-[10px] font-mono text-slate-500">
-          SECURE_ACCESS_GRIP_V1
-        </div>
-      </div>
-
-      <div class="bg-[#020617] rounded-2xl p-10 border border-slate-800 border-dashed min-h-[350px] flex flex-col items-center justify-center group hover:border-indigo-500/50 transition-colors">
+    <main v-if="activePage?.showPage" class="flex-grow flex flex-col bg-[#0f172a] overflow-y-auto custom-scroll">
+      <ForgeElement 
+          v-for="el in (activePage.elements || [])" 
+          :key="el.id" 
+          :element="el" 
+          :selectedId="selectedElement"
+          :activePage="activePage"
+          @select="$emit('selectElement', $event)"
+          @updateTree="$emit('recordHistory')"
+          :database="database"
+          :mode="mode"
+        />
+        <div v-if="!activePage.elements?.length" class="h-full min-h-[300px] flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-2xl group hover:border-indigo-500/50 transition-colors">
           <div class="w-16 h-1 bg-slate-800 mb-8 group-hover:bg-indigo-500 transition-colors"></div>
-          <span class="text-slate-600 font-mono text-xs uppercase tracking-[0.2em]">Mount point for {{ activePage?.name }} modules</span>
-      </div>
+          <span class="text-slate-600 font-mono text-xs uppercase tracking-[0.2em]">Mount point for modules</span>
+        </div>
     </main>
   </div>
 </template>
 
 <script setup>
-defineProps(['activePage', 'pages', 'activePageId', 'expandedNodes']);
-defineEmits(['update:activePageId', 'toggleExpand']);
+import ForgeElement from '../components/ForgeElement.vue';
+const props = defineProps([
+  'activePage', 'pages', 'activePageId', 'expandedNodes', 
+  'selectedElement', 'database', 'mode'
+]);
+const emit = defineEmits(['update:activePageId', 'toggleExpand', 'selectElement', 'recordHistory']);
 </script>

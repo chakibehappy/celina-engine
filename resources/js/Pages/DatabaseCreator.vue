@@ -60,17 +60,18 @@ const saveProject = async () => {
         data: {
           manifest: {
             database: nodes.value.map(node => ({
-            table: node.name.toLowerCase(),
-            columns: node.columns.map(col => ({
-              name: col.name,
-              type: col.type.toLowerCase() === 'uuid' ? 'increments' : col.type.toLowerCase(),
-              unique: col.isPk || false,
-              constrained: col.isFk ? "detect" : null 
-            })),
-            logic: {
-              auth: node.name.toLowerCase() === 'users',
-              timestamp: true
-            }
+              table: node.name.toLowerCase(),
+              columns: node.columns.map(col => ({
+                name: col.name,
+                type: col.type.toLowerCase() === 'uuid' ? 'increments' : col.type.toLowerCase(),
+                unique: col.isPk || false,
+                constrained: col.isFk ? "detect" : null 
+              })),
+              records: node.records || [],
+              logic: {
+                auth: node.name.toLowerCase() === 'users',
+                timestamp: true
+              }
           })),
         },
         ui_state: {
@@ -322,46 +323,42 @@ const autoLinkNodes = (sql, allNodes) => {
     const newConnections = [];
     
     // 1. PRIMARY: Explicit Foreign Key Constraints
-    // This looks for: CONSTRAINT `fk_name` FOREIGN KEY (`local_col`) REFERENCES `target_table` (`target_col`)
-    const fkRegex = /FOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/g;
+    const fkRegex = /FOREIGN KEY \(`(\w+)`\) REFERENCES `(\w+)` \(`(\w+)`\)/gi; // added 'i' flag
     let match;
     while ((match = fkRegex.exec(sql)) !== null) {
         const sourceColName = match[1];
-        const targetTableName = match[2].toUpperCase();
+        const targetTableName = match[2];
         
-        // Find which node contains this FK definition
-        const fromNode = allNodes.find(n => n.columns.some(c => c.name === sourceColName));
-        const toNode = allNodes.find(n => n.name === targetTableName);
+        // Use case-insensitive search for the nodes
+        const fromNode = allNodes.find(n => 
+            n.columns.some(c => c.name.toLowerCase() === sourceColName.toLowerCase())
+        );
+        const toNode = allNodes.find(n => 
+            n.name.toLowerCase() === targetTableName.toLowerCase()
+        );
 
         if (fromNode && toNode) {
             newConnections.push({ fromId: toNode.id, toId: fromNode.id });
-            const col = fromNode.columns.find(c => c.name === sourceColName);
-            if (col) { 
-                col.isFk = true; 
-                col.fixed = true; 
-            }
+            const col = fromNode.columns.find(c => c.name.toLowerCase() === sourceColName.toLowerCase());
+            if (col) { col.isFk = true; col.fixed = true; }
         }
     }
 
-    // 2. SECONDARY: Conservative Heuristic (Only if no formal FKs were found for a node)
+    // 2. SECONDARY: Heuristic (Pattern: table_id)
     allNodes.forEach(targetNode => {
-        // Only run heuristic if this node hasn't been connected via formal FKs yet
         const alreadyLinked = newConnections.some(c => c.toId === targetNode.id);
         
         if (!alreadyLinked) {
             targetNode.columns.forEach(col => {
-                // Ignore columns like 'sales_id' if they aren't meant to be connections
-                // We check for table_id pattern but ensure it's not the PK
-                if (col.name.endsWith('_id') && !col.isPk) {
-                    const potentialTableName = col.name.replace('_id', '').toUpperCase();
-                    const sourceNode = allNodes.find(n => n.name === potentialTableName);
+                if (col.name.toLowerCase().endsWith('_id') && !col.isPk) {
+                    const potentialName = col.name.toLowerCase().replace('_id', '');
                     
-                    if (sourceNode && !newConnections.some(c => c.toId === targetNode.id && c.fromId === sourceNode.id)) {
-                        // Double check: In logistics, label columns are often VARCHAR, 
-                        // while true IDs are usually INT/BIGINT/UUID.
-                        const isLikelyActualId = col.type !== 'VARCHAR'; 
-                        
-                        if (isLikelyActualId) {
+                    // Match potentialName against node names (case-insensitive)
+                    const sourceNode = allNodes.find(n => n.name.toLowerCase() === potentialName);
+                    
+                    if (sourceNode) {
+                        // Avoid self-referencing links unless explicit
+                        if (sourceNode.id !== targetNode.id) {
                             newConnections.push({ fromId: sourceNode.id, toId: targetNode.id });
                             col.isFk = true;
                         }
@@ -373,9 +370,127 @@ const autoLinkNodes = (sql, allNodes) => {
     
     return newConnections;
 };
+
+// const parseSqlToNodes = (sql) => {
+//     const newNodes = [];
+//     const newDatabase = [];
+//     const tableRegex = /CREATE TABLE `(\w+)`\s*\(([\s\S]+?)\)\s*ENGINE/gi;
+//     let match;
+//     let index = 0;
+
+//     // 1. TABLE PARSER 
+//     while ((match = tableRegex.exec(sql)) !== null) {
+//         const tableName = match[1];
+//         const columnBlock = match[2];
+//         const columnLines = columnBlock.split(/,\s*\n/);
+//         const columns = [];
+
+//         columnLines.forEach(line => {
+//             // const colMatch = line.trim().match(/^`(\w+)` (\w+)(\([\d,]+\))?/);
+//             const colMatch = line.trim().match(/^`(\w+)`\s+([a-zA-Z]+)/);
+//             if (colMatch) {
+//                 const colName = colMatch[1];
+//                 let rawType = colMatch[2].toUpperCase();
+//                 let type = 'VARCHAR';
+                
+//                 if (rawType.includes('INT')) type = rawType.includes('BIG') ? 'BIGINT' : 'INT';
+//                 if (rawType.includes('TEXT')) type = rawType.includes('LONG') ? 'LONGTEXT' : 'TEXT';
+//                 if (rawType.includes('DECIMAL') || rawType === 'FLOAT') type = 'DECIMAL';
+//                 if (rawType === 'DOUBLE') type = 'DOUBLE';
+//                 if (rawType === 'DATETIME') type = 'DATETIME';
+//                 if (rawType.includes('TIMESTAMP')) type = 'TIMESTAMP';
+//                 if (rawType === 'TINYINT' && line.includes('(1)')) type = 'BOOLEAN';
+//                 if (rawType.includes('BLOB')) type = 'BLOB';
+//                 if (rawType.includes('JSON')) type = 'JSON';
+
+//                 const isPk = line.toLowerCase().includes('primary key') || colName === 'id';
+//                 columns.push({
+//                     id: Math.random().toString(36).substr(2, 9),
+//                     name: colName,
+//                     type: type,
+//                     fixed: isPk,
+//                     isPk: isPk
+//                 });
+//             }
+//         });
+
+//         newNodes.push({
+//             id: Date.now() + index,
+//             name: tableName.toUpperCase(),
+//             x: (index % 4) * 350 + 50,
+//             y: Math.floor(index / 4) * 450 + 50,
+//             columns: columns,
+//             records: [] // Initializing for data storage
+//         });
+//         newDatabase.push({
+//             table: tableName.toLowerCase(),
+//             columns: columns,
+//             records: []
+//         });
+//         index++;
+//     }
+
+//     // 2. DATA RECORD PARSER
+//     // Matches: INSERT INTO `table` (`col1`, `col2`) VALUES ('val1', 'val2');
+//     const insertRegex = /INSERT INTO `(\w+)` \((.+?)\) VALUES\s*([\s\S]+?);/g;
+
+//     let insertMatch;
+//     while ((insertMatch = insertRegex.exec(sql)) !== null) {
+//         const tableName = insertMatch[1].toUpperCase();
+//         const columns = insertMatch[2].replace(/`/g, '').split(',').map(c => c.trim());
+//         const valuesBlock = insertMatch[3].trim();
+
+//         // Match each row: (....)
+//         const rowRegex = /\(([\s\S]*?)\)/g;
+//         let rowMatch;
+
+//         // const targetNode = newNodes.find(n => n.name === tableName);
+//         const targetTable = newDatabase.find(t => t.table.toUpperCase() === tableName);
+//         if (!targetTable) continue;
+
+//         while ((rowMatch = rowRegex.exec(valuesBlock)) !== null) {
+//             console.log("Hello!!");
+//             const rawRow = rowMatch[1];
+
+//             // Split values safely (handles commas inside quotes)
+//             const values = rawRow.match(/'(?:\\'|[^'])*'|NULL|[^,]+/g)
+//                 .map(v => v.trim().replace(/^'|'$/g, ''));
+
+//             const record = {};
+//             columns.forEach((col, i) => {
+//                 record[col] = values[i] ?? null;
+//             });
+
+//             // targetNode.records.push(record);
+//             targetTable.records.push(record);
+//         }
+//     }
+
+//     // 3. CHECK PK PASS
+//     const alterPkRegex = /ALTER TABLE `(\w+)` ADD PRIMARY KEY \(`(\w+)`\)/g;
+//     while ((match = alterPkRegex.exec(sql)) !== null) {
+//         const node = newNodes.find(n => n.name === match[1].toUpperCase());
+//         if (node) {
+//             const col = node.columns.find(c => c.name === match[2]);
+//             if (col) { col.isPk = true; col.fixed = true; }
+//         }
+//     }
+
+//     // 4. FINALIZATION
+//     if (newNodes.length > 0) {
+//         if (confirm(`Detected ${newNodes.length} tables. Append to canvas?`)) {
+//             const autoConnections = autoLinkNodes(sql, newNodes);
+//             database.value = [...database.value, ...newDatabase];
+//             nodes.value = [...nodes.value, ...newNodes];
+//             connections.value = [...connections.value, ...autoConnections];
+//         }
+//     }
+// };
+
+
 const parseSqlToNodes = (sql) => {
     const newNodes = [];
-    const tableRegex = /CREATE TABLE `(\w+)` \(([\s\S]+?)\) ENGINE/g;
+    const tableRegex = /CREATE TABLE `(\w+)`\s*\(([\s\S]+?)\)\s*ENGINE/gi;
     let match;
     let index = 0;
 
@@ -383,11 +498,11 @@ const parseSqlToNodes = (sql) => {
     while ((match = tableRegex.exec(sql)) !== null) {
         const tableName = match[1];
         const columnBlock = match[2];
-        const columnLines = columnBlock.split(',\n');
+        const columnLines = columnBlock.split(/,\s*\n/);
         const columns = [];
 
         columnLines.forEach(line => {
-            const colMatch = line.trim().match(/^`(\w+)` (\w+)(\([\d,]+\))?/);
+            const colMatch = line.trim().match(/^`(\w+)`\s+([a-zA-Z]+)/);
             if (colMatch) {
                 const colName = colMatch[1];
                 let rawType = colMatch[2].toUpperCase();
@@ -416,30 +531,43 @@ const parseSqlToNodes = (sql) => {
 
         newNodes.push({
             id: Date.now() + index,
-            name: tableName.toUpperCase(),
+            name: tableName, // ✅ keep original
             x: (index % 4) * 350 + 50,
             y: Math.floor(index / 4) * 450 + 50,
             columns: columns,
-            records: [] // Initializing for data storage
+            records: []
         });
+
+
         index++;
     }
 
     // 2. DATA RECORD PARSER
-    // Matches: INSERT INTO `table` (`col1`, `col2`) VALUES ('val1', 'val2');
-    const insertRegex = /INSERT INTO `(\w+)` \((.+?)\) VALUES\s*\((.+?)\);/g;
+    const insertRegex = /INSERT INTO `(\w+)` \((.+?)\) VALUES\s*([\s\S]+?);/g;
+
     let insertMatch;
     while ((insertMatch = insertRegex.exec(sql)) !== null) {
-        const tableName = insertMatch[1].toUpperCase();
-        const columnsStr = insertMatch[2].replace(/`/g, '').split(',').map(s => s.trim());
-        const valuesStr = insertMatch[3].split(',').map(s => s.trim().replace(/^'|'$/g, ''));
+        const tableName = insertMatch[1]; // ✅ keep original
+        const columns = insertMatch[2].replace(/`/g, '').split(',').map(c => c.trim());
+        const valuesBlock = insertMatch[3].trim();
+
+        const rowRegex = /\(([\s\S]*?)\)/g;
+        let rowMatch;
 
         const targetNode = newNodes.find(n => n.name === tableName);
-        if (targetNode) {
+        if (!targetNode) continue;
+
+        while ((rowMatch = rowRegex.exec(valuesBlock)) !== null) {
+            const rawRow = rowMatch[1];
+
+            const values = rawRow.match(/'(?:\\'|[^'])*'|NULL|[^,]+/g)
+                .map(v => v.trim().replace(/^'|'$/g, ''));
+
             const record = {};
-            columnsStr.forEach((colName, i) => {
-                record[colName] = valuesStr[i];
+            columns.forEach((col, i) => {
+                record[col] = values[i] ?? null;
             });
+
             targetNode.records.push(record);
         }
     }
@@ -447,12 +575,13 @@ const parseSqlToNodes = (sql) => {
     // 3. CHECK PK PASS
     const alterPkRegex = /ALTER TABLE `(\w+)` ADD PRIMARY KEY \(`(\w+)`\)/g;
     while ((match = alterPkRegex.exec(sql)) !== null) {
-        const node = newNodes.find(n => n.name === match[1].toUpperCase());
+        const node = newNodes.find(n => n.name === match[1]);
         if (node) {
-            const col = node.columns.find(c => c.name === match[2]);
+            const col = node.columns.find(c => c.name.toUpperCase() === match[2].toUpperCase());
             if (col) { col.isPk = true; col.fixed = true; }
         }
     }
+
 
     // 4. FINALIZATION
     if (newNodes.length > 0) {
@@ -464,7 +593,6 @@ const parseSqlToNodes = (sql) => {
     }
 };
 
-// Fetch the active session name on mount
 const fetchActiveSession = async () => {
     try {
         const response = await axios.get('/get-active-project');
