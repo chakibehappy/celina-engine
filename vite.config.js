@@ -4,6 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+    base: '/celina-engine/build/',
     plugins: [
         tailwindcss(),
         laravel({

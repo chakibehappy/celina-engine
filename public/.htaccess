@@ -4,6 +4,7 @@
     </IfModule>
 
     RewriteEngine On
+    RewriteBase /celina-engine/
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
