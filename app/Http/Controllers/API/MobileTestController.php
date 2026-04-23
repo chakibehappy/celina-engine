@@ -39,25 +39,38 @@ class MobileTestController extends Controller
     {
         return response()->json([
             [
-                'label' => 'Home',
-                'icon'  => 'home',
-                'route' => 'home_screen'
+                'label'      => 'Home',
+                'icon'       => 'home',
+                'route'      => 'home_screen',
+                'icon_size'  => '26',
+                'show_label' => 'true',
+                'content_data' => '' 
             ],
             [
-                'label' => 'Chat',
-                'icon'  => 'chat_bubble',
-                'route' => 'chat_screen'
+                'label'      => 'Chat',
+                'icon'       => 'chat_bubble',
+                'route'      => 'chat_screen',
+                'icon_size'  => '24',
+                'show_label' => 'true',
+                'content_data' => ''
             ],
             [
-                'label' => 'Account',
-                'icon'  => 'person',
-                'route' => 'account_screen'
+                'label'      => 'Surprise',
+                'icon'       => 'globe',
+                'route'      => 'custom_webview_screen',
+                'icon_size'  => '24',
+                'show_label' => 'true',
+                // Testing with a URL first as requested
+                'content_data' => 'https://www.google.com' 
             ],
-            [
-                'label' => 'Account',
-                'icon'  => 'person',
-                'route' => 'account_screen'
-            ]
+            // [
+            //     'label'      => 'Account',
+            //     'icon'       => 'person',
+            //     'route'      => 'account_screen',
+            //     'icon_size'  => '24',
+            //     'show_label' => 'true',
+            //     'content_data' => ''
+            // ]
         ]);
     }
 
