@@ -264,101 +264,95 @@ class MobileTestController extends Controller
             <style>
                 :root {
                     --bg-color: #F8F9FE;
-                    --card-bg: #ffffff;
                     --purple-prime: #6C5CE7;
                     --purple-light: #a29bfe;
-                    --text-main: #2D3436;
-                    --text-secondary: #636E72;
+                    --text-white: #ffffff;
                     --accent-red: #ff7675;
-                    --accent-green: #00b894;
+                    --accent-green: #55efc4;
                 }
 
                 body { 
                     font-family: "Poppins", sans-serif; 
                     background: var(--bg-color); 
-                    color: var(--text-main); 
+                    color: var(--text-white); 
                     margin: 0; padding: 0; 
-                    text-align: center; 
                     display: flex; flex-direction: column; 
+                    justify-content: center; align-items: center;
                     height: 100vh; width: 100vw; 
                     overflow: hidden; 
                     box-sizing: border-box;
                     -webkit-user-select: none;
                 }
 
-                .container {
-                    background: var(--card-bg);
-                    margin: 20px;
-                    padding: 20px;
-                    border-radius: 25px;
-                    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.1);
-                    border: 1px solid rgba(108, 92, 231, 0.05);
-                    flex: 1;
-                    display: flex;
-                    flex-direction: column;
+                h3 { letter-spacing: 1.5px; color: var(--purple-light); margin-bottom: 5px; }
+
+                #timer { 
+                    font-size: 20px; color: var(--accent-red); 
+                    font-weight: 600; margin-bottom: 20px;
+                    text-shadow: 0 0 10px rgba(255, 118, 117, 0.3);
                 }
 
-                h3 { margin-top: 10px; font-size: 18px; letter-spacing: 1px; color: var(--purple-prime); }
-
-                #timer { font-size: 24px; color: var(--accent-red); font-weight: 600; margin-bottom: 15px; }
-
                 .board { 
-                    display: flex; justify-content: center; gap: 5px; 
-                    margin: 20px 0; min-height: 45px; 
+                    display: flex; justify-content: center; gap: 8px; 
+                    margin-bottom: 30px; min-height: 45px; 
                 }
 
                 .letter-tile { 
-                    width: 9vw; max-width: 35px; height: 40px; /* Lowered height */
+                    width: 10vw; max-width: 40px; height: 45px; 
                     background: linear-gradient(135deg, var(--purple-prime), var(--purple-light)); 
-                    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-                    color: white; font-size: 18px; font-weight: 600; 
-                    box-shadow: 0 3px #4834d4; transform: scale(0);
+                    border-radius: 10px; display: flex; align-items: center; justify-content: center; 
+                    font-size: 20px; font-weight: 600; color: white; border: none;
+                    box-shadow: 0 4px #4834d4; cursor: pointer; transition: 0.1s;
                     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
                 }
+                
+                .letter-tile:active { transform: translateY(2px); box-shadow: 0 2px #4834d4; }
+                .letter-tile.used { opacity: 0.3; pointer-events: none; transform: scale(0.9); box-shadow: none; }
 
-                @keyframes popIn { to { transform: scale(1); } }
+                @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+                .controls { width: 100%; max-width: 400px; padding: 0 20px; box-sizing: border-box; }
 
                 input { 
-                    width: 85%; padding: 12px; border-radius: 15px; 
-                    border: 2px solid #F1F2F6; background: #F8F9FE; 
-                    color: var(--text-main); font-family: "Poppins"; font-size: 16px; 
-                    outline: none; text-align: center; transition: 0.3s;
+                    width: 100%; padding: 14px; border-radius: 15px; 
+                    border: 2px solid var(--purple-prime); background: rgba(255,255,255,0.05); 
+                    color: var(--text-white); font-family: "Poppins"; font-size: 20px; 
+                    margin-bottom: 15px; outline: none; text-align: center;
+                    text-transform: uppercase; box-sizing: border-box;
                 }
-                input:focus { border-color: var(--purple-prime); background: white; }
 
                 .action-btn { 
-                    background: var(--purple-prime); border: none; padding: 12px 30px; 
+                    background: var(--purple-prime); border: none; padding: 14px 35px; 
                     border-radius: 50px; color: white; font-weight: 600; font-family: "Poppins"; 
-                    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3); margin-top: 15px;
+                    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); cursor: pointer;
                 }
 
-                .sexy-msg { color: var(--accent-green); font-weight: 600; margin: 15px 0; min-height: 20px; }
-                .score-val { font-size: 36px; font-weight: 600; color: var(--purple-prime); }
-                .checking { opacity: 0.6; pointer-events: none; }
+                .sexy-msg { color: var(--accent-green); margin: 15px 0; font-weight: 600; min-height: 24px; }
+                .score-val { font-size: 42px; font-weight: 600; color: var(--purple-light); }
+                .checking { opacity: 0.5; pointer-events: none; }
             </style>
         </head>
         <body>
-            <div class="container">
-                <h3>COUNTDOWN</h3>
-                <div id="timer">Ready?</div>
-                
-                <div class="board" id="letterBoard"></div>
+            <h3>COUNTDOWN</h3>
+            <div id="timer">Ready?</div>
+            
+            <div class="board" id="letterBoard"></div>
 
+            <div class="controls">
                 <div id="selectionControls">
-                    <button class="action-btn" onclick="generateLetters()">SET LETTERS</button>
+                    <button class="action-btn" onclick="generateLetters()">START GAME</button>
                 </div>
 
                 <div id="gameplay" style="display: none;">
-                    <input type="text" id="wordInput" placeholder="Type word..." autocomplete="off" />
-                    <br>
-                    <button class="action-btn" id="submitBtn" onclick="submitWord()" style="background: var(--accent-green); box-shadow: 0 6px 20px rgba(0, 184, 148, 0.3);">SUBMIT</button>
+                    <input type="text" id="wordInput" placeholder="TAP TILES OR TYPE..." autocomplete="off" />
+                    <button class="action-btn" id="submitBtn" onclick="submitWord()" style="background: var(--accent-green); width: 100%;">SUBMIT WORD</button>
                 </div>
 
                 <div id="endState" style="display: none;">
-                    <div style="font-size: 12px; color: var(--text-secondary);">TOTAL SCORE</div>
-                    <div class="score-val" id="score">0</div>
+                    <div style="font-size: 14px; opacity: 0.6;">SCORE</div>
+                    <div class="score-val" id="scoreDisplay">0</div>
                     <div id="feedback" class="sexy-msg"></div>
-                    <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red); box-shadow: 0 6px 20px rgba(255, 118, 117, 0.3);">PLAY AGAIN</button>
+                    <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red); width: 100%;">PLAY AGAIN</button>
                 </div>
             </div>
 
@@ -366,19 +360,20 @@ class MobileTestController extends Controller
                 const vowels = "AEIOU";
                 const consonants = "BCDFGHJKLMNPQRSTVWXYZ";
                 let currentLetters = [];
-                let score = 0;
+                let totalScore = 0;
                 let timerInterval;
 
                 function generateLetters() {
                     document.getElementById("selectionControls").style.display = "none";
                     currentLetters = [];
-                    const vCount = Math.floor(Math.random() * 2) + 3; 
-                    for(let i=0; i<9; i++) {
-                        let src = (i < vCount) ? vowels : consonants;
-                        currentLetters.push(src[Math.floor(Math.random() * src.length)]);
-                    }
+                    
+                    // Composition: 4 Vowels, 5 Consonants
+                    for(let i=0; i<4; i++) currentLetters.push(vowels[Math.floor(Math.random() * vowels.length)]);
+                    for(let i=0; i<5; i++) currentLetters.push(consonants[Math.floor(Math.random() * consonants.length)]);
+                    
                     currentLetters.sort(() => Math.random() - 0.5);
                     renderLetters();
+                    
                     setTimeout(() => {
                         document.getElementById("timer").innerText = "00:30";
                         document.getElementById("gameplay").style.display = "block";
@@ -390,12 +385,19 @@ class MobileTestController extends Controller
                     const board = document.getElementById("letterBoard");
                     board.innerHTML = "";
                     currentLetters.forEach((l, i) => {
-                        const div = document.createElement("div");
-                        div.className = "letter-tile";
-                        div.innerText = l;
-                        div.style.animationDelay = `${i * 0.05}s`;
-                        board.appendChild(div);
+                        const btn = document.createElement("button");
+                        btn.className = "letter-tile";
+                        btn.innerText = l;
+                        btn.style.animationDelay = `${i * 0.05}s`;
+                        btn.onclick = () => tapLetter(btn, l);
+                        board.appendChild(btn);
                     });
+                }
+
+                function tapLetter(btn, letter) {
+                    const input = document.getElementById("wordInput");
+                    input.value = (input.value + letter).toUpperCase();
+                    btn.classList.add("used");
                 }
 
                 function startTimer() {
@@ -403,7 +405,7 @@ class MobileTestController extends Controller
                     timerInterval = setInterval(() => {
                         timeLeft--;
                         document.getElementById("timer").innerText = `00:${timeLeft < 10 ? "0"+timeLeft : timeLeft}`;
-                        if (timeLeft <= 0) endGame("TIME EXPIRED");
+                        if (timeLeft <= 0) endGame("TIME UP!");
                     }, 1000);
                 }
 
@@ -411,18 +413,6 @@ class MobileTestController extends Controller
                     const val = document.getElementById("wordInput").value.toUpperCase().trim();
                     if (val.length < 3) return;
 
-                    // 1. Local Check
-                    let temp = [...currentLetters];
-                    let possible = true;
-                    for (let c of val) {
-                        let idx = temp.indexOf(c);
-                        if (idx > -1) temp.splice(idx, 1);
-                        else { possible = false; break; }
-                    }
-
-                    if (!possible) { endGame("INVALID LETTERS!"); return; }
-
-                    // 2. API Check (The part I missed!)
                     const btn = document.getElementById("submitBtn");
                     btn.classList.add("checking");
                     document.getElementById("timer").innerText = "VERIFYING...";
@@ -430,16 +420,15 @@ class MobileTestController extends Controller
                     try {
                         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${val.toLowerCase()}`);
                         if (res.ok) {
-                            score += val.length;
-                            document.getElementById("score").innerText = score;
+                            totalScore += val.length;
+                            document.getElementById("scoreDisplay").innerText = totalScore;
                             endGame(`"${val}" IS VALID! +${val.length}`);
                         } else {
-                            endGame(`"${val}" IS NOT A WORD!`);
+                            endGame(`"${val}" IS NOT A WORD`);
                         }
                     } catch (e) {
-                        // If offline, just accept it
-                        score += val.length;
-                        document.getElementById("score").innerText = score;
+                        totalScore += val.length;
+                        document.getElementById("scoreDisplay").innerText = totalScore;
                         endGame(`OFFLINE: +${val.length} PTS`);
                     }
                     btn.classList.remove("checking");
@@ -453,7 +442,6 @@ class MobileTestController extends Controller
                 }
 
                 function resetGame() {
-                    document.getElementById("feedback").innerText = "";
                     document.getElementById("timer").innerText = "Ready?";
                     document.getElementById("selectionControls").style.display = "block";
                     document.getElementById("endState").style.display = "none";
