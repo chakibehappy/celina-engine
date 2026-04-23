@@ -124,7 +124,7 @@ class MobileTestController extends Controller
                 'icon'       => 'home',
                 'route'      => 'home_screen',
                 'icon_size'  => '20',
-                'show_label' => 'true',
+                'show_label' => 'false',
                 'content_data' => '' 
             ],
             [
@@ -132,35 +132,19 @@ class MobileTestController extends Controller
                 'icon'       => 'chat_bubble',
                 'route'      => 'chat_screen',
                 'icon_size'  => '20',
-                'show_label' => 'true',
+                'show_label' => 'false',
                 'content_data' => ''
-            ],
-            [
-                'label'      => 'Surprise',
-                'icon'       => 'globe',
-                'route'      => 'custom_webview_screen',
-                'icon_size'  => '20',
-                'show_label' => 'false',
-                'content_data' => 'https://kitxel.cloud/celina-engine/' 
-            ],
-            [
-                'label'      => 'Sexy',
-                'icon'       => 'heart_smile',
-                'route'      => 'custom_webview_screen',
-                'icon_size'  => '24',
-                'show_label' => 'false',
-                'content_data' => $sexyHtml 
             ],
             [
                 'label'      => 'Account',
                 'icon'       => 'person',
                 'route'      => 'account_screen',
                 'icon_size'  => '20',
-                'show_label' => 'true',
+                'show_label' => 'false',
                 'content_data' => ''
             ],
             [
-                'label'      => 'Sexy',
+                'label'      => 'Custom',
                 'icon'       => 'heart_smile',
                 'route'      => 'custom_webview_screen',
                 'icon_size'  => '24',
