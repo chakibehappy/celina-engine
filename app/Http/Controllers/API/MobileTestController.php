@@ -259,245 +259,343 @@ class MobileTestController extends Controller
         <!DOCTYPE html>
         <html>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-            <style>
-                :root {
-                    --bg-color: #F8F9FE;
-                    --purple-prime: #6C5CE7;
-                    --purple-light: #a29bfe;
-                    --text-main: #54328b;
-                    --accent-red: #ff7675;
-                    --accent-green: #55efc4;
-                }
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-                body { 
-                    font-family: "Poppins", sans-serif; 
-                    background: var(--bg-color); 
-                    color: var(--text-main); 
-                    margin: 0; padding: 0; 
-                    display: flex; flex-direction: column; 
-                    justify-content: center; align-items: center;
-                    height: 100vh; width: 100vw; 
-                    overflow: hidden; 
-                    box-sizing: border-box;
-                    -webkit-user-select: none;
-                }
+        <style>
+        :root {
+            --bg: #F5F6FA;
+            --purple: #6C5CE7;
+            --purple-soft: #A29BFE;
+            --text: #2D3436;
+            --muted: #B2BEC3;
+            --green: #55EFC4;
+            --red: #FF7675;
+        }
 
-                h3 { letter-spacing: 1.5px; color: var(--purple-light); margin-bottom: 5px; text-align: center; }
+        /* Disable ugly tap highlight */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
 
-                #timer { 
-                    font-size: 20px; color: var(--accent-red); 
-                    font-weight: 600; margin-bottom: 20px;
-                    text-shadow: 0 0 10px rgba(255, 118, 117, 0.3);
-                }
+        body {
+            margin: 0;
+            font-family: "Poppins", sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            height: 100vh;
+        }
 
-                .board { 
-                    display: flex; justify-content: center; 
-                    gap: 1.5vw; /* Responsive gap */
-                    width: 95vw; 
-                    margin: 0 auto 30px auto; 
-                    flex-wrap: nowrap; /* Forces one row */
-                }
+        /* TITLE */
+        h3 {
+            letter-spacing: 2px;
+            color: var(--purple-soft);
+            margin-bottom: 5px;
+        }
 
-                .letter-tile { 
-                    flex: 1;
-                    max-width: 45px; 
-                    aspect-ratio: 1 / 1.2;
-                    background: linear-gradient(135deg, var(--purple-prime), var(--purple-light)); 
-                    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-                    font-size: clamp(14px, 4vw, 20px); font-weight: 600; color: white; border: none;
-                    box-shadow: 0 4px #4834d4; cursor: pointer; transition: 0.1s;
-                    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                }
-                
-                .letter-tile:active { transform: translateY(2px); box-shadow: 0 2px #4834d4; }
-                .letter-tile.used { opacity: 0.3; pointer-events: auto; transform: scale(0.9); box-shadow: none; background: #dfe6e9; color: #b2bec3; }
+        /* TIMER */
+        #timer {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--red);
+            margin-bottom: 20px;
+        }
 
-                @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        /* BOARD */
+        .board {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 420px;
+            padding: 0 20px; /* IMPORTANT: horizontal padding */
+            box-sizing: border-box;
+            margin-bottom: 25px;
+        }
 
-                .controls { 
-                    width: 100%; max-width: 400px; padding: 0 20px; 
-                    box-sizing: border-box; text-align: center; 
-                    display: flex; flex-direction: column; align-items: center;
-                }
+        /* LETTER TILE */
+        .letter-tile {
+            flex: 1;
+            aspect-ratio: 1 / 1.2;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 18px;
+            color: white;
 
-                .input-container { width: 100%; position: relative; margin-bottom: 15px; }
+            background: linear-gradient(135deg, var(--purple), var(--purple-soft));
 
-                input { 
-                    width: 100%; padding: 14px; border-radius: 15px; 
-                    border: 2px solid var(--purple-prime); background: white; 
-                    color: var(--text-main); font-family: "Poppins"; font-size: 22px; 
-                    outline: none; text-align: center; font-weight: 600;
-                    text-transform: uppercase; box-sizing: border-box;
-                    caret-color: transparent; /* Hide cursor since read-only */
-                }
+            box-shadow: 0 6px 0 #5649c9;
+            transition: all 0.1s ease;
+        }
 
-                .clear-btn {
-                    margin-top: 8px; font-size: 12px; color: var(--accent-red);
-                    text-decoration: underline; cursor: pointer; font-weight: 600;
-                }
+        /* MOBILE PRESS FEEDBACK */
+        .letter-tile:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #5649c9;
+        }
 
-                .action-btn { 
-                    background: var(--purple-prime); border: none; padding: 14px 35px; 
-                    border-radius: 50px; color: white; font-weight: 600; font-family: "Poppins"; 
-                    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); cursor: pointer;
-                    width: 100%;
-                }
+        /* USED TILE */
+        .letter-tile.used {
+            background: #EAEAF5;
+            color: var(--muted);
+            box-shadow: none;
+            transform: scale(0.92);
+        }
 
-                #selectionControls, #gameplay, #endState { width: 100%; text-align: center; }
+        /* CONTROLS CARD */
+        .controls {
+            width: 100%;
+            max-width: 420px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
 
-                .sexy-msg { color: var(--accent-green); margin: 15px 0; font-weight: 600; min-height: 24px; }
-                .score-val { font-size: 48px; font-weight: 600; color: var(--purple-prime); line-height: 1; margin: 10px 0; }
-                .checking { opacity: 0.5; pointer-events: none; }
-            </style>
+        /* INPUT */
+        input {
+            width: 100%;
+            padding: 16px;
+            border-radius: 20px;
+            border: 2px solid var(--purple);
+            text-align: center;
+            font-size: 22px;
+            font-weight: 600;
+            background: white;
+            outline: none;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            caret-color: transparent;
+        }
+
+        /* BUTTON BASE */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 999px;
+            border: none;
+            font-weight: 600;
+            font-family: "Poppins";
+            font-size: 15px;
+            margin-top: 10px;
+            transition: all 0.12s ease;
+        }
+
+        /* PRIMARY */
+        .btn-green {
+            background: var(--green);
+            color: white;
+            box-shadow: 0 8px 20px rgba(85, 239, 196, 0.4);
+        }
+
+        /* SECONDARY (RESET) */
+        .btn-red {
+            background: var(--red);
+            color: white;
+            box-shadow: 0 8px 20px rgba(255, 118, 117, 0.4);
+        }
+
+        /* PURPLE */
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+        }
+
+        /* PRESS EFFECT */
+        .btn:active {
+            transform: scale(0.96);
+            opacity: 0.9;
+        }
+
+        /* TEXT BUTTON REMOVED → now real button */
+        .clear-btn {
+            display: none;
+        }
+
+        /* STATES */
+        #selectionControls,
+        #gameplay,
+        #endState {
+            width: 100%;
+        }
+
+        .score-val {
+            font-size: 42px;
+            font-weight: 600;
+            color: var(--purple);
+        }
+
+        .sexy-msg {
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--green);
+        }
+
+        .checking {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        </style>
         </head>
+
         <body>
-            <h3>COUNTDOWN</h3>
-            <div id="timer">Ready?</div>
-            
-            <div class="board" id="letterBoard"></div>
 
-            <div class="controls">
-                <div id="selectionControls">
-                    <button class="action-btn" onclick="generateLetters()">START GAME</button>
-                </div>
+        <h3>COUNTDOWN</h3>
+        <div id="timer">Ready?</div>
 
-                <div id="gameplay" style="display: none;">
-                    <div class="input-container">
-                        <input type="text" id="wordInput" placeholder="..." readonly />
-                        <div class="clear-btn" onclick="clearSelection()">RESET SELECTION</div>
-                    </div>
-                    <button class="action-btn" id="submitBtn" onclick="submitWord()" style="background: var(--accent-green);">SUBMIT WORD</button>
-                </div>
+        <div class="board" id="letterBoard"></div>
 
-                <div id="endState" style="display: none;">
-                    <div style="font-size: 14px; opacity: 0.6;">TOTAL SCORE</div>
-                    <div class="score-val" id="scoreDisplay">0</div>
-                    <div id="feedback" class="sexy-msg"></div>
-                    <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red);">PLAY AGAIN</button>
-                </div>
+        <div class="controls">
+
+            <div id="selectionControls">
+                <button class="btn btn-purple" onclick="generateLetters()">START GAME</button>
             </div>
 
-            <script>
-                const vowels = "AEIOU";
-                const consonants = "BCDFGHJKLMNPQRSTVWXYZ";
-                let currentLetters = [];
-                let selectedIndices = [];
-                let totalScore = 0;
-                let timerInterval;
+            <div id="gameplay" style="display:none;">
+                <input type="text" id="wordInput" placeholder="..." readonly />
 
-                function generateLetters() {
-                    document.getElementById("selectionControls").style.display = "none";
-                    currentLetters = [];
-                    selectedIndices = [];
-                    
-                    for(let i=0; i<4; i++) currentLetters.push(vowels[Math.floor(Math.random() * vowels.length)]);
-                    for(let i=0; i<5; i++) currentLetters.push(consonants[Math.floor(Math.random() * consonants.length)]);
-                    
-                    currentLetters.sort(() => Math.random() - 0.5);
-                    renderLetters();
-                    
-                    setTimeout(() => {
-                        document.getElementById("timer").innerText = "00:30";
-                        document.getElementById("gameplay").style.display = "block";
-                        startTimer();
-                    }, 1000);
+                <!-- NEW RESET BUTTON -->
+                <button class="btn btn-red" onclick="clearSelection()">RESET SELECTION</button>
+
+                <button class="btn btn-green" id="submitBtn" onclick="submitWord()">SUBMIT WORD</button>
+            </div>
+
+            <div id="endState" style="display:none;">
+                <div style="opacity:0.6; font-size:14px;">TOTAL SCORE</div>
+                <div class="score-val" id="scoreDisplay">0</div>
+                <div id="feedback" class="sexy-msg"></div>
+                <button class="btn btn-purple" onclick="resetGame()">PLAY AGAIN</button>
+            </div>
+
+        </div>
+
+        <script>
+        const vowels = "AEIOU";
+        const consonants = "BCDFGHJKLMNPQRSTVWXYZ";
+
+        let currentLetters = [];
+        let selectedIndices = [];
+        let totalScore = 0;
+        let timerInterval;
+
+        function generateLetters() {
+            document.getElementById("selectionControls").style.display = "none";
+
+            currentLetters = [];
+            selectedIndices = [];
+
+            for(let i=0;i<4;i++) currentLetters.push(vowels[Math.random()*vowels.length|0]);
+            for(let i=0;i<5;i++) currentLetters.push(consonants[Math.random()*consonants.length|0]);
+
+            currentLetters.sort(()=>Math.random()-0.5);
+            renderLetters();
+
+            setTimeout(()=>{
+                document.getElementById("timer").innerText = "00:30";
+                document.getElementById("gameplay").style.display = "block";
+                startTimer();
+            },500);
+        }
+
+        function renderLetters(){
+            const board = document.getElementById("letterBoard");
+            board.innerHTML = "";
+
+            currentLetters.forEach((l,i)=>{
+                const btn = document.createElement("button");
+                btn.className = "letter-tile";
+                btn.innerText = l;
+                btn.onclick = ()=>handleTileClick(i);
+                board.appendChild(btn);
+            });
+        }
+
+        function handleTileClick(index){
+            const tile = document.querySelectorAll(".letter-tile")[index];
+            const idx = selectedIndices.indexOf(index);
+
+            if(idx>-1){
+                selectedIndices.splice(idx,1);
+                tile.classList.remove("used");
+            }else{
+                selectedIndices.push(index);
+                tile.classList.add("used");
+            }
+
+            updateInput();
+        }
+
+        function updateInput(){
+            document.getElementById("wordInput").value =
+                selectedIndices.map(i=>currentLetters[i]).join("");
+        }
+
+        function clearSelection(){
+            selectedIndices = [];
+            document.querySelectorAll(".letter-tile").forEach(t=>t.classList.remove("used"));
+            updateInput();
+        }
+
+        function startTimer(){
+            let t=30;
+            timerInterval = setInterval(()=>{
+                t--;
+                document.getElementById("timer").innerText =
+                    "00:"+(t<10?"0"+t:t);
+                if(t<=0) endGame("TIME UP!");
+            },1000);
+        }
+
+        async function submitWord(){
+            const val = document.getElementById("wordInput").value;
+            if(val.length<3) return;
+
+            const btn = document.getElementById("submitBtn");
+            btn.classList.add("checking");
+            document.getElementById("timer").innerText = "VERIFYING...";
+
+            try{
+                const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${val.toLowerCase()}`);
+                if(res.ok){
+                    totalScore += val.length;
+                    document.getElementById("scoreDisplay").innerText = totalScore;
+                    endGame(`"${val}" is valid! +${val.length}`);
+                }else{
+                    endGame(`"${val}" not a word`);
                 }
+            }catch(e){
+                totalScore += val.length;
+                document.getElementById("scoreDisplay").innerText = totalScore;
+                endGame(`Offline +${val.length}`);
+            }
 
-                function renderLetters() {
-                    const board = document.getElementById("letterBoard");
-                    board.innerHTML = "";
-                    currentLetters.forEach((l, i) => {
-                        const btn = document.createElement("button");
-                        btn.className = "letter-tile";
-                        btn.id = "tile-" + i;
-                        btn.innerText = l;
-                        btn.style.animationDelay = `${i * 0.05}s`;
-                        btn.onclick = () => handleTileClick(i);
-                        board.appendChild(btn);
-                    });
-                }
+            btn.classList.remove("checking");
+        }
 
-                function handleTileClick(index) {
-                    const tile = document.getElementById("tile-" + index);
-                    const idxInSelection = selectedIndices.indexOf(index);
+        function endGame(msg){
+            clearInterval(timerInterval);
+            document.getElementById("gameplay").style.display="none";
+            document.getElementById("endState").style.display="block";
+            document.getElementById("feedback").innerText=msg;
+        }
 
-                    if (idxInSelection > -1) {
-                        // Undo selection
-                        selectedIndices.splice(idxInSelection, 1);
-                        tile.classList.remove("used");
-                    } else {
-                        // Add selection
-                        selectedIndices.push(index);
-                        tile.classList.add("used");
-                    }
-                    updateInput();
-                }
+        function resetGame(){
+            document.getElementById("timer").innerText="Ready?";
+            document.getElementById("selectionControls").style.display="block";
+            document.getElementById("endState").style.display="none";
+            document.getElementById("wordInput").value="";
+            document.getElementById("letterBoard").innerHTML="";
+            selectedIndices=[];
+        }
+        </script>
 
-                function updateInput() {
-                    const input = document.getElementById("wordInput");
-                    input.value = selectedIndices.map(i => currentLetters[i]).join("");
-                }
-
-                function clearSelection() {
-                    selectedIndices = [];
-                    document.querySelectorAll(".letter-tile").forEach(t => t.classList.remove("used"));
-                    updateInput();
-                }
-
-                function startTimer() {
-                    let timeLeft = 30;
-                    timerInterval = setInterval(() => {
-                        timeLeft--;
-                        document.getElementById("timer").innerText = `00:${timeLeft < 10 ? "0"+timeLeft : timeLeft}`;
-                        if (timeLeft <= 0) endGame("TIME UP!");
-                    }, 1000);
-                }
-
-                async function submitWord() {
-                    const val = document.getElementById("wordInput").value;
-                    if (val.length < 3) return;
-
-                    const btn = document.getElementById("submitBtn");
-                    btn.classList.add("checking");
-                    document.getElementById("timer").innerText = "VERIFYING...";
-
-                    try {
-                        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${val.toLowerCase()}`);
-                        if (res.ok) {
-                            totalScore += val.length;
-                            document.getElementById("scoreDisplay").innerText = totalScore;
-                            endGame(`"${val}" IS VALID! +${val.length}`);
-                        } else {
-                            endGame(`"${val}" IS NOT A WORD`);
-                        }
-                    } catch (e) {
-                        totalScore += val.length;
-                        document.getElementById("scoreDisplay").innerText = totalScore;
-                        endGame(`OFFLINE: +${val.length} PTS`);
-                    }
-                    btn.classList.remove("checking");
-                }
-
-                function endGame(msg) {
-                    clearInterval(timerInterval);
-                    document.getElementById("gameplay").style.display = "none";
-                    document.getElementById("endState").style.display = "block";
-                    document.getElementById("feedback").innerText = msg;
-                }
-
-                function resetGame() {
-                    document.getElementById("timer").innerText = "Ready?";
-                    document.getElementById("selectionControls").style.display = "block";
-                    document.getElementById("endState").style.display = "none";
-                    document.getElementById("wordInput").value = "";
-                    document.getElementById("letterBoard").innerHTML = "";
-                    selectedIndices = [];
-                }
-            </script>
         </body>
-        </html>';
+        </html>
+        ';
 
         return response()->json([
             [
