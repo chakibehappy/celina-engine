@@ -255,7 +255,7 @@ class MobileTestController extends Controller
         </body>
         </html>';
 
-        $$countDownGame = '
+        $countDownGame = '
         <!DOCTYPE html>
         <html>
         <head>
@@ -263,20 +263,19 @@ class MobileTestController extends Controller
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
             <style>
                 :root {
-                    --bg-color: #F8F9FE;
-                    --card-bg: #ffffff;
+                    /* Theme Colors derived from your Native App screenshot */
+                    --bg-color: #0c0823;
                     --purple-prime: #6C5CE7;
                     --purple-light: #a29bfe;
-                    --text-main: #2D3436;
-                    --text-secondary: #636E72;
+                    --text-white: #ffffff;
                     --accent-red: #ff7675;
-                    --accent-green: #00b894;
+                    --accent-green: #55efc4;
                 }
 
                 body { 
                     font-family: "Poppins", sans-serif; 
                     background: var(--bg-color); 
-                    color: var(--text-main); 
+                    color: var(--text-white); 
                     margin: 0; padding: 0; 
                     text-align: center; 
                     display: flex; flex-direction: column; 
@@ -286,80 +285,120 @@ class MobileTestController extends Controller
                     -webkit-user-select: none;
                 }
 
-                .container {
-                    background: var(--card-bg);
-                    margin: 20px;
-                    padding: 20px;
-                    border-radius: 25px;
-                    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.1);
-                    border: 1px solid rgba(108, 92, 231, 0.05);
-                    flex: 1;
-                    display: flex;
-                    flex-direction: column;
+                h3 { 
+                    margin-top: 30px; margin-bottom: 10px; 
+                    letter-spacing: 1.5px; 
+                    color: var(--purple-light); 
                 }
 
-                h3 { margin-top: 10px; font-size: 18px; letter-spacing: 1px; color: var(--purple-prime); }
+                #timer { 
+                    font-size: 20px; 
+                    color: var(--accent-red); 
+                    font-weight: 600; 
+                    margin-bottom: 5px;
+                    text-shadow: 0 0 10px rgba(255, 118, 117, 0.4);
+                }
 
-                #timer { font-size: 24px; color: var(--accent-red); font-weight: 600; margin-bottom: 15px; }
-
+                /* ONE-ROW, SHORT TILE LOGIC */
                 .board { 
-                    display: flex; justify-content: center; gap: 5px; 
-                    margin: 20px 0; min-height: 45px; 
+                    display: flex; 
+                    justify-content: center; 
+                    align-items: center; /* Vertical Center */
+                    gap: 6px; 
+                    flex-wrap: nowrap; 
+                    margin: auto 20px; /* Vertically centered in the available space */
+                    flex: 1; /* Pushes other content away but handles keyboard resize */
+                    min-height: 55px; /* Shortened */
                 }
 
                 .letter-tile { 
-                    width: 9vw; max-width: 35px; height: 40px; /* Lowered height */
+                    width: 10vw; 
+                    max-width: 40px;
+                    height: 50px; /* Shortened */
                     background: linear-gradient(135deg, var(--purple-prime), var(--purple-light)); 
-                    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-                    color: white; font-size: 18px; font-weight: 600; 
-                    box-shadow: 0 3px #4834d4; transform: scale(0);
+                    border-radius: 6px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 20px; 
+                    font-weight: 600; 
+                    box-shadow: 0 4px #4834d4;
+                    transform: scale(0);
                     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                    -webkit-backface-visibility: hidden;
                 }
 
                 @keyframes popIn { to { transform: scale(1); } }
 
-                input { 
-                    width: 85%; padding: 12px; border-radius: 15px; 
-                    border: 2px solid #F1F2F6; background: #F8F9FE; 
-                    color: var(--text-main); font-family: "Poppins"; font-size: 16px; 
-                    outline: none; text-align: center; transition: 0.3s;
+                /* The Rest of the UI */
+                .game-controls-container {
+                    margin-bottom: calc(env(safe-area-inset-bottom) + 10px);
+                    padding: 20px;
+                    background: rgba(12, 8, 35, 0.95); /* Prevent overlap visibility */
+                    z-index: 10;
                 }
-                input:focus { border-color: var(--purple-prime); background: white; }
+
+                input { 
+                    width: 80%; padding: 12px; 
+                    border-radius: 12px; 
+                    border: 2px solid var(--purple-prime); 
+                    background: #1e1e3f; 
+                    color: var(--text-white); 
+                    font-family: "Poppins"; font-size: 16px; 
+                    margin-bottom: 10px; outline: none; 
+                    text-align: center;
+                }
 
                 .action-btn { 
-                    background: var(--purple-prime); border: none; padding: 12px 30px; 
-                    border-radius: 50px; color: white; font-weight: 600; font-family: "Poppins"; 
-                    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.3); margin-top: 15px;
+                    background: var(--purple-prime); border: none; 
+                    padding: 12px 25px; border-radius: 50px; 
+                    color: white; font-weight: 600; font-family: "Poppins"; cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+                    transition: transform 0.2s;
                 }
 
-                .sexy-msg { color: var(--accent-green); font-weight: 600; margin: 15px 0; min-height: 20px; }
-                .score-val { font-size: 36px; font-weight: 600; color: var(--purple-prime); }
-                .checking { opacity: 0.6; pointer-events: none; }
+                .action-btn:active { transform: translateY(2px); box-shadow: none; }
+
+                .sexy-msg { 
+                    color: var(--accent-green); 
+                    margin-top: 10px; font-weight: 600; 
+                    min-height: 24px; 
+                }
+
+                #retryBtn {
+                    background: var(--accent-red);
+                    margin-top: 15px;
+                    box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4);
+                }
+
             </style>
         </head>
         <body>
-            <div class="container">
-                <h3>COUNTDOWN</h3>
-                <div id="timer">Ready?</div>
-                
-                <div class="board" id="letterBoard"></div>
+            <h3>COUNTDOWN</h3>
+            <div id="timer">Ready?</div>
+            
+            <div class="board" id="letterBoard">
+                </div>
 
-                <div id="selectionControls">
+            <div class="game-controls-container">
+                
+                <div class="controls" id="selectionControls">
                     <button class="action-btn" onclick="generateLetters()">SET LETTERS</button>
                 </div>
 
                 <div id="gameplay" style="display: none;">
-                    <input type="text" id="wordInput" placeholder="Type word..." autocomplete="off" />
+                    <input type="text" id="wordInput" placeholder="Longest word..." autocomplete="off" />
                     <br>
-                    <button class="action-btn" id="submitBtn" onclick="submitWord()" style="background: var(--accent-green); box-shadow: 0 6px 20px rgba(0, 184, 148, 0.3);">SUBMIT</button>
+                    <button class="action-btn" onclick="submitWord()" style="background: #00b894;">SUBMIT</button>
                 </div>
 
                 <div id="endState" style="display: none;">
-                    <div style="font-size: 12px; color: var(--text-secondary);">TOTAL SCORE</div>
-                    <div class="score-val" id="score">0</div>
+                    <div style="font-size: 14px; opacity: 0.7;">TOTAL SCORE</div>
+                    <div style="font-size: 32px; font-weight: 600;" id="score">0</div>
                     <div id="feedback" class="sexy-msg"></div>
-                    <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red); box-shadow: 0 6px 20px rgba(255, 118, 117, 0.3);">PLAY AGAIN</button>
+                    <button id="retryBtn" class="action-btn" onclick="resetGame()">PLAY AGAIN</button>
                 </div>
+
             </div>
 
             <script>
@@ -367,15 +406,17 @@ class MobileTestController extends Controller
                 const consonants = "BCDFGHJKLMNPQRSTVWXYZ";
                 let currentLetters = [];
                 let score = 0;
+                let timeLeft = 30;
                 let timerInterval;
 
                 function generateLetters() {
                     document.getElementById("selectionControls").style.display = "none";
                     currentLetters = [];
-                    const vCount = Math.floor(Math.random() * 2) + 3; 
+                    const vowelCount = Math.floor(Math.random() * 2) + 3; 
                     for(let i=0; i<9; i++) {
-                        let src = (i < vCount) ? vowels : consonants;
-                        currentLetters.push(src[Math.floor(Math.random() * src.length)]);
+                        const isVowel = i < vowelCount;
+                        const source = isVowel ? vowels : consonants;
+                        currentLetters.push(source[Math.floor(Math.random() * source.length)]);
                     }
                     currentLetters.sort(() => Math.random() - 0.5);
                     renderLetters();
@@ -383,23 +424,23 @@ class MobileTestController extends Controller
                         document.getElementById("timer").innerText = "00:30";
                         document.getElementById("gameplay").style.display = "block";
                         startTimer();
-                    }, 1000);
+                    }, 1200);
                 }
 
                 function renderLetters() {
                     const board = document.getElementById("letterBoard");
                     board.innerHTML = "";
-                    currentLetters.forEach((l, i) => {
+                    currentLetters.forEach((l, index) => {
                         const div = document.createElement("div");
                         div.className = "letter-tile";
                         div.innerText = l;
-                        div.style.animationDelay = `${i * 0.05}s`;
+                        div.style.animationDelay = `${index * 0.1}s`;
                         board.appendChild(div);
                     });
                 }
 
                 function startTimer() {
-                    let timeLeft = 30;
+                    timeLeft = 30;
                     timerInterval = setInterval(() => {
                         timeLeft--;
                         document.getElementById("timer").innerText = `00:${timeLeft < 10 ? "0"+timeLeft : timeLeft}`;
@@ -407,42 +448,20 @@ class MobileTestController extends Controller
                     }, 1000);
                 }
 
-                async function submitWord() {
-                    const val = document.getElementById("wordInput").value.toUpperCase().trim();
-                    if (val.length < 3) return;
-
-                    // 1. Local Check
-                    let temp = [...currentLetters];
-                    let possible = true;
-                    for (let c of val) {
-                        let idx = temp.indexOf(c);
-                        if (idx > -1) temp.splice(idx, 1);
-                        else { possible = false; break; }
+                function submitWord() {
+                    const input = document.getElementById("wordInput").value.toUpperCase().trim();
+                    if (!input) return;
+                    let tempLetters = [...currentLetters];
+                    let isValid = true;
+                    for (let char of input) {
+                        const index = tempLetters.indexOf(char);
+                        if (index > -1) { tempLetters.splice(index, 1); } else { isValid = false; break; }
                     }
-
-                    if (!possible) { endGame("INVALID LETTERS!"); return; }
-
-                    // 2. API Check (The part I missed!)
-                    const btn = document.getElementById("submitBtn");
-                    btn.classList.add("checking");
-                    document.getElementById("timer").innerText = "VERIFYING...";
-
-                    try {
-                        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${val.toLowerCase()}`);
-                        if (res.ok) {
-                            score += val.length;
-                            document.getElementById("score").innerText = score;
-                            endGame(`"${val}" IS VALID! +${val.length}`);
-                        } else {
-                            endGame(`"${val}" IS NOT A WORD!`);
-                        }
-                    } catch (e) {
-                        // If offline, just accept it
-                        score += val.length;
+                    if (isValid && input.length >= 2) {
+                        score += input.length;
                         document.getElementById("score").innerText = score;
-                        endGame(`OFFLINE: +${val.length} PTS`);
-                    }
-                    btn.classList.remove("checking");
+                        endGame(`EXCELLENT: ${input.length} PTS`);
+                    } else { endGame(input.length < 2 ? "TOO SHORT" : "INVALID LETTERS"); }
                 }
 
                 function endGame(msg) {
@@ -453,6 +472,7 @@ class MobileTestController extends Controller
                 }
 
                 function resetGame() {
+                    currentLetters = [];
                     document.getElementById("feedback").innerText = "";
                     document.getElementById("timer").innerText = "Ready?";
                     document.getElementById("selectionControls").style.display = "block";
