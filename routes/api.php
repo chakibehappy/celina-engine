@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\API\MobileTestController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Your new test route
-Route::post('/test-login', [MobileTestController::class, 'login']);
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
