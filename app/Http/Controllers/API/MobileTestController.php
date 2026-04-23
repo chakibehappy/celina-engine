@@ -259,85 +259,146 @@ class MobileTestController extends Controller
         <!DOCTYPE html>
         <html>
         <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
             <style>
-                body { font-family: "Poppins", sans-serif; background: #0f0c29; color: white; margin: 0; padding: 20px; text-align: center; overflow: hidden; }
-                
-                /* One-row board logic */
+                :root {
+                    /* Theme Colors derived from your Native App screenshot */
+                    --bg-color: #0c0823;
+                    --purple-prime: #6C5CE7;
+                    --purple-light: #a29bfe;
+                    --text-white: #ffffff;
+                    --accent-red: #ff7675;
+                    --accent-green: #55efc4;
+                }
+
+                body { 
+                    font-family: "Poppins", sans-serif; 
+                    background: var(--bg-color); 
+                    color: var(--text-white); 
+                    margin: 0; padding: 0; 
+                    text-align: center; 
+                    display: flex; flex-direction: column; 
+                    height: 100vh; width: 100vw; 
+                    overflow: hidden; 
+                    box-sizing: border-box;
+                    -webkit-user-select: none;
+                }
+
+                h3 { 
+                    margin-top: 30px; margin-bottom: 10px; 
+                    letter-spacing: 1.5px; 
+                    color: var(--purple-light); 
+                }
+
+                #timer { 
+                    font-size: 20px; 
+                    color: var(--accent-red); 
+                    font-weight: 600; 
+                    margin-bottom: 5px;
+                    text-shadow: 0 0 10px rgba(255, 118, 117, 0.4);
+                }
+
+                /* ONE-ROW, SHORT TILE LOGIC */
                 .board { 
                     display: flex; 
                     justify-content: center; 
-                    gap: 8px; 
-                    margin: 25px 0; 
+                    align-items: center; /* Vertical Center */
+                    gap: 6px; 
                     flex-wrap: nowrap; 
-                    min-height: 65px; 
+                    margin: auto 20px; /* Vertically centered in the available space */
+                    flex: 1; /* Pushes other content away but handles keyboard resize */
+                    min-height: 55px; /* Shortened */
                 }
 
                 .letter-tile { 
                     width: 10vw; 
-                    max-width: 45px;
-                    height: 60px; 
-                    background: linear-gradient(135deg, #6C5CE7, #a29bfe); 
-                    border-radius: 8px; 
+                    max-width: 40px;
+                    height: 50px; /* Shortened */
+                    background: linear-gradient(135deg, var(--purple-prime), var(--purple-light)); 
+                    border-radius: 6px; 
                     display: flex; 
                     align-items: center; 
                     justify-content: center; 
-                    font-size: 22px; 
+                    font-size: 20px; 
                     font-weight: 600; 
                     box-shadow: 0 4px #4834d4;
                     transform: scale(0);
-                    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+                    -webkit-backface-visibility: hidden;
                 }
 
-                @keyframes popIn {
-                    to { transform: scale(1); }
-                }
+                @keyframes popIn { to { transform: scale(1); } }
 
-                .controls { margin-bottom: 30px; }
-                
-                button { 
-                    background: #6C5CE7; border: none; padding: 12px 25px; border-radius: 50px; 
-                    color: white; font-weight: 600; font-family: "Poppins"; cursor: pointer;
-                    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
-                    transition: 0.3s;
+                /* The Rest of the UI */
+                .game-controls-container {
+                    margin-bottom: calc(env(safe-area-inset-bottom) + 10px);
+                    padding: 20px;
+                    background: rgba(12, 8, 35, 0.95); /* Prevent overlap visibility */
+                    z-index: 10;
                 }
-
-                button:active { transform: translateY(2px); box-shadow: none; }
 
                 input { 
-                    width: 85%; padding: 15px; border-radius: 12px; border: 2px solid #6C5CE7; 
-                    background: #1e1e3f; color: white; font-family: "Poppins"; font-size: 18px; 
-                    margin-bottom: 15px; outline: none; text-align: center;
+                    width: 80%; padding: 12px; 
+                    border-radius: 12px; 
+                    border: 2px solid var(--purple-prime); 
+                    background: #1e1e3f; 
+                    color: var(--text-white); 
+                    font-family: "Poppins"; font-size: 16px; 
+                    margin-bottom: 10px; outline: none; 
+                    text-align: center;
                 }
 
-                .stats { margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
-                #timer { font-size: 22px; color: #ff7675; font-weight: 600; margin-bottom: 10px; }
-                .sexy-msg { color: #55efc4; margin-top: 10px; font-weight: 600; min-height: 24px; }
+                .action-btn { 
+                    background: var(--purple-prime); border: none; 
+                    padding: 12px 25px; border-radius: 50px; 
+                    color: white; font-weight: 600; font-family: "Poppins"; cursor: pointer;
+                    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+                    transition: transform 0.2s;
+                }
+
+                .action-btn:active { transform: translateY(2px); box-shadow: none; }
+
+                .sexy-msg { 
+                    color: var(--accent-green); 
+                    margin-top: 10px; font-weight: 600; 
+                    min-height: 24px; 
+                }
+
+                #retryBtn {
+                    background: var(--accent-red);
+                    margin-top: 15px;
+                    box-shadow: 0 4px 15px rgba(255, 118, 117, 0.4);
+                }
+
             </style>
         </head>
         <body>
-            <h3 style="letter-spacing: 2px; color: #a29bfe;">COUNTDOWN</h3>
+            <h3>COUNTDOWN</h3>
             <div id="timer">Ready?</div>
             
             <div class="board" id="letterBoard">
                 </div>
 
-            <div class="controls" id="selectionControls">
-                <button onclick="generateLetters()">SET LETTERS</button>
-            </div>
+            <div class="game-controls-container">
+                
+                <div class="controls" id="selectionControls">
+                    <button class="action-btn" onclick="generateLetters()">SET LETTERS</button>
+                </div>
 
-            <div id="gameplay" style="display: none;">
-                <input type="text" id="wordInput" placeholder="Enter longest word..." autocomplete="off" />
-                <br>
-                <button onclick="submitWord()" style="background: #00b894;">SUBMIT</button>
-            </div>
+                <div id="gameplay" style="display: none;">
+                    <input type="text" id="wordInput" placeholder="Longest word..." autocomplete="off" />
+                    <br>
+                    <button class="action-btn" onclick="submitWord()" style="background: #00b894;">SUBMIT</button>
+                </div>
 
-            <div class="stats">
-                <div style="font-size: 14px; opacity: 0.7;">TOTAL SCORE</div>
-                <div style="font-size: 32px; font-weight: 600;" id="score">0</div>
-                <div id="feedback" class="sexy-msg"></div>
-                <button id="retryBtn" onclick="resetGame()" style="display: none; margin-top: 15px; background: #ff7675;">PLAY AGAIN</button>
+                <div id="endState" style="display: none;">
+                    <div style="font-size: 14px; opacity: 0.7;">TOTAL SCORE</div>
+                    <div style="font-size: 32px; font-weight: 600;" id="score">0</div>
+                    <div id="feedback" class="sexy-msg"></div>
+                    <button id="retryBtn" class="action-btn" onclick="resetGame()">PLAY AGAIN</button>
+                </div>
+
             </div>
 
             <script>
@@ -351,23 +412,16 @@ class MobileTestController extends Controller
                 function generateLetters() {
                     document.getElementById("selectionControls").style.display = "none";
                     currentLetters = [];
-                    
-                    // Generate a standard Countdown mix: 3 or 4 vowels, the rest consonants
                     const vowelCount = Math.floor(Math.random() * 2) + 3; 
-                    
                     for(let i=0; i<9; i++) {
                         const isVowel = i < vowelCount;
                         const source = isVowel ? vowels : consonants;
                         currentLetters.push(source[Math.floor(Math.random() * source.length)]);
                     }
-
-                    // Shuffle them so vowels arent all at the start
                     currentLetters.sort(() => Math.random() - 0.5);
-                    
                     renderLetters();
-                    
-                    // Start gameplay after animation sequence (~1s)
                     setTimeout(() => {
+                        document.getElementById("timer").innerText = "00:30";
                         document.getElementById("gameplay").style.display = "block";
                         startTimer();
                     }, 1200);
@@ -380,7 +434,6 @@ class MobileTestController extends Controller
                         const div = document.createElement("div");
                         div.className = "letter-tile";
                         div.innerText = l;
-                        // Staggered animation delay
                         div.style.animationDelay = `${index * 0.1}s`;
                         board.appendChild(div);
                     });
@@ -398,34 +451,24 @@ class MobileTestController extends Controller
                 function submitWord() {
                     const input = document.getElementById("wordInput").value.toUpperCase().trim();
                     if (!input) return;
-
                     let tempLetters = [...currentLetters];
                     let isValid = true;
-
                     for (let char of input) {
                         const index = tempLetters.indexOf(char);
-                        if (index > -1) {
-                            tempLetters.splice(index, 1);
-                        } else {
-                            isValid = false;
-                            break;
-                        }
+                        if (index > -1) { tempLetters.splice(index, 1); } else { isValid = false; break; }
                     }
-
                     if (isValid && input.length >= 2) {
                         score += input.length;
                         document.getElementById("score").innerText = score;
                         endGame(`EXCELLENT: ${input.length} PTS`);
-                    } else {
-                        endGame(input.length < 2 ? "TOO SHORT" : "INVALID LETTERS");
-                    }
+                    } else { endGame(input.length < 2 ? "TOO SHORT" : "INVALID LETTERS"); }
                 }
 
                 function endGame(msg) {
                     clearInterval(timerInterval);
                     document.getElementById("gameplay").style.display = "none";
+                    document.getElementById("endState").style.display = "block";
                     document.getElementById("feedback").innerText = msg;
-                    document.getElementById("retryBtn").style.display = "inline-block";
                 }
 
                 function resetGame() {
@@ -433,7 +476,7 @@ class MobileTestController extends Controller
                     document.getElementById("feedback").innerText = "";
                     document.getElementById("timer").innerText = "Ready?";
                     document.getElementById("selectionControls").style.display = "block";
-                    document.getElementById("retryBtn").style.display = "none";
+                    document.getElementById("endState").style.display = "none";
                     document.getElementById("wordInput").value = "";
                     document.getElementById("letterBoard").innerHTML = "";
                 }
