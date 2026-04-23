@@ -101,7 +101,7 @@ class MobileTestController extends Controller
             <div class="card">
                 <div class="icon-box">🚀</div>
                 <h1>Engine Activated</h1>
-                <p>You are now running <b>Hybrid Mode</b>. This page was rendered via raw HTML injected from Singapore (or Palembang!) straight into Kotlin.</p>
+                <p>You are now running <b>Hybrid Mode</b>. This page was rendered via raw HTML injected from Backend straight into Mobile Stack.</p>
                 <div class="badge">System Nominal</div>
                 
                 <div class="stats-grid">
@@ -123,7 +123,7 @@ class MobileTestController extends Controller
                 'label'      => 'Home',
                 'icon'       => 'home',
                 'route'      => 'home_screen',
-                'icon_size'  => '26',
+                'icon_size'  => '20',
                 'show_label' => 'true',
                 'content_data' => '' 
             ],
@@ -131,7 +131,7 @@ class MobileTestController extends Controller
                 'label'      => 'Chat',
                 'icon'       => 'chat_bubble',
                 'route'      => 'chat_screen',
-                'icon_size'  => '24',
+                'icon_size'  => '20',
                 'show_label' => 'true',
                 'content_data' => ''
             ],
@@ -139,26 +139,34 @@ class MobileTestController extends Controller
                 'label'      => 'Surprise',
                 'icon'       => 'globe',
                 'route'      => 'custom_webview_screen',
-                'icon_size'  => '24',
-                'show_label' => 'true',
-                'content_data' => 'https://gemini.google.com/app/' 
+                'icon_size'  => '20',
+                'show_label' => 'false',
+                'content_data' => 'https://kitxel.cloud/celina-engine/' 
             ],
             [
                 'label'      => 'Sexy',
                 'icon'       => 'heart_smile',
                 'route'      => 'custom_webview_screen',
                 'icon_size'  => '24',
-                'show_label' => 'true',
+                'show_label' => 'false',
                 'content_data' => $sexyHtml 
             ],
-            // [
-            //     'label'      => 'Account',
-            //     'icon'       => 'person',
-            //     'route'      => 'account_screen',
-            //     'icon_size'  => '24',
-            //     'show_label' => 'true',
-            //     'content_data' => ''
-            // ]
+            [
+                'label'      => 'Account',
+                'icon'       => 'person',
+                'route'      => 'account_screen',
+                'icon_size'  => '20',
+                'show_label' => 'true',
+                'content_data' => ''
+            ],
+            [
+                'label'      => 'Sexy',
+                'icon'       => 'heart_smile',
+                'route'      => 'custom_webview_screen',
+                'icon_size'  => '24',
+                'show_label' => 'false',
+                'content_data' => $sexyHtml 
+            ],
         ]);
     }
 
