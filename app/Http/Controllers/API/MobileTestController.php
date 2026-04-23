@@ -266,7 +266,7 @@ class MobileTestController extends Controller
                     --bg-color: #F8F9FE;
                     --purple-prime: #6C5CE7;
                     --purple-light: #a29bfe;
-                    --text-white: #ffffff;
+                    --text-main: #54328b;
                     --accent-red: #ff7675;
                     --accent-green: #55efc4;
                 }
@@ -274,7 +274,7 @@ class MobileTestController extends Controller
                 body { 
                     font-family: "Poppins", sans-serif; 
                     background: var(--bg-color); 
-                    color: var(--text-white); 
+                    color: var(--text-main); 
                     margin: 0; padding: 0; 
                     display: flex; flex-direction: column; 
                     justify-content: center; align-items: center;
@@ -284,21 +284,25 @@ class MobileTestController extends Controller
                     -webkit-user-select: none;
                 }
 
-                h3 { letter-spacing: 1.5px; color: var(--purple-light); margin-bottom: 5px; }
+                h3 { letter-spacing: 1.5px; color: var(--purple-light); margin-bottom: 5px; text-align: center; }
 
                 #timer { 
                     font-size: 20px; color: var(--accent-red); 
                     font-weight: 600; margin-bottom: 20px;
                     text-shadow: 0 0 10px rgba(255, 118, 117, 0.3);
+                    text-align: center;
                 }
 
                 .board { 
-                    display: flex; justify-content: center; gap: 8px; 
-                    margin-bottom: 30px; min-height: 45px; 
+                    display: flex; justify-content: center; gap: 6px; 
+                    flex-wrap: wrap; /* Allows wrapping instead of overflowing */
+                    max-width: 95vw; /* Keeps board within screen bounds */
+                    margin: 0 auto 30px auto; 
+                    min-height: 45px; 
                 }
 
                 .letter-tile { 
-                    width: 10vw; max-width: 40px; height: 45px; 
+                    width: 11vw; max-width: 45px; height: 45px; 
                     background: linear-gradient(135deg, var(--purple-prime), var(--purple-light)); 
                     border-radius: 10px; display: flex; align-items: center; justify-content: center; 
                     font-size: 20px; font-weight: 600; color: white; border: none;
@@ -311,12 +315,16 @@ class MobileTestController extends Controller
 
                 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
-                .controls { width: 100%; max-width: 400px; padding: 0 20px; box-sizing: border-box; }
+                .controls { 
+                    width: 100%; max-width: 400px; padding: 0 20px; 
+                    box-sizing: border-box; text-align: center; 
+                    display: flex; flex-direction: column; align-items: center;
+                }
 
                 input { 
                     width: 100%; padding: 14px; border-radius: 15px; 
                     border: 2px solid var(--purple-prime); background: rgba(255,255,255,0.05); 
-                    color: var(--text-white); font-family: "Poppins"; font-size: 20px; 
+                    color: var(--text-main); font-family: "Poppins"; font-size: 20px; 
                     margin-bottom: 15px; outline: none; text-align: center;
                     text-transform: uppercase; box-sizing: border-box;
                 }
@@ -325,10 +333,22 @@ class MobileTestController extends Controller
                     background: var(--purple-prime); border: none; padding: 14px 35px; 
                     border-radius: 50px; color: white; font-weight: 600; font-family: "Poppins"; 
                     box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); cursor: pointer;
+                    display: inline-block;
                 }
 
-                .sexy-msg { color: var(--accent-green); margin: 15px 0; font-weight: 600; min-height: 24px; }
-                .score-val { font-size: 42px; font-weight: 600; color: var(--purple-light); }
+                #selectionControls, #gameplay, #endState { width: 100%; text-align: center; }
+
+                .sexy-msg { 
+                    color: var(--accent-green); margin: 15px 0; 
+                    font-weight: 600; min-height: 24px; text-align: center;
+                }
+                
+                .score-val { 
+                    font-size: 42px; font-weight: 600; 
+                    color: var(--purple-prime); text-align: center; 
+                    width: 100%;
+                }
+                
                 .checking { opacity: 0.5; pointer-events: none; }
             </style>
         </head>
@@ -349,7 +369,7 @@ class MobileTestController extends Controller
                 </div>
 
                 <div id="endState" style="display: none;">
-                    <div style="font-size: 14px; opacity: 0.6;">SCORE</div>
+                    <div style="font-size: 14px; opacity: 0.6; text-align: center;">TOTAL SCORE</div>
                     <div class="score-val" id="scoreDisplay">0</div>
                     <div id="feedback" class="sexy-msg"></div>
                     <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red); width: 100%;">PLAY AGAIN</button>
@@ -451,7 +471,7 @@ class MobileTestController extends Controller
             </script>
         </body>
         </html>';
-
+        
         return response()->json([
             [
                 'label'      => 'Home',
