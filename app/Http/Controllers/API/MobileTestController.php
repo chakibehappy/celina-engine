@@ -35,10 +35,31 @@ class MobileTestController extends Controller
         ], 401);
     }
 
+    public function getNavigation()
+    {
+        return response()->json([
+            [
+                'label' => 'Home',
+                'icon'  => 'home',
+                'route' => 'home_screen'
+            ],
+            [
+                'label' => 'Chat',
+                'icon'  => 'chat_bubble',
+                'route' => 'chat_screen'
+            ],
+            // [
+            //     'label' => 'Account',
+            //     'icon'  => 'person',
+            //     'route' => 'account_screen'
+            // ]
+        ]);
+    }
+
     public function getHomeData(Request $request)
     {
         // In a real flow, you'd pull $request->user()->name
-        $userName = "Chakiii Admin"; 
+        $userName = "Admin"; 
 
         $menus = [
             ['label' => 'Projects', 'icon_id' => 'edit_note'],
