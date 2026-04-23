@@ -48,11 +48,16 @@ class MobileTestController extends Controller
                 'icon'  => 'chat_bubble',
                 'route' => 'chat_screen'
             ],
-            // [
-            //     'label' => 'Account',
-            //     'icon'  => 'person',
-            //     'route' => 'account_screen'
-            // ]
+            [
+                'label' => 'Account',
+                'icon'  => 'person',
+                'route' => 'account_screen'
+            ],
+            [
+                'label' => 'Account',
+                'icon'  => 'person',
+                'route' => 'account_screen'
+            ]
         ]);
     }
 
