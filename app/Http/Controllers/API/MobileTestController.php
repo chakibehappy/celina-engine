@@ -290,28 +290,29 @@ class MobileTestController extends Controller
                     font-size: 20px; color: var(--accent-red); 
                     font-weight: 600; margin-bottom: 20px;
                     text-shadow: 0 0 10px rgba(255, 118, 117, 0.3);
-                    text-align: center;
                 }
 
                 .board { 
-                    display: flex; justify-content: center; gap: 6px; 
-                    flex-wrap: wrap; /* Allows wrapping instead of overflowing */
-                    max-width: 95vw; /* Keeps board within screen bounds */
+                    display: flex; justify-content: center; 
+                    gap: 1.5vw; /* Responsive gap */
+                    width: 95vw; 
                     margin: 0 auto 30px auto; 
-                    min-height: 45px; 
+                    flex-wrap: nowrap; /* Forces one row */
                 }
 
                 .letter-tile { 
-                    width: 11vw; max-width: 45px; height: 45px; 
+                    flex: 1;
+                    max-width: 45px; 
+                    aspect-ratio: 1 / 1.2;
                     background: linear-gradient(135deg, var(--purple-prime), var(--purple-light)); 
-                    border-radius: 10px; display: flex; align-items: center; justify-content: center; 
-                    font-size: 20px; font-weight: 600; color: white; border: none;
+                    border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+                    font-size: clamp(14px, 4vw, 20px); font-weight: 600; color: white; border: none;
                     box-shadow: 0 4px #4834d4; cursor: pointer; transition: 0.1s;
                     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
                 }
                 
                 .letter-tile:active { transform: translateY(2px); box-shadow: 0 2px #4834d4; }
-                .letter-tile.used { opacity: 0.3; pointer-events: none; transform: scale(0.9); box-shadow: none; }
+                .letter-tile.used { opacity: 0.3; pointer-events: auto; transform: scale(0.9); box-shadow: none; background: #dfe6e9; color: #b2bec3; }
 
                 @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
 
@@ -321,34 +322,33 @@ class MobileTestController extends Controller
                     display: flex; flex-direction: column; align-items: center;
                 }
 
+                .input-container { width: 100%; position: relative; margin-bottom: 15px; }
+
                 input { 
                     width: 100%; padding: 14px; border-radius: 15px; 
-                    border: 2px solid var(--purple-prime); background: rgba(255,255,255,0.05); 
-                    color: var(--text-main); font-family: "Poppins"; font-size: 20px; 
-                    margin-bottom: 15px; outline: none; text-align: center;
+                    border: 2px solid var(--purple-prime); background: white; 
+                    color: var(--text-main); font-family: "Poppins"; font-size: 22px; 
+                    outline: none; text-align: center; font-weight: 600;
                     text-transform: uppercase; box-sizing: border-box;
+                    caret-color: transparent; /* Hide cursor since read-only */
+                }
+
+                .clear-btn {
+                    margin-top: 8px; font-size: 12px; color: var(--accent-red);
+                    text-decoration: underline; cursor: pointer; font-weight: 600;
                 }
 
                 .action-btn { 
                     background: var(--purple-prime); border: none; padding: 14px 35px; 
                     border-radius: 50px; color: white; font-weight: 600; font-family: "Poppins"; 
                     box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); cursor: pointer;
-                    display: inline-block;
+                    width: 100%;
                 }
 
                 #selectionControls, #gameplay, #endState { width: 100%; text-align: center; }
 
-                .sexy-msg { 
-                    color: var(--accent-green); margin: 15px 0; 
-                    font-weight: 600; min-height: 24px; text-align: center;
-                }
-                
-                .score-val { 
-                    font-size: 42px; font-weight: 600; 
-                    color: var(--purple-prime); text-align: center; 
-                    width: 100%;
-                }
-                
+                .sexy-msg { color: var(--accent-green); margin: 15px 0; font-weight: 600; min-height: 24px; }
+                .score-val { font-size: 48px; font-weight: 600; color: var(--purple-prime); line-height: 1; margin: 10px 0; }
                 .checking { opacity: 0.5; pointer-events: none; }
             </style>
         </head>
@@ -364,15 +364,18 @@ class MobileTestController extends Controller
                 </div>
 
                 <div id="gameplay" style="display: none;">
-                    <input type="text" id="wordInput" placeholder="TAP TILES OR TYPE..." autocomplete="off" />
-                    <button class="action-btn" id="submitBtn" onclick="submitWord()" style="background: var(--accent-green); width: 100%;">SUBMIT WORD</button>
+                    <div class="input-container">
+                        <input type="text" id="wordInput" placeholder="..." readonly />
+                        <div class="clear-btn" onclick="clearSelection()">RESET SELECTION</div>
+                    </div>
+                    <button class="action-btn" id="submitBtn" onclick="submitWord()" style="background: var(--accent-green);">SUBMIT WORD</button>
                 </div>
 
                 <div id="endState" style="display: none;">
-                    <div style="font-size: 14px; opacity: 0.6; text-align: center;">TOTAL SCORE</div>
+                    <div style="font-size: 14px; opacity: 0.6;">TOTAL SCORE</div>
                     <div class="score-val" id="scoreDisplay">0</div>
                     <div id="feedback" class="sexy-msg"></div>
-                    <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red); width: 100%;">PLAY AGAIN</button>
+                    <button class="action-btn" onclick="resetGame()" style="background: var(--accent-red);">PLAY AGAIN</button>
                 </div>
             </div>
 
@@ -380,14 +383,15 @@ class MobileTestController extends Controller
                 const vowels = "AEIOU";
                 const consonants = "BCDFGHJKLMNPQRSTVWXYZ";
                 let currentLetters = [];
+                let selectedIndices = [];
                 let totalScore = 0;
                 let timerInterval;
 
                 function generateLetters() {
                     document.getElementById("selectionControls").style.display = "none";
                     currentLetters = [];
+                    selectedIndices = [];
                     
-                    // Composition: 4 Vowels, 5 Consonants
                     for(let i=0; i<4; i++) currentLetters.push(vowels[Math.floor(Math.random() * vowels.length)]);
                     for(let i=0; i<5; i++) currentLetters.push(consonants[Math.floor(Math.random() * consonants.length)]);
                     
@@ -407,17 +411,39 @@ class MobileTestController extends Controller
                     currentLetters.forEach((l, i) => {
                         const btn = document.createElement("button");
                         btn.className = "letter-tile";
+                        btn.id = "tile-" + i;
                         btn.innerText = l;
                         btn.style.animationDelay = `${i * 0.05}s`;
-                        btn.onclick = () => tapLetter(btn, l);
+                        btn.onclick = () => handleTileClick(i);
                         board.appendChild(btn);
                     });
                 }
 
-                function tapLetter(btn, letter) {
+                function handleTileClick(index) {
+                    const tile = document.getElementById("tile-" + index);
+                    const idxInSelection = selectedIndices.indexOf(index);
+
+                    if (idxInSelection > -1) {
+                        // Undo selection
+                        selectedIndices.splice(idxInSelection, 1);
+                        tile.classList.remove("used");
+                    } else {
+                        // Add selection
+                        selectedIndices.push(index);
+                        tile.classList.add("used");
+                    }
+                    updateInput();
+                }
+
+                function updateInput() {
                     const input = document.getElementById("wordInput");
-                    input.value = (input.value + letter).toUpperCase();
-                    btn.classList.add("used");
+                    input.value = selectedIndices.map(i => currentLetters[i]).join("");
+                }
+
+                function clearSelection() {
+                    selectedIndices = [];
+                    document.querySelectorAll(".letter-tile").forEach(t => t.classList.remove("used"));
+                    updateInput();
                 }
 
                 function startTimer() {
@@ -430,7 +456,7 @@ class MobileTestController extends Controller
                 }
 
                 async function submitWord() {
-                    const val = document.getElementById("wordInput").value.toUpperCase().trim();
+                    const val = document.getElementById("wordInput").value;
                     if (val.length < 3) return;
 
                     const btn = document.getElementById("submitBtn");
@@ -467,11 +493,12 @@ class MobileTestController extends Controller
                     document.getElementById("endState").style.display = "none";
                     document.getElementById("wordInput").value = "";
                     document.getElementById("letterBoard").innerHTML = "";
+                    selectedIndices = [];
                 }
             </script>
         </body>
         </html>';
-        
+
         return response()->json([
             [
                 'label'      => 'Home',
