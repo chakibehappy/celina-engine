@@ -82,27 +82,32 @@ class MobileAppController extends Controller
      */
     public function getNavigation(Request $request)
     {
-        $user = $request->user();
-        $platform = $request->header('X-Platform', 'flutter');
-        
-        $navs = AppNavigation::with(['screen', 'icon']) 
-            ->where('app_id', $user->app_id) // Filter by the specific app context
-            ->orderBy('order')
-            ->get();
+        try {
+            $user = $request->user();
+            $platform = $request->header('X-Platform', 'kotlin-mobile');
+            
+            $navs = AppNavigation::with(['screen', 'icon']) 
+                ->where('app_id', $user->app_id)
+                ->orderBy('order')
+                ->get();
 
-        return response()->json([
-            'app_id' => $user->app_id, // Metadata for mobile verification
-            'data'   => $navs->map(fn($nav) => [
-                'label'        => $nav->label,
-                'icon'         => $this->resolveIcon($nav->icon, $platform),
-                'route'        => $nav->screen->route,
-                'icon_size'    => (float)$nav->icon_size,
-                'font_size'    => (float)$nav->font_size,
-                'show_label'   => (bool)$nav->show_label,
-                'type'         => $nav->screen->type,
-                'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
-            ])
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Navigation loaded',
+                'data'    => $navs->map(fn($nav) => [
+                    'label'        => $nav->label,
+                    'icon'         => $this->resolveIcon($nav->icon, $platform),
+                    'route'        => $nav->screen->route,
+                    'icon_size'    => (string)$nav->icon_size, // Cast to string for Map<String, String>
+                    'font_size'    => (string)$nav->font_size,
+                    'show_label'   => $nav->show_label ? 'true' : 'false',
+                    'type'         => $nav->screen->type,
+                    'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
+                ])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
