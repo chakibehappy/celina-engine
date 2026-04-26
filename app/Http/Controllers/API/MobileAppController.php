@@ -90,24 +90,20 @@ class MobileAppController extends Controller
                 ->orderBy('order')
                 ->get();
 
-             return response()->json([
-            [
-                'label'      => 'Chat',
-                'icon'       => 'chat_bubble',
-                'route'      => 'chat_screen',
-                'icon_size'  => '24',
-                'show_label' => 'false',
-                'content_data' => ''
-            ],
-            [
-                'label'      => 'Account',
-                'icon'       => 'person',
-                'route'      => 'account_screen',
-                'icon_size'  => '24',
-                'show_label' => 'false',
-                'content_data' => ''
-            ],
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Navigation loaded',
+                'data'    => $navs->map(fn($nav) => [
+                    'label'        => $nav->label,
+                    'icon'         => $this->resolveIcon($nav->icon, $platform),
+                    'route'        => $nav->screen->route,
+                    'icon_size'    => (string)$nav->icon_size, // Cast to string for Map<String, String>
+                    'font_size'    => (string)$nav->font_size,
+                    'show_label'   => $nav->show_label ? 'true' : 'false',
+                    'type'         => $nav->screen->type,
+                    'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
+                ])
+            ]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
