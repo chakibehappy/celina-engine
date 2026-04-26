@@ -13,4 +13,10 @@ class AppNavigation extends Model
     { 
         return $this->belongsTo(AppScreen::class); 
     }
+
+    public function icon()
+    {
+        return $this->belongsTo(SystemIcon::class, 'system_icon_id');
+    }
+
 }

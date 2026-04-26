@@ -147,33 +147,40 @@ class MobileAppController extends Controller
     {
         try {
             $user = $request->user();
-            
-            // Fetch from DB
+            $platform = 'kotlin'; // Hardcoded for this endpoint/request
+
             $navs = AppNavigation::with(['screen', 'icon']) 
                 ->where('app_id', $user->app_id)
                 ->orderBy('order')
                 ->get();
 
-            // Map directly to an array so the Kotlin client receives a JsonArray
-            $formattedNavs = $navs->map(function($nav) {
+            $formattedNavs = $navs->map(function($nav) use ($platform) {
+                // Use your existing resolveIcon helper
+                $iconData = $this->resolveIcon($nav->icon, $platform);
+                
                 return [
                     'label'        => $nav->label,
-                    // Ensure this returns just the string name of the icon (e.g., "home")
-                    'icon'         => $nav->icon ? $nav->icon->name : 'help', 
-                    'route'        => $nav->screen->route,
+                    'icon'         => $iconData['value'], // This sends "home", "person", etc.
+                    'route'        => $nav->screen->route ?? 'home_screen',
                     'icon_size'    => (string)($nav->icon_size ?? '24'),
                     'show_label'   => $nav->show_label ? 'true' : 'false',
-                    // This carries your HTML for the custom_webview_screen
-                    'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
+                    'content_data' => ($nav->screen && $nav->screen->type === 'custom') 
+                                    ? $nav->screen->content_data 
+                                    : ''
                 ];
             });
 
-            // Return the collection directly to match the Kotlin decodeFromString<JsonArray>
             return response()->json($formattedNavs);
 
         } catch (\Exception $e) {
+            // This is what caught the "Call to undefined relationship" error earlier
             return response()->json([
-                ['label' => 'Error', 'icon' => 'warning', 'route' => 'error', 'content_data' => $e->getMessage()]
+                [
+                    'label' => 'Error', 
+                    'icon' => 'warning', 
+                    'route' => 'error', 
+                    'content_data' => $e->getMessage()
+                ]
             ], 500);
         }
     }
