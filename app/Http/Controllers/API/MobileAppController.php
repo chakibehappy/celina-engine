@@ -84,7 +84,6 @@ class MobileAppController extends Controller
     {
         try {
             $user = $request->user();
-            $platform = $request->header('X-Platform', 'kotlin-mobile');
             
             $navs = AppNavigation::with(['screen', 'icon']) 
                 ->where('app_id', $user->app_id)
@@ -116,36 +115,40 @@ class MobileAppController extends Controller
     public function getScreenData(Request $request, $route)
     {
         $user = $request->user();
-        $platform = $request->header('X-Platform', 'flutter');
 
-        // Maintained your deep eager loading to prevent N+1 performance issues
         $screen = AppScreen::with(['menus.icon', 'menus.subModules.icon'])
             ->where('app_id', $user->app_id)
             ->where('route', $route)
             ->first();
 
         if (!$screen) {
-            return response()->json(['error' => 'Unauthorized or Not Found'], 403);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Unauthorized or Not Found'
+            ], 403);
         }
 
         return response()->json([
-            'success'      => true,
-            'app_id'       => $user->app_id,
-            'title'        => $screen->title,
-            'type'         => $screen->type,
-            'content_data' => $screen->content_data,
-            'menus'        => $screen->menus->map(fn($menu) => [
-                'label' => $menu->label,
-                'icon'  => $this->resolveIcon($menu->icon, $platform),
-                'sub_modules' => $menu->subModules->map(fn($sub) => [
-                    'label' => $sub->label,
-                    'desc'  => $sub->description,
-                    'icon'  => $this->resolveIcon($sub->icon, $platform),
-                    'count' => $sub->count,
-                    'table' => $sub->table_name,
-                    'color' => $sub->color
+            'success' => true,
+            'message' => 'Screen data loaded',
+            'data'    => [ // <--- THE MISSING ENVELOPE
+                'app_id'       => $user->app_id,
+                'title'        => $screen->title,
+                'type'         => $screen->type,
+                'content_data' => $screen->content_data,
+                'menus'        => $screen->menus->map(fn($menu) => [
+                    'label' => $menu->label,
+                    'icon'  => $this->resolveIcon($menu->icon, $platform),
+                    'sub_modules' => $menu->subModules->map(fn($sub) => [
+                        'label' => $sub->label,
+                        'desc'  => $sub->description,
+                        'icon'  => $this->resolveIcon($sub->icon, $platform),
+                        'count' => $sub->count,
+                        'table' => $sub->table_name,
+                        'color' => $sub->color
+                    ])
                 ])
-            ])
+            ]
         ]);
     }
 
