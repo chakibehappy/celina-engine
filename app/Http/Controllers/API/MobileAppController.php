@@ -35,18 +35,22 @@ class MobileAppController extends Controller
 
         $token = $user->createToken($request->device_name)->plainTextToken;
 
+        // Consistent CelinaResponse structure
         return response()->json([
             'success' => true,
-            'token'   => $token,
-            'app_context' => [
-                'app_id'   => $user->app_id, // Added for testing/state persistence
-                'app_name' => $user->app->name,
-                'slug'     => $user->app->slug,
-            ],
-            'user' => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
+            'message' => 'Handshake Successful', // Optional: Good for debugging
+            'data' => [
+                'token'   => $token,
+                'app_context' => [
+                    'app_id'   => $user->app_id,
+                    'app_name' => $user->app->name,
+                    'slug'     => $user->app->slug,
+                ],
+                'user' => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                ]
             ]
         ]);
     }
