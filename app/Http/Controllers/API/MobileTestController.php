@@ -37,7 +37,8 @@ class MobileTestController extends Controller
 
     public function getNavigation()
     {
-        // $sexyHtml = '
+        // can be anything that can be put inside webview
+        // $customHtml = '
         // <!DOCTYPE html>
         // <html>
         // <head>
@@ -562,20 +563,39 @@ class MobileTestController extends Controller
     {
         // In a real flow, you'd pull $request->user()->name
         $userName = "Admin"; 
-
         $menus = [
-            ['label' => 'Projects', 'icon_id' => 'edit_note'],
-            ['label' => 'Tasks', 'icon_id' => 'account_tree'],
-            ['label' => 'Clients', 'icon_id' => 'people'],
-            ['label' => 'Calendar', 'icon_id' => 'calendar'],
-            ['label' => 'Documents', 'icon_id' => 'description'],
-            ['label' => 'Invoices', 'icon_id' => 'assignment'],
-            ['label' => 'Reports', 'icon_id' => 'insert_chart'],
-            ['label' => 'Info', 'icon_id' => 'campaign'],
-            ['label' => 'Notes', 'icon_id' => 'sticky_note'],
-            ['label' => 'Files' , 'icon_id' => 'file_present'],
-            ['label' => 'Team', 'icon_id' => 'group'],
-            ['label' => 'Settings', 'icon_id' => 'settings'],
+            [
+                'label' => 'Projects', 
+                'icon_id' => 'edit_note',
+                'sub_modules' => [
+                    ['label' => 'All Projects', 'desc' => 'Full project directory', 'icon_id' => 'folder_open', 'count' => 24],
+                    ['label' => 'Project Tasks', 'desc' => 'Active task tracking', 'icon_id' => 'assignment', 'count' => 56],
+                    ['label' => 'Project Budget', 'desc' => 'Financial oversight', 'icon_id' => 'monetization', 'count' => 9, 'color' => '#4CAF50'],
+                ]
+            ],
+            [
+                'label' => 'Tasks', 
+                'icon_id' => 'account_tree',
+                'sub_modules' => [
+                    ['label' => 'My Tasks', 'desc' => 'Assigned to you', 'icon_id' => 'person', 'count' => 12],
+                    ['label' => 'Pending Review', 'desc' => 'Waiting for approval', 'icon_id' => 'rule', 'count' => 5],
+                ]
+            ],
+            // DIRECT ACCESS (No Sub-Menu)
+            ['label' => 'Clients', 'icon_id' => 'people', 'sub_modules' => []], 
+            ['label' => 'Documents', 'icon_id' => 'description', 'sub_modules' => []],
+            
+            [
+                'label' => 'Team', 
+                'icon_id' => 'group',
+                'sub_modules' => [
+                    ['label' => 'Members', 'desc' => 'Staff directory', 'icon_id' => 'badge', 'count' => 15],
+                    ['label' => 'Permissions', 'desc' => 'Role management', 'icon_id' => 'lock', 'count' => 4],
+                ]
+            ],
+            // DIRECT ACCESS
+            ['label' => 'Invoices', 'icon_id' => 'receipt', 'sub_modules' => []],
+            ['label' => 'Reports', 'icon_id' => 'insert_chart', 'sub_modules' => []],
         ];
 
         $recentItems = [
