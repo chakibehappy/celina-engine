@@ -92,14 +92,6 @@ class MobileAppController extends Controller
 
              return response()->json([
             [
-                'label'      => 'Home',
-                'icon'       => 'home',
-                'route'      => 'home_screen',
-                'icon_size'  => '24',
-                'show_label' => 'false',
-                'content_data' => '' 
-            ],
-            [
                 'label'      => 'Chat',
                 'icon'       => 'chat_bubble',
                 'route'      => 'chat_screen',
@@ -114,22 +106,6 @@ class MobileAppController extends Controller
                 'icon_size'  => '24',
                 'show_label' => 'false',
                 'content_data' => ''
-            ],
-            [
-                'label'      => 'Live',
-                'icon'       => 'heart_smile',
-                'route'      => 'custom_webview_screen',
-                'icon_size'  => '24',
-                'show_label' => 'false',
-                'content_data' => $gameHtml 
-            ],
-            [
-                'label'      => 'Countdown',
-                'icon'       => 'edit_note',
-                'route'      => 'custom_webview_screen',
-                'icon_size'  => '24',
-                'show_label' => 'false',
-                'content_data' => $countDownGame 
             ],
         ]);
         } catch (\Exception $e) {
