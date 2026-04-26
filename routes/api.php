@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-// use App\Http\Controllers\API\MobileTestController;
+use App\Http\Controllers\API\MobileTestController;
 
 // // This is the clean, no-middleware route for testing
 // Route::post('/test-login', [MobileTestController::class, 'login']);

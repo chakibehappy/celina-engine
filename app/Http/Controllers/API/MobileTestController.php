@@ -513,7 +513,7 @@ class MobileTestController extends Controller
         </script>
         </body>
         </html>
-';
+        ';
 
         return response()->json([
             [
