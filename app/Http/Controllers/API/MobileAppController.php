@@ -80,32 +80,101 @@ class MobileAppController extends Controller
     /**
      * Fetch navigation tabs scoped strictly to the user's assigned App.
      */
+    // public function getNavigation(Request $request)
+    // {
+    //     try {
+    //         $user = $request->user();
+            
+    //         $navs = AppNavigation::with(['screen', 'icon']) 
+    //             ->where('app_id', $user->app_id)
+    //             ->orderBy('order')
+    //             ->get();
+    //         // should be on test controller :
+    //         //     return response()->json([
+    //         //     [
+    //         //         'label'      => 'Home',
+    //         //         'icon'       => 'home',
+    //         //         'route'      => 'home_screen',
+    //         //         'icon_size'  => '24',
+    //         //         'show_label' => 'false',
+    //         //         'content_data' => '' 
+    //         //     ],
+    //         //     [
+    //         //         'label'      => 'Chat',
+    //         //         'icon'       => 'chat_bubble',
+    //         //         'route'      => 'chat_screen',
+    //         //         'icon_size'  => '24',
+    //         //         'show_label' => 'false',
+    //         //         'content_data' => ''
+    //         //     ],
+    //         //     [
+    //         //         'label'      => 'Account',
+    //         //         'icon'       => 'person',
+    //         //         'route'      => 'account_screen',
+    //         //         'icon_size'  => '24',
+    //         //         'show_label' => 'false',
+    //         //         'content_data' => ''
+    //         //     ],
+    //         //     [
+    //         //         'label'      => 'Live',
+    //         //         'icon'       => 'edit_note',
+    //         //         'route'      => 'custom_webview_screen',
+    //         //         'icon_size'  => '24',
+    //         //         'show_label' => 'false',
+    //         //         'content_data' => $html 
+    //         //     ],
+    //         // ]);
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Navigation loaded',
+    //             'data'    => $navs->map(fn($nav) => [
+    //                 'label'        => $nav->label,
+    //                 'icon'         => $this->resolveIcon($nav->icon, $platform),
+    //                 'route'        => $nav->screen->route,
+    //                 'icon_size'    => (string)$nav->icon_size, // Cast to string for Map<String, String>
+    //                 'font_size'    => (string)$nav->font_size,
+    //                 'show_label'   => $nav->show_label ? 'true' : 'false',
+    //                 'type'         => $nav->screen->type,
+    //                 'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
+    //             ])
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    //     }
+    // }
+
     public function getNavigation(Request $request)
     {
         try {
             $user = $request->user();
             
+            // Fetch from DB
             $navs = AppNavigation::with(['screen', 'icon']) 
                 ->where('app_id', $user->app_id)
                 ->orderBy('order')
                 ->get();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Navigation loaded',
-                'data'    => $navs->map(fn($nav) => [
+            // Map directly to an array so the Kotlin client receives a JsonArray
+            $formattedNavs = $navs->map(function($nav) {
+                return [
                     'label'        => $nav->label,
-                    'icon'         => $this->resolveIcon($nav->icon, $platform),
+                    // Ensure this returns just the string name of the icon (e.g., "home")
+                    'icon'         => $nav->icon ? $nav->icon->name : 'help', 
                     'route'        => $nav->screen->route,
-                    'icon_size'    => (string)$nav->icon_size, // Cast to string for Map<String, String>
-                    'font_size'    => (string)$nav->font_size,
+                    'icon_size'    => (string)($nav->icon_size ?? '24'),
                     'show_label'   => $nav->show_label ? 'true' : 'false',
-                    'type'         => $nav->screen->type,
+                    // This carries your HTML for the custom_webview_screen
                     'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
-                ])
-            ]);
+                ];
+            });
+
+            // Return the collection directly to match the Kotlin decodeFromString<JsonArray>
+            return response()->json($formattedNavs);
+
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json([
+                ['label' => 'Error', 'icon' => 'warning', 'route' => 'error', 'content_data' => $e->getMessage()]
+            ], 500);
         }
     }
 
