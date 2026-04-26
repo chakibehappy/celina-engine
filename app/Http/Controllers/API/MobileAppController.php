@@ -16,45 +16,67 @@ class MobileAppController extends Controller
     /**
      * Authenticate AppUser and return token + app branding + unique app_id.
      */
-    public function login(Request $request)
+   public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-            'device_name' => 'required',
-        ]);
-
-        // Eager load the app relationship
-        $user = AppUser::with('app')->where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Invalid credentials.'],
+        try {
+            // 1. Manual Validation to ensure consistent JSON even on failure
+            $validator = \Validator::make($request->all(), [
+                'email'       => 'required|email',
+                'password'    => 'required',
+                'device_name' => 'required',
             ]);
-        }
 
-        $token = $user->createToken($request->device_name)->plainTextToken;
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors'  => $validator->errors()
+                ], 422);
+            }
 
-        // Consistent CelinaResponse structure
-        return response()->json([
-            'success' => true,
-            'message' => 'Handshake Successful', // Optional: Good for debugging
-            'data' => [
-                'token'   => $token,
-                'app_context' => [
-                    'app_id'   => $user->app_id,
-                    'app_name' => $user->app->name,
-                    'slug'     => $user->app->slug,
-                ],
-                'user' => [
-                    'id'    => $user->id,
-                    'name'  => $user->name,
-                    'email' => $user->email,
+            // 2. Find User
+            $user = AppUser::with('app')->where('email', $request->email)->first();
+
+            // 3. Check Credentials
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid credentials.',
+                    'errors'  => ['email' => ['Invalid email or password.']]
+                ], 401);
+            }
+
+            // 4. Generate Token
+            $token = $user->createToken($request->device_name)->plainTextToken;
+
+            // 5. Success Response (The Perfect Envelope)
+            return response()->json([
+                'success' => true,
+                'message' => 'Handshake Successful',
+                'data' => [
+                    'token'       => $token,
+                    'app_context' => [
+                        'app_id'   => $user->app_id,
+                        'app_name' => $user->app->name ?? 'Default App',
+                        'slug'     => $user->app->slug ?? 'default',
+                    ],
+                    'user' => [
+                        'id'    => $user->id,
+                        'name'  => $user->name,
+                        'email' => $user->email,
+                    ]
                 ]
-            ]
-        ]);
-    }
+            ]);
 
+        } catch (\Exception $e) {
+            // Catch-all for database errors or logic crashes
+            return response()->json([
+                'success' => false,
+                'message' => 'Server Error: ' . $e->getMessage(),
+                'data'    => null
+            ], 500);
+        }
+    }
     /**
      * Fetch navigation tabs scoped strictly to the user's assigned App.
      */
