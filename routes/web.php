@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
 
 use App\Http\Controllers\MobileDashboardTestController;
+use App\Http\Controllers\Auth\GoogleController;
 
 Route::get('/', function () {
     return Inertia::render('Home');
@@ -53,3 +54,6 @@ Route::prefix('test-dashboard')->group(function () {
         return $controller->deleteData($type, $id); 
     })->name('test-dashboard.delete');
 });
+
+// for register in Google Cloud Console
+Route::get('/auth/google/callback', [GoogleController::class, 'handleCallback'])->name('auth.google.callback');
