@@ -33,28 +33,23 @@ Route::get('/test-create', function (\App\Services\ProjectGenerator $gen) {
 
 
 Route::prefix('test-dashboard')->group(function () {
-    Route::get('/', [MobileDashboardTestController::class, 'index'])->name('test.dashboard');
+    Route::get('/', [MobileDashboardTestController::class, 'index'])->name('test-dashboard.index');
     
     // --- Specific Routes (Nav & Screen) ---
-    Route::post('/nav', [MobileDashboardTestController::class, 'storeNavigation']);
-    Route::post('/screen', [MobileDashboardTestController::class, 'storeScreen']);
+    Route::post('/nav', [MobileDashboardTestController::class, 'storeNavigation'])->name('test-dashboard.nav.store');
+    Route::post('/screen', [MobileDashboardTestController::class, 'storeScreen'])->name('test-dashboard.screen.store');
     
-    Route::put('/nav/{id}', [MobileDashboardTestController::class, 'updateNavigation']);
-    Route::put('/screen/{id}', [MobileDashboardTestController::class, 'updateScreenContent']);
+    Route::put('/nav/{id}', [MobileDashboardTestController::class, 'updateNavigation'])->name('test-dashboard.nav.update');
+    Route::put('/screen/{id}', [MobileDashboardTestController::class, 'updateScreenContent'])->name('test-dashboard.screen.update');
     
-    Route::delete('/nav/{id}', [MobileDashboardTestController::class, 'destroyNavigation']);
-    Route::delete('/screen/{id}', [MobileDashboardTestController::class, 'destroyScreen']);
+    Route::delete('/nav/{id}', [MobileDashboardTestController::class, 'destroyNavigation'])->name('test-dashboard.nav.destroy');
+    Route::delete('/screen/{id}', [MobileDashboardTestController::class, 'destroyScreen'])->name('test-dashboard.screen.destroy');
 
-    // --- Generic Data Routes (User, Menu, Submodule, Role) ---
-    // These match the openModal('user') calls in your Vue frontend
-    Route::post('/{type}', [MobileDashboardTestController::class, 'storeData']);
-    Route::put('/{type}/{id}', [MobileDashboardTestController::class, 'updateData']);
-    
-    // This allows deleteData('user', id) to work for all generic types
+    // --- Generic Data Routes ---
+    Route::post('/{type}', [MobileDashboardTestController::class, 'storeData'])->name('test-dashboard.store');
+    Route::put('/{type}/{id}', [MobileDashboardTestController::class, 'updateData'])->name('test-dashboard.update');
     Route::delete('/{type}/{id}', function($type, $id) {
-        // We can reuse the controller's logic or add a destroyData method
-        // For now, let's just point it to a new method or handle it simply:
         $controller = app(MobileDashboardTestController::class);
         return $controller->deleteData($type, $id); 
-    });
+    })->name('test-dashboard.delete');
 });

@@ -145,6 +145,7 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
+// Access the route helper globally (provided by Ziggy)
 const props = defineProps({ 
     navigations: Array, 
     screens: Array, 
@@ -154,7 +155,7 @@ const props = defineProps({
     menus: Array,
     subModules: Array,
     system_icons: Array,
-    schemas: Object // This is the key to the automation
+    schemas: Object
 });
 
 const viewMode = ref('lab'); 
@@ -170,30 +171,32 @@ const customScreens = computed(() => {
 const openModal = (type, item = null) => {
     modalType.value = type;
     isEditing.value = !!item;
-    // Default to the first app_id if it exists in schema and is new
     formData.value = item ? { ...item } : { app_id: props.apps[0]?.id };
     showDataModal.value = true;
 };
 
+// Generic Data CRUD using Ziggy route() helper
+// Generic Data CRUD
 const saveData = () => {
-    const url = isEditing.value 
-        ? `/test-dashboard/${modalType.value}/${formData.value.id}` 
-        : `/test-dashboard/${modalType.value}`;
-    
-    router[isEditing.value ? 'put' : 'post'](url, formData.value, {
+    const routeName = isEditing.value ? 'test-dashboard.update' : 'test-dashboard.store';
+    const routeParams = isEditing.value 
+        ? { type: modalType.value, id: formData.value.id } 
+        : { type: modalType.value };
+
+    router[isEditing.value ? 'put' : 'post'](route(routeName, routeParams), formData.value, {
         onSuccess: () => showDataModal.value = false
     });
 };
 
 const deleteData = (type, id) => {
     if(confirm(`Permanent delete ${type} #${id}?`)) {
-        router.delete(`/test-dashboard/${type}/${id}`);
+        router.delete(route('test-dashboard.delete', { type, id }));
     }
 };
 
 // Quick Autosave for Lab Mode
-const saveNav = (nav) => router.put(`/test-dashboard/nav/${nav.id}`, nav);
-const saveScreen = (screen) => router.put(`/test-dashboard/screen/${screen.id}`, screen);
+const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav);
+const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen);
 const deleteNav = (id) => deleteData('nav', id);
 </script>
 
