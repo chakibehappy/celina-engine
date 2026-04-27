@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
+
 class MobileAppController extends Controller
 {
     /**
@@ -261,5 +264,52 @@ class MobileAppController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['success' => true]);
+    }
+
+    public function googleLogin(Request $request) 
+    {
+        try {
+            // 1. Verify the JWT from the Kotlin app
+            $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
+
+            // 2. Find or Create based ONLY on email for now
+            $user = AppUser::with('app')->updateOrCreate(
+                ['email' => $googleUser->getEmail()],
+                [
+                    'name'     => $googleUser->getName(),
+                    'app_id'   => 1, // Defaulting to your main Celina App
+                    'password' => Hash::make(Str::random(24)), 
+                    // 'google_id' => $googleUser->getId(), // Commented out for later
+                ]
+            );
+
+            // 3. Issue the Sanctum token
+            $token = $user->createToken($request->device_name)->plainTextToken;
+
+            // 4. Return the standard "Celina Envelope"
+            return response()->json([
+                'success' => true,
+                'message' => 'Google Handshake Successful',
+                'data' => [
+                    'token'       => $token,
+                    'app_context' => [
+                        'app_id'   => $user->app_id,
+                        'app_name' => $user->app->name ?? 'Default App',
+                        'slug'     => $user->app->slug ?? 'default',
+                    ],
+                    'user' => [
+                        'id'    => $user->id,
+                        'name'  => $user->name,
+                        'email' => $user->email,
+                    ]
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Google Auth Failed: ' . $e->getMessage(),
+            ], 401);
+        }
     }
 }

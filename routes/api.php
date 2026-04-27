@@ -18,6 +18,7 @@ use App\Http\Controllers\API\MobileAppController;
 
 // Public routes
 Route::post('/app/login', [MobileAppController::class, 'login']);
+Route::post('/app/google-login', [MobileAppController::class, 'googleLogin']);
 
 // Protected routes (Requires Bearer Token)
 Route::middleware('auth:sanctum')->group(function () {
