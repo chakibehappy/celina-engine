@@ -43,20 +43,20 @@
                             </span>
                         </div>
                         <span class="text-[10px] bg-pink-900/30 text-pink-400 px-2 py-1 rounded border border-pink-800/50 uppercase tracking-widest">
-                            {{ screen.type === 'custom' ? 'Live Preview' : 'JSON Viewer' }}
+                            {{ screen.type === 'custom' ? 'Live Preview' : 'Tree Viewer' }}
                         </span>
                     </div>
 
                     <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         <div class="space-y-2">
                             <label class="text-[10px] text-gray-500 font-mono">
-                                {{ screen.type === 'dynamic' ? 'LOGIC / JSON CONFIG' : 'HTML CONTENT' }}
+                                {{ screen.type === 'dynamic' ? 'JSON CONFIG' : 'HTML CONTENT' }}
                             </label>
                             <textarea 
                                 v-model="screen.content_data" 
                                 class="w-full h-[580px] font-mono text-[11px] bg-black text-green-500 p-4 rounded-lg border border-gray-700 custom-scrollbar focus:border-purple-500 transition-colors resize-none" 
                                 @change="saveScreen(screen)"
-                                :placeholder="screen.type === 'dynamic' ? '// Enter logic or dynamic data configuration...' : 'Enter HTML structure...'"
+                                :placeholder="screen.type === 'dynamic' ? '// JSON format required...' : 'Enter HTML structure...'"
                             ></textarea>
                         </div>
 
@@ -73,8 +73,13 @@
                                 <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-1 bg-gray-400/50 rounded-full"></div>
                             </div>
 
-                            <div v-else class="w-full h-[580px] bg-gray-950 border border-gray-700 rounded-lg p-4 overflow-auto custom-scrollbar">
-                                <pre class="text-[11px] font-mono text-blue-400 leading-relaxed">{{ formatJson(screen.content_data) }}</pre>
+                            <div v-else class="w-full h-[580px] bg-gray-950 border border-gray-700 rounded-lg p-6 overflow-auto custom-scrollbar font-mono text-xs">
+                                <div v-if="getParsedJson(screen.content_data)">
+                                    <ul class="space-y-1">
+                                        <TreeItem :item="getParsedJson(screen.content_data)" name="root" />
+                                    </ul>
+                                </div>
+                                <div v-else class="text-red-500 italic opacity-50">// Awaiting valid JSON...</div>
                             </div>
                         </div>
                     </div>
@@ -88,7 +93,6 @@
                     <span class="uppercase tracking-widest text-xs text-purple-300">{{ type.replace(/_/g, ' ') }}s</span>
                     <button @click="openModal(type)" class="text-[10px] bg-green-600 px-3 py-1 rounded hover:bg-green-500">+ NEW</button>
                 </div>
-                
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="text-gray-500 bg-gray-900/50">
@@ -98,15 +102,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item in props[type === 'submodule' ? 'subModules' : type + 's']" :key="item.id" class="border-b border-gray-700/50 hover:bg-gray-750">
+                            <tr v-for="item in props[type === 'submodule' ? 'subModules' : type + 's']" :key="item.id" class="border-b border-gray-700/50 hover:bg-gray-750 text-gray-300">
                                 <td v-for="f in fields" :key="f.key" class="p-3">
-                                    <span v-if="f.key === 'id'" 
-                                        :class="type === 'system_icon' ? 'material-symbols-outlined text-white-500 text-lg' : 'font-mono text-gray-600'">
-                                        {{ type === 'system_icon' ? item[f.key] : '#' + item[f.key] }}
-                                    </span>
-                                    <span v-else-if="f.key.endsWith('_id')" class="text-purple-400">
-                                        {{ item[f.key.replace('_id', '')]?.name || item[f.key.replace('_id', '')]?.label || item[f.key] }}
-                                    </span>
+                                    <span v-if="f.key === 'id'" class="font-mono text-gray-600">#{{ item[f.key] }}</span>
                                     <span v-else class="truncate max-w-[150px] inline-block">{{ item[f.key] }}</span>
                                 </td>
                                 <td class="p-3 text-right whitespace-nowrap">
@@ -122,44 +120,20 @@
 
         <div v-if="showDataModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-md border border-gray-600 shadow-2xl">
-                <h3 class="text-xl font-bold mb-6 capitalize text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                <h3 class="text-xl font-bold mb-6 text-purple-400">
                     {{ isEditing ? 'Edit' : 'Create' }} {{ modalType }}
                 </h3>
-                
                 <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                     <div v-for="field in schemas[modalType]" :key="field.key">
                         <template v-if="field.key !== 'id' || (!isEditing && modalType === 'system_icon')">
-                            <label class="text-[10px] text-gray-500 block mb-1 uppercase font-bold tracking-tighter">{{ field.label }}</label>
-                            
-                            <select v-if="field.type === 'select_screen_type'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
-                                <option value="standard">Standard</option>
-                                <option value="custom">Custom</option>
-                                <option value="dynamic">Dynamic</option>
-                            </select>
-
-                            <select v-else-if="field.type === 'select'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
-                                <option v-for="opt in props[field.options]" :key="opt.id" :value="opt.id">
-                                    {{ opt.name || opt.label || opt.title || opt.id }}
-                                </option>
-                            </select>
-
-                            <textarea v-else-if="field.type === 'textarea'" v-model="formData[field.key]" rows="3" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white font-mono text-xs"></textarea>
-
-                            <div v-else-if="field.type === 'checkbox'" class="flex items-center gap-2 p-3 bg-gray-900 rounded border border-gray-700">
-                                <input type="checkbox" v-model="formData[field.key]" class="rounded border-gray-700 text-purple-600 focus:ring-purple-500">
-                                <span class="text-xs text-gray-400">Enabled / Active</span>
-                            </div>
-
-                            <input v-else :type="field.type" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
+                            <label class="text-[10px] text-gray-500 block mb-1 uppercase font-bold">{{ field.label }}</label>
+                            <input v-model="formData[field.key]" :type="field.type" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
                         </template>
                     </div>
                 </div>
-
                 <div class="flex justify-end gap-4 mt-8 pt-4 border-t border-gray-700">
                     <button @click="showDataModal = false" class="text-gray-400 text-sm">Cancel</button>
-                    <button @click="saveData" class="bg-purple-600 hover:bg-purple-500 px-8 py-2 rounded-lg font-bold shadow-lg transition">
-                        Commit
-                    </button>
+                    <button @click="saveData" class="bg-purple-600 hover:bg-purple-500 px-8 py-2 rounded-lg font-bold">Commit</button>
                 </div>
             </div>
         </div>
@@ -167,19 +141,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, defineComponent, h } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({ 
-    navigations: Array, 
-    screens: Array, 
-    apps: Array,
-    users: Array,
-    roles: Array,
-    menus: Array,
-    subModules: Array,
-    system_icons: Array,
-    schemas: Object
+    navigations: Array, screens: Array, apps: Array, users: Array, 
+    roles: Array, menus: Array, subModules: Array, system_icons: Array, schemas: Object
 });
 
 const viewMode = ref('lab'); 
@@ -188,21 +155,41 @@ const modalType = ref('');
 const isEditing = ref(false);
 const formData = ref({});
 
-// Filters screens that need raw data editing (Custom & Dynamic)
-const filteredScreens = computed(() => {
-    return props.screens.filter(s => s.type === 'custom' || s.type === 'dynamic');
-});
+const filteredScreens = computed(() => props.screens.filter(s => s.type === 'custom' || s.type === 'dynamic'));
 
-// JSON Beautifier for Preview
-const formatJson = (data) => {
-    try {
-        if (!data) return '';
-        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-        return JSON.stringify(parsed, null, 4);
-    } catch (e) {
-        return data; // Return raw string if not valid JSON
-    }
+const getParsedJson = (data) => {
+    try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return null; }
 };
+
+// Tree Item Component (The "jsonviewer" logic)
+const TreeItem = defineComponent({
+    name: 'TreeItem',
+    props: ['item', 'name'],
+    setup(props) {
+        const isOpen = ref(true);
+        const isObject = computed(() => typeof props.item === 'object' && props.item !== null);
+        const isArray = computed(() => Array.isArray(props.item));
+
+        return () => h('li', { class: 'list-none' }, [
+            h('div', { class: 'flex items-center gap-1 py-0.5' }, [
+                isObject.value ? h('button', { 
+                    onClick: (e) => { e.stopPropagation(); isOpen.value = !isOpen.value; },
+                    class: 'text-[9px] w-4 text-gray-500 hover:text-white transition'
+                }, isOpen.value ? '▼' : '▶') : h('span', { class: 'w-4' }),
+                
+                h('span', { class: 'text-purple-400' }, props.name + ':'),
+                
+                !isObject.value ? h('span', { class: 'text-green-500 ml-1' }, 
+                    typeof props.item === 'string' ? `"${props.item}"` : String(props.item)
+                ) : h('span', { class: 'text-gray-600 text-[10px] ml-1' }, isArray.value ? `Array[${props.item.length}]` : '{ }')
+            ]),
+            
+            (isObject.value && isOpen.value) ? h('ul', { class: 'ml-4 border-l border-gray-800 pl-2' }, 
+                Object.entries(props.item).map(([key, value]) => h(TreeItem, { key, name: key, item: value }))
+            ) : null
+        ]);
+    }
+});
 
 const openModal = (type, item = null) => {
     modalType.value = type;
@@ -213,19 +200,13 @@ const openModal = (type, item = null) => {
 
 const saveData = () => {
     const routeName = isEditing.value ? 'test-dashboard.update' : 'test-dashboard.store';
-    const routeParams = isEditing.value 
-        ? { type: modalType.value, id: formData.value.id } 
-        : { type: modalType.value };
-
-    router[isEditing.value ? 'put' : 'post'](route(routeName, routeParams), formData.value, {
+    router[isEditing.value ? 'put' : 'post'](route(routeName, { type: modalType.value, id: formData.value.id }), formData.value, {
         onSuccess: () => showDataModal.value = false
     });
 };
 
 const deleteData = (type, id) => {
-    if(confirm(`Permanent delete ${type} #${id}?`)) {
-        router.delete(route('test-dashboard.delete', { type, id }));
-    }
+    if(confirm(`Permanent delete ${type} #${id}?`)) router.delete(route('test-dashboard.delete', { type, id }));
 };
 
 const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav);
@@ -237,15 +218,5 @@ const deleteNav = (id) => deleteData('nav', id);
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-
-iframe {
-    scrollbar-width: none;
-}
-iframe::-webkit-scrollbar {
-    display: none;
-}
-pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
+iframe::-webkit-scrollbar { display: none; }
 </style>
