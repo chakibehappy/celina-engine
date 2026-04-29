@@ -178,7 +178,8 @@ const syncScroll = (e, id) => {
 
 const highlightCode = (code, type) => {
     if (!code) return '';
-    // Escape HTML first
+    
+    // 1. Escape HTML first to prevent injection
     let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     if (type === 'dynamic') { 
@@ -188,16 +189,20 @@ const highlightCode = (code, type) => {
             .replace(/:\s*(\d+)/g, ': <span class="text-orange-300">$1</span>') 
             .replace(/:\s*(true|false|null)/g, ': <span class="text-blue-400">$1</span>'); 
     } else { 
-        // Improved HTML Highlighter to avoid "text-orange" span collision
-        return res
-            .replace(/(&lt;\/?)([a-z0-9-]+)/gi, '$1<span class="text-pink-500">$2</span>') // Tags
-            .replace(/(\s)([a-z-]+)(=)(")/gi, '$1<span class="text-orange-300">$2</span>$3$4') // Attributes (ensures it's an attribute name)
-            .replace(/"([^"]*)"/g, (match) => {
-                // Only wrap in green if it's not already inside a highlight span's class attribute
-                return match.includes('text-') ? match : `<span class="text-green-300">${match}</span>`;
-            })
-            .replace(/\b(function|var|let|const|return|if|else|for|while)\b/g, '<span class="text-purple-400">$1</span>')
-            .replace(/\b(true|false|null|undefined)\b/g, '<span class="text-blue-400">$1</span>');
+        // 2. Combined HTML/JS Regex to prevent overlapping matches
+        // Order matters: we match strings first so we don't highlight tags inside them.
+        const regex = /("[^"]*")|(&lt;\/?)([a-z0-9-]+)|(\b[a-z-]+(?==))|(\b(function|var|let|const|return|if|else|for|while|true|false|null|undefined)\b)/gi;
+
+        return res.replace(regex, (match, string, tagStart, tagName, attrName, keyword) => {
+            if (string) return `<span class="text-green-300">${string}</span>`;
+            if (tagName) return `${tagStart}<span class="text-pink-500">${tagName}</span>`;
+            if (attrName) return `<span class="text-orange-300">${attrName}</span>`;
+            if (keyword) {
+                const color = /true|false|null|undefined/.test(keyword) ? 'text-blue-400' : 'text-purple-400';
+                return `<span class="${color}">${keyword}</span>`;
+            }
+            return match;
+        });
     }
 };
 
