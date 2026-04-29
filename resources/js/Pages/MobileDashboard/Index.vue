@@ -45,12 +45,15 @@
                 <div v-for="screen in filteredScreens" :key="screen.id" class="bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl overflow-hidden">
                     <div class="bg-gray-850 px-6 py-3 border-b border-gray-700 flex justify-between items-center">
                         <div class="flex items-center gap-4">
-                             <div class="flex gap-1.5 mr-4">
+                            <div class="flex gap-1.5 mr-4">
                                 <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
                                 <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
                                 <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
                             </div>
-                            <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-mono text-sm focus:ring-0 p-0 text-purple-400 w-auto" placeholder="filename.js">
+                            <div class="bg-[#0d1117] px-4 py-1 rounded-t-lg border-x border-t border-gray-700 -mb-[13px] z-10 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm text-orange-400">{{ screen.type === 'custom' ? 'html' : 'settings' }}</span>
+                                <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-mono text-xs focus:ring-0 p-0 text-gray-300 w-auto min-w-[120px]" spellcheck="false">
+                            </div>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="text-[10px] font-mono text-gray-500">UTF-8</span>
@@ -60,45 +63,55 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12">
-                        <div class="lg:col-span-7 bg-[#0d1117] flex border-r border-gray-700">
-                            <div class="w-12 bg-[#0d1117] border-r border-gray-800/50 py-6 text-right pr-3 select-none">
-                                <div v-for="n in 25" :key="n" class="text-[11px] font-mono text-gray-600 leading-relaxed">{{ n }}</div>
+                        <div class="lg:col-span-7 bg-[#0d1117] flex border-r border-gray-700 relative h-[650px]">
+                            
+                            <div class="w-12 bg-[#0d1117] border-r border-gray-800/50 py-6 text-right pr-3 select-none overflow-hidden">
+                                <div v-for="n in (screen.content_data?.split('\n').length || 1)" :key="n" 
+                                     class="text-[11px] font-mono text-gray-600 leading-[20px] h-[20px]">
+                                    {{ n }}
+                                </div>
                             </div>
                             
-                            <div class="flex-1 relative">
+                            <div class="flex-1 relative overflow-hidden group">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="w-full h-[600px] font-mono text-[13px] bg-transparent text-blue-100 p-6 focus:ring-0 outline-none transition-all resize-none leading-relaxed custom-scrollbar" 
-                                    @change="saveScreen(screen)"
+                                    class="absolute inset-0 w-full h-full font-mono text-[13px] bg-transparent text-transparent caret-white p-6 focus:ring-0 outline-none z-20 resize-none leading-[20px] overflow-y-auto custom-scrollbar whitespace-pre" 
+                                    @input="saveScreen(screen)"
                                     spellcheck="false"
                                 ></textarea>
-                                <div class="absolute bottom-2 right-4 text-[9px] text-gray-600 font-mono">
-                                    Spaces: 4 | Ln {{ screen.content_data?.split('\n').length }}, Col 1
+
+                                <pre class="absolute inset-0 w-full h-full font-mono text-[13px] p-6 pointer-events-none z-10 leading-[20px] overflow-hidden whitespace-pre-wrap select-none"
+                                     v-html="highlightCode(screen.content_data, screen.type)"></pre>
+                                
+                                <div class="absolute bottom-2 right-4 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded">
+                                    {{ screen.type === 'custom' ? 'HTML5' : 'JSON SCHEMA' }}
                                 </div>
                             </div>
                         </div>
 
                         <div class="lg:col-span-5 bg-gray-900 flex flex-col">
-                            <div class="bg-gray-800/50 px-4 py-2 border-b border-gray-700 text-[10px] font-mono text-gray-400 flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[12px]">visibility</span> PREVIEW_RENDER
+                            <div class="bg-gray-800/50 px-4 py-2 border-b border-gray-700 text-[10px] font-mono text-gray-400 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[12px]">play_arrow</span> LIVE_OUTPUT
+                                </div>
+                                <div class="flex gap-1">
+                                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                </div>
                             </div>
                             
-                            <div class="flex-1 p-6">
-                                <div v-if="screen.type === 'custom'" class="flex justify-center items-center h-full">
-                                    <div class="relative w-[260px] h-[520px] bg-black rounded-[2.5rem] border-[6px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10">
-                                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-gray-800 rounded-b-xl z-10"></div>
-                                        <iframe :srcdoc="screen.content_data" class="w-full h-full bg-white border-none" loading="lazy"></iframe>
-                                    </div>
+                            <div class="flex-1 p-6 flex justify-center items-center overflow-auto">
+                                <div v-if="screen.type === 'custom'" class="relative w-[280px] h-[580px] scale-90 origin-center bg-black rounded-[3rem] border-[8px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10">
+                                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-800 rounded-b-2xl z-10"></div>
+                                    <iframe :srcdoc="screen.content_data" class="w-full h-full bg-white border-none"></iframe>
                                 </div>
 
-                                <div v-else class="h-full bg-black/40 border border-gray-800 rounded-xl p-6 overflow-auto custom-scrollbar font-mono text-xs shadow-inner">
-                                    <div v-if="getParsedJson(screen.content_data)">
-                                        <ul class="space-y-1">
-                                            <TreeItem :item="getParsedJson(screen.content_data)" name="root" :depth="0" />
-                                        </ul>
-                                    </div>
-                                    <div v-else class="h-full flex flex-col items-center justify-center opacity-30 italic">
-                                        <span class="text-red-400 text-sm">// Compilation Error</span>
+                                <div v-else class="w-full h-full bg-black/40 border border-gray-800 rounded-xl p-6 font-mono text-xs overflow-auto custom-scrollbar shadow-inner">
+                                    <ul v-if="getParsedJson(screen.content_data)" class="space-y-1">
+                                        <TreeItem :item="getParsedJson(screen.content_data)" name="root" :depth="0" />
+                                    </ul>
+                                    <div v-else class="text-red-500 flex flex-col items-center justify-center h-full gap-2 opacity-50">
+                                        <span class="material-symbols-outlined text-4xl">heart_broken</span>
+                                        <span class="text-xs uppercase tracking-widest font-bold">invalid_json_format</span>
                                     </div>
                                 </div>
                             </div>
@@ -151,12 +164,29 @@ const props = defineProps({
 });
 
 const viewMode = ref('lab'); 
-const showDataModal = ref(false);
-const modalType = ref('');
-const isEditing = ref(false);
-const formData = ref({});
 
-const filteredScreens = computed(() => props.screens.filter(s => s.type === 'custom' || s.type === 'dynamic'));
+const filteredScreens = computed(() => props.screens?.filter(s => s.type === 'custom' || s.type === 'dynamic') || []);
+
+// Real-time Syntax Highlighting Processor
+const highlightCode = (code, type) => {
+    if (!code) return '';
+    let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    if (type === 'dynamic') { // JSON Theme
+        return res
+            .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")(\s*:)/g, '<span class="text-purple-400">$1</span>$3') // Keys
+            .replace(/:\s*("(?:\\.|[^\\"])*")/g, ': <span class="text-green-300">$1</span>') // Strings
+            .replace(/:\s*(\d+)/g, ': <span class="text-orange-300">$1</span>') // Numbers
+            .replace(/:\s*(true|false|null)/g, ': <span class="text-blue-400">$1</span>'); // Consts
+    } else { // HTML Theme
+        return res
+            .replace(/(&lt;\/?)([a-z0-9-]+)/gi, '$1<span class="text-pink-500">$2</span>') // Tags
+            .replace(/(\s)([a-z-]+)(=)/gi, '$1<span class="text-orange-300">$2</span>$3') // Attributes
+            .replace(/"([^"]*)"/g, '<span class="text-green-300">"$1"</span>') // Values
+            .replace(/(&lt;script&gt;)/gi, '<span class="text-yellow-400 font-bold">$1</span>')
+            .replace(/(&lt;\/script&gt;)/gi, '<span class="text-yellow-400 font-bold">$1</span>');
+    }
+};
 
 const getParsedJson = (data) => {
     try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return null; }
@@ -177,77 +207,49 @@ const TreeItem = defineComponent({
                     onClick: (e) => { e.stopPropagation(); isOpen.value = !isOpen.value; },
                     class: 'text-[9px] w-4 text-gray-600 hover:text-purple-400 transition transform' + (isOpen.value ? '' : ' -rotate-90')
                 }, '▼') : h('span', { class: 'w-4' }),
-                
                 h('span', { class: 'text-blue-400 font-medium' }, props.name),
                 h('span', { class: 'text-gray-500 mx-0.5' }, ':'),
-                
                 !isObject.value ? h('span', { class: 'text-amber-200/90 ml-1' }, 
                     typeof props.item === 'string' ? `"${props.item}"` : String(props.item)
                 ) : h('span', { class: 'text-gray-500 text-[9px] ml-1 opacity-50 uppercase tracking-tighter' }, 
                     isArray.value ? `Array[${props.item.length}]` : 'Object'
                 )
             ]),
-            
             (isObject.value && isOpen.value) ? h('ul', { class: 'ml-4 border-l border-white/5 pl-3 mt-0.5' }, 
                 Object.entries(props.item).map(([key, value]) => h(TreeItem, { 
-                    key, 
-                    name: key, 
-                    item: value, 
-                    depth: props.depth + 1 
+                    key, name: key, item: value, depth: props.depth + 1 
                 }))
             ) : null
         ]);
     }
 });
 
-const openModal = (type, item = null) => {
-    modalType.value = type;
-    isEditing.value = !!item;
-    formData.value = item ? { ...item } : { app_id: props.apps[0]?.id };
-    showDataModal.value = true;
-};
-
-const saveData = () => {
-    const routeName = isEditing.value ? 'test-dashboard.update' : 'test-dashboard.store';
-    router[isEditing.value ? 'put' : 'post'](route(routeName, { type: modalType.value, id: formData.value.id }), formData.value, {
-        onSuccess: () => showDataModal.value = false
-    });
-};
-
+const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav);
+const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen);
 const deleteData = (type, id) => {
     if(confirm(`Permanent delete ${type} #${id}?`)) router.delete(route('test-dashboard.delete', { type, id }));
 };
-
-const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav);
-const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen);
 const deleteNav = (id) => deleteData('nav', id);
 </script>
 
 <style>
 .bg-gray-850 { background-color: #161b22; }
 
-/* IDE Style Scrollbar */
-.custom-scrollbar::-webkit-scrollbar { 
-    width: 10px; 
+/* IDE Core Layout Alignment */
+textarea, pre {
+    line-height: 20px !important;
+    letter-spacing: normal !important;
 }
-.custom-scrollbar::-webkit-scrollbar-track { 
-    background: #0d1117; 
-}
+
+/* Custom IDE Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #0d1117; }
 .custom-scrollbar::-webkit-scrollbar-thumb { 
     background: #30363d; 
-    border: 2px solid #0d1117;
-    border-radius: 10px; 
+    border-radius: 4px; 
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { 
-    background: #484f58;
-    cursor: pointer;
-}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
 
-/* Global cursor for scrollbar areas */
-.custom-scrollbar {
-    scrollbar-color: #30363d #0d1117;
-    scrollbar-width: thin;
-}
-
+pre::-webkit-scrollbar { display: none; }
 iframe::-webkit-scrollbar { display: none; }
 </style>
