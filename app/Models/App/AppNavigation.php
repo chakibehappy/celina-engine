@@ -7,7 +7,16 @@ use App\Models\App\AppScreen; // <--- Add this!
 
 class AppNavigation extends Model
 {
-    protected $fillable = ['app_id', 'screen_id', 'label', 'system_icon_id', 'order'];
+    protected $fillable = [
+        'app_id', 
+        'screen_id', 
+        'label',
+        'system_icon_id',
+        'order',
+        'icon_size',
+        'font_size',
+        'show_label'
+    ];
 
     public function screen() 
     { 
