@@ -33,37 +33,46 @@
             <section class="space-y-4">
                 <h2 class="text-xl font-bold border-b border-gray-700 pb-2 text-pink-400">Raw Screen Data</h2>
                 
-                <div v-for="screen in customScreens" :key="screen.id" class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
+                <div v-for="screen in filteredScreens" :key="screen.id" class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-xl">
                     <div class="flex justify-between items-center mb-4">
-                        <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-bold text-lg focus:ring-0 p-0 text-white">
-                        <span class="text-[10px] bg-pink-900/30 text-pink-400 px-2 py-1 rounded border border-pink-800/50 uppercase tracking-widest">Live Preview</span>
+                        <div class="flex items-center gap-3">
+                            <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-bold text-lg focus:ring-0 p-0 text-white">
+                            <span :class="screen.type === 'custom' ? 'bg-blue-900/30 text-blue-400 border-blue-800/50' : 'bg-yellow-900/30 text-yellow-400 border-yellow-800/50'" 
+                                  class="text-[9px] px-2 py-0.5 rounded border uppercase tracking-widest font-bold">
+                                {{ screen.type }}
+                            </span>
+                        </div>
+                        <span v-if="screen.type === 'custom'" class="text-[10px] bg-pink-900/30 text-pink-400 px-2 py-1 rounded border border-pink-800/50 uppercase tracking-widest">Live Preview</span>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <div :class="screen.type === 'custom' ? 'grid grid-cols-1 xl:grid-cols-2 gap-8' : 'grid grid-cols-1 gap-4'">
                         <div class="space-y-2">
-                            <label class="text-[10px] text-gray-500 font-mono">CONTENT DATA (RAW)</label>
+                            <label class="text-[10px] text-gray-500 font-mono">
+                                {{ screen.type === 'dynamic' ? 'LOGIC / JSON CONFIG' : 'HTML CONTENT' }}
+                            </label>
                             <textarea 
                                 v-model="screen.content_data" 
-                                rows="12" 
+                                rows="15" 
                                 class="w-full font-mono text-[11px] bg-black text-green-500 p-4 rounded-lg border border-gray-700 custom-scrollbar focus:border-purple-500 transition-colors" 
                                 @change="saveScreen(screen)"
-                                placeholder="Enter raw data/JSON here..."
+                                :placeholder="screen.type === 'dynamic' ? '// Enter logic or dynamic data configuration...' : 'Enter HTML structure...'"
                             ></textarea>
                         </div>
 
-                        <div class="space-y-2">
-                            <label class="text-[10px] text-gray-500 font-mono">IFRAME VIEWPORT</label>
-                            <div class="relative w-full aspect-[9/16] max-h-[400px] bg-white rounded-lg overflow-hidden border-4 border-gray-900 shadow-inner">
+                        <div v-if="screen.type === 'custom'" class="flex flex-col items-center">
+                            <label class="text-[10px] text-gray-500 font-mono mb-2 self-start uppercase">Mobile Viewport</label>
+                            <div class="relative w-[280px] h-[580px] bg-black rounded-[3rem] border-[8px] border-gray-700 shadow-2xl overflow-hidden ring-4 ring-gray-900">
+                                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-700 rounded-b-2xl z-10"></div>
                                 <iframe 
                                     :srcdoc="screen.content_data"
-                                    class="w-full h-full border-none"
+                                    class="w-full h-full bg-white border-none"
                                     loading="lazy"
                                 ></iframe>
+                                <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-1 bg-gray-400/50 rounded-full"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </section>
         </div>
 
@@ -85,7 +94,6 @@
                         <tbody>
                             <tr v-for="item in props[type === 'submodule' ? 'subModules' : type + 's']" :key="item.id" class="border-b border-gray-700/50 hover:bg-gray-750">
                                 <td v-for="f in fields" :key="f.key" class="p-3">
-                                    
                                     <span v-if="f.key === 'id'" 
                                         :class="type === 'system_icon' ? 'material-symbols-outlined text-white-500 text-lg' : 'font-mono text-gray-600'">
                                         {{ type === 'system_icon' ? item[f.key] : '#' + item[f.key] }}
@@ -156,7 +164,6 @@
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
-// Access the route helper globally (provided by Ziggy)
 const props = defineProps({ 
     navigations: Array, 
     screens: Array, 
@@ -175,8 +182,9 @@ const modalType = ref('');
 const isEditing = ref(false);
 const formData = ref({});
 
-const customScreens = computed(() => {
-    return props.screens.filter(s => s.type === 'custom');
+// Filters screens that need raw data editing (Custom & Dynamic)
+const filteredScreens = computed(() => {
+    return props.screens.filter(s => s.type === 'custom' || s.type === 'dynamic');
 });
 
 const openModal = (type, item = null) => {
@@ -186,8 +194,6 @@ const openModal = (type, item = null) => {
     showDataModal.value = true;
 };
 
-// Generic Data CRUD using Ziggy route() helper
-// Generic Data CRUD
 const saveData = () => {
     const routeName = isEditing.value ? 'test-dashboard.update' : 'test-dashboard.store';
     const routeParams = isEditing.value 
@@ -205,7 +211,6 @@ const deleteData = (type, id) => {
     }
 };
 
-// Quick Autosave for Lab Mode
 const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav);
 const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen);
 const deleteNav = (id) => deleteData('nav', id);
@@ -215,4 +220,11 @@ const deleteNav = (id) => deleteData('nav', id);
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+
+iframe {
+    scrollbar-width: none;
+}
+iframe::-webkit-scrollbar {
+    display: none;
+}
 </style>
