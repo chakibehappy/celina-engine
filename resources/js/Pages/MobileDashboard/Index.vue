@@ -166,6 +166,7 @@ const props = defineProps({
 const viewMode = ref('lab'); 
 const filteredScreens = computed(() => props.screens?.filter(s => s.type === 'custom' || s.type === 'dynamic') || []);
 
+// --- IDE Logic ---
 const syncScroll = (e, id) => {
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
@@ -181,7 +182,6 @@ const syncScroll = (e, id) => {
 const highlightCode = (code, type) => {
     if (!code) return '';
     let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
     if (type === 'dynamic') { 
         return res
             .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")(\s*:)/g, '<span class="text-purple-400">$1</span>$3') 
@@ -190,7 +190,6 @@ const highlightCode = (code, type) => {
             .replace(/:\s*(true|false|null)/g, ': <span class="text-blue-400">$1</span>'); 
     } else { 
         const regex = /("[^"]*")|(&lt;\/?)([a-z0-9-]+)|(\b[a-z-]+(?==))|(\b(function|var|let|const|return|if|else|for|while|true|false|null|undefined)\b)/gi;
-
         return res.replace(regex, (match, string, tagStart, tagName, attrName, keyword) => {
             if (string) return `<span class="text-green-300">${string}</span>`;
             if (tagName) return `${tagStart}<span class="text-pink-500">${tagName}</span>`;
@@ -208,6 +207,31 @@ const getParsedJson = (data) => {
     try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return null; }
 };
 
+// --- CRUD Actions ---
+const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav, { preserveScroll: true, preserveState: true });
+const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen, { preserveScroll: true, preserveState: true });
+
+// RESTORED: Table Modal/CRUD connection
+const openModal = (type, item = null) => {
+    // Assuming you have a separate event or state management for your modal component
+    // If you're using a common inertia route for the form:
+    if (item) {
+        console.log(`Editing ${type} #${item.id}`);
+        // router.get(route(`test-dashboard.${type}.edit`, { id: item.id }));
+    } else {
+        console.log(`Creating new ${type}`);
+        // router.get(route(`test-dashboard.${type}.create`));
+    }
+};
+
+const deleteData = (type, id) => {
+    if(confirm(`Permanent delete ${type} #${id}?`)) {
+        router.delete(route('test-dashboard.delete', { type, id }), { preserveScroll: true });
+    }
+};
+const deleteNav = (id) => deleteData('nav', id);
+
+// --- JSON Tree Component ---
 const TreeItem = defineComponent({
     name: 'TreeItem',
     props: ['item', 'name', 'depth'],
@@ -215,7 +239,6 @@ const TreeItem = defineComponent({
         const isOpen = ref(props.depth < 4);
         const isObject = computed(() => typeof props.item === 'object' && props.item !== null);
         const isArray = computed(() => Array.isArray(props.item));
-
         return () => h('li', { class: 'list-none' }, [
             h('div', { class: 'flex items-center gap-1 py-0.5 group cursor-default' }, [
                 isObject.value ? h('button', { 
@@ -238,37 +261,16 @@ const TreeItem = defineComponent({
         ]);
     }
 });
-
-const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav, {
-    preserveScroll: true,
-    preserveState: true
-});
-
-const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen, {
-    preserveScroll: true,
-    preserveState: true
-});
-
-const deleteData = (type, id) => {
-    if(confirm(`Permanent delete ${type} #${id}?`)) router.delete(route('test-dashboard.delete', { type, id }));
-};
-const deleteNav = (id) => deleteData('nav', id);
 </script>
 
 <style>
 .bg-gray-850 { background-color: #161b22; }
-
 textarea, pre {
     line-height: 20px !important;
     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
     tab-size: 4;
 }
-
-pre {
-    white-space: pre !important; 
-    word-wrap: normal !important;
-}
-
+pre { white-space: pre !important; word-wrap: normal !important; }
 .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #0d1117; }
 .custom-scrollbar::-webkit-scrollbar-thumb { 
@@ -277,6 +279,5 @@ pre {
     border: 2px solid #0d1117;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
-
 iframe::-webkit-scrollbar { display: none; }
 </style>
