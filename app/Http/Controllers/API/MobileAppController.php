@@ -162,6 +162,7 @@ class MobileAppController extends Controller
                 $iconData = $this->resolveIcon($nav->icon, $platform);
                 
                 return [
+                    'screen_id'    => (string)$nav->screen_id,
                     'label'        => $nav->label,
                     'icon'         => $iconData['value'], // This sends "home", "person", etc.
                     'route'        => $nav->screen->route ?? 'home_screen',
@@ -185,6 +186,30 @@ class MobileAppController extends Controller
                     'content_data' => $e->getMessage()
                 ]
             ], 500);
+        }
+    }
+
+    public function getScreenDetails(Request $request, $screen_id)
+    {
+        try {
+            $screen = AppScreen::where('id', $screen_id)
+                ->where('app_id', $request->user()->app_id)
+                ->first();
+
+            if (!$screen) {
+                return response()->json(['error' => 'Screen not found'], 404);
+            }
+
+            // Force decode the JSON column so it's sent as an object/array
+            if (is_string($screen->content_data)) {
+                $screen->content_data = json_decode($screen->content_data, true);
+            }
+
+            // Return the whole model instance
+            return response()->json($screen);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
