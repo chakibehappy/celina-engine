@@ -39,64 +39,67 @@
 
             <section class="space-y-6">
                 <h2 class="text-xl font-bold border-b border-gray-700 pb-2 text-pink-400 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">terminal</span> Raw Screen Data
+                    <span class="material-symbols-outlined text-sm">terminal</span> IDE Environment
                 </h2>
                 
-                <div v-for="screen in filteredScreens" :key="screen.id" class="bg-gray-800 p-6 rounded-2xl border border-gray-700 shadow-2xl">
-                    <div class="flex justify-between items-center mb-6">
+                <div v-for="screen in filteredScreens" :key="screen.id" class="bg-gray-800 rounded-2xl border border-gray-700 shadow-2xl overflow-hidden">
+                    <div class="bg-gray-850 px-6 py-3 border-b border-gray-700 flex justify-between items-center">
                         <div class="flex items-center gap-4">
-                            <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-bold text-2xl focus:ring-0 p-0 text-white w-auto min-w-[200px]" placeholder="Screen Title">
-                            <span :class="screen.type === 'custom' ? 'bg-blue-900/30 text-blue-400 border-blue-800/50' : 'bg-yellow-900/30 text-yellow-400 border-yellow-800/50'" 
-                                  class="text-[10px] px-3 py-1 rounded-full border uppercase tracking-widest font-bold">
-                                {{ screen.type }}
-                            </span>
+                             <div class="flex gap-1.5 mr-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+                            </div>
+                            <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-mono text-sm focus:ring-0 p-0 text-purple-400 w-auto" placeholder="filename.js">
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] bg-pink-900/30 text-pink-400 px-3 py-1 rounded-full border border-pink-800/50 uppercase tracking-widest font-bold">
-                                {{ screen.type === 'custom' ? 'HTML Editor' : 'Logic Engine' }}
-                            </span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-[10px] font-mono text-gray-500">UTF-8</span>
+                            <div class="h-4 w-[1px] bg-gray-700"></div>
+                            <span class="text-[10px] font-mono text-pink-500 uppercase font-bold">{{ screen.type }}</span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        <div class="lg:col-span-7 space-y-2">
-                            <label class="text-[10px] text-gray-500 font-mono flex justify-between">
-                                <span>{{ screen.type === 'dynamic' ? 'JSON SCHEMA CONFIG' : 'SOURCE CODE' }}</span>
-                                <span class="text-purple-500/50 italic font-normal">Auto-saving enabled...</span>
-                            </label>
-                            <div class="relative group">
+                    <div class="grid grid-cols-1 lg:grid-cols-12">
+                        <div class="lg:col-span-7 bg-[#0d1117] flex border-r border-gray-700">
+                            <div class="w-12 bg-[#0d1117] border-r border-gray-800/50 py-6 text-right pr-3 select-none">
+                                <div v-for="n in 25" :key="n" class="text-[11px] font-mono text-gray-600 leading-relaxed">{{ n }}</div>
+                            </div>
+                            
+                            <div class="flex-1 relative">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="w-full h-[650px] font-mono text-[13px] bg-slate-950 text-slate-300 p-6 rounded-xl border border-gray-700 custom-scrollbar focus:border-purple-500 outline-none transition-all resize-none shadow-inner leading-relaxed" 
+                                    class="w-full h-[600px] font-mono text-[13px] bg-transparent text-blue-100 p-6 focus:ring-0 outline-none transition-all resize-none leading-relaxed custom-scrollbar" 
                                     @change="saveScreen(screen)"
                                     spellcheck="false"
                                 ></textarea>
-                                <div class="absolute top-4 right-4 opacity-20 group-hover:opacity-100 transition pointer-events-none">
-                                    <span class="material-symbols-outlined text-white">code</span>
+                                <div class="absolute bottom-2 right-4 text-[9px] text-gray-600 font-mono">
+                                    Spaces: 4 | Ln {{ screen.content_data?.split('\n').length }}, Col 1
                                 </div>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-5 flex flex-col">
-                            <label class="text-[10px] text-gray-500 font-mono mb-2 uppercase tracking-widest">Live Execution Output</label>
-                            
-                            <div v-if="screen.type === 'custom'" class="flex justify-center items-center h-[650px] bg-slate-950/50 rounded-xl border border-dashed border-gray-700">
-                                <div class="relative w-[280px] h-[580px] bg-black rounded-[3rem] border-[8px] border-gray-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden ring-1 ring-gray-700">
-                                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-800 rounded-b-2xl z-10"></div>
-                                    <iframe :srcdoc="screen.content_data" class="w-full h-full bg-white border-none" loading="lazy"></iframe>
-                                    <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-1 bg-gray-600 rounded-full"></div>
-                                </div>
+                        <div class="lg:col-span-5 bg-gray-900 flex flex-col">
+                            <div class="bg-gray-800/50 px-4 py-2 border-b border-gray-700 text-[10px] font-mono text-gray-400 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[12px]">visibility</span> PREVIEW_RENDER
                             </div>
-
-                            <div v-else class="w-full h-[650px] bg-slate-950 border border-gray-700 rounded-xl p-8 overflow-auto custom-scrollbar font-mono text-xs shadow-inner">
-                                <div v-if="getParsedJson(screen.content_data)">
-                                    <ul class="space-y-1">
-                                        <TreeItem :item="getParsedJson(screen.content_data)" name="root" :depth="0" />
-                                    </ul>
+                            
+                            <div class="flex-1 p-6">
+                                <div v-if="screen.type === 'custom'" class="flex justify-center items-center h-full">
+                                    <div class="relative w-[260px] h-[520px] bg-black rounded-[2.5rem] border-[6px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10">
+                                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-gray-800 rounded-b-xl z-10"></div>
+                                        <iframe :srcdoc="screen.content_data" class="w-full h-full bg-white border-none" loading="lazy"></iframe>
+                                    </div>
                                 </div>
-                                <div v-else class="h-full flex flex-col items-center justify-center opacity-30 italic">
-                                    <span class="material-symbols-outlined text-4xl mb-2 text-red-500">heart_broken</span>
-                                    <span class="text-red-400 text-sm">// Syntax Error: Invalid JSON Format</span>
+
+                                <div v-else class="h-full bg-black/40 border border-gray-800 rounded-xl p-6 overflow-auto custom-scrollbar font-mono text-xs shadow-inner">
+                                    <div v-if="getParsedJson(screen.content_data)">
+                                        <ul class="space-y-1">
+                                            <TreeItem :item="getParsedJson(screen.content_data)" name="root" :depth="0" />
+                                        </ul>
+                                    </div>
+                                    <div v-else class="h-full flex flex-col items-center justify-center opacity-30 italic">
+                                        <span class="text-red-400 text-sm">// Compilation Error</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -135,8 +138,7 @@
                 </div>
             </div>
         </div>
-
-        </div>
+    </div>
 </template>
 
 <script setup>
@@ -160,12 +162,11 @@ const getParsedJson = (data) => {
     try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return null; }
 };
 
-// Tree Item Component with Depth-Based Auto-Collapse
+// Tree Item Component
 const TreeItem = defineComponent({
     name: 'TreeItem',
     props: ['item', 'name', 'depth'],
     setup(props) {
-        // Automatically close if depth > 2 (root is 0, children is 1, index is 2)
         const isOpen = ref(props.depth < 3);
         const isObject = computed(() => typeof props.item === 'object' && props.item !== null);
         const isArray = computed(() => Array.isArray(props.item));
@@ -223,25 +224,28 @@ const deleteNav = (id) => deleteData('nav', id);
 </script>
 
 <style>
-/* Professional Scrollbar */
+.bg-gray-850 { background-color: #161b22; }
+
+/* IDE Style Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { 
-    width: 6px; 
+    width: 10px; 
 }
 .custom-scrollbar::-webkit-scrollbar-track { 
-    background: #020617; /* slate-950 */
+    background: #0d1117; 
 }
 .custom-scrollbar::-webkit-scrollbar-thumb { 
-    background: #334155; /* slate-700 */
+    background: #30363d; 
+    border: 2px solid #0d1117;
     border-radius: 10px; 
-    cursor: pointer !important; /* Visual cue for the user */
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
-    background: #475569; /* slate-600 */
+    background: #484f58;
+    cursor: pointer;
 }
 
-/* Ensure the pointer shows on the thumb */
+/* Global cursor for scrollbar areas */
 .custom-scrollbar {
-    scrollbar-color: #334155 #020617;
+    scrollbar-color: #30363d #0d1117;
     scrollbar-width: thin;
 }
 
