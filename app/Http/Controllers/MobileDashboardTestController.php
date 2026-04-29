@@ -126,7 +126,7 @@ class MobileDashboardTestController extends Controller
         $nav->update($request->validate([
             'label' => 'required|string',
             'icon_size' => 'required|integer',
-            'show_label' => 'required|boolean',
+            'show_label' => 'required|integer',
         ]));
         return back()->with('success', 'Navigation updated!');
     }
