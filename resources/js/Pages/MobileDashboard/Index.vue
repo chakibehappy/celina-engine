@@ -42,26 +42,28 @@
                                 {{ screen.type }}
                             </span>
                         </div>
-                        <span v-if="screen.type === 'custom'" class="text-[10px] bg-pink-900/30 text-pink-400 px-2 py-1 rounded border border-pink-800/50 uppercase tracking-widest">Live Preview</span>
+                        <span class="text-[10px] bg-pink-900/30 text-pink-400 px-2 py-1 rounded border border-pink-800/50 uppercase tracking-widest">
+                            {{ screen.type === 'custom' ? 'Live Preview' : 'JSON Viewer' }}
+                        </span>
                     </div>
 
-                    <div :class="screen.type === 'custom' ? 'grid grid-cols-1 xl:grid-cols-2 gap-8' : 'grid grid-cols-1 gap-4'">
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         <div class="space-y-2">
                             <label class="text-[10px] text-gray-500 font-mono">
                                 {{ screen.type === 'dynamic' ? 'LOGIC / JSON CONFIG' : 'HTML CONTENT' }}
                             </label>
                             <textarea 
                                 v-model="screen.content_data" 
-                                rows="15" 
-                                class="w-full font-mono text-[11px] bg-black text-green-500 p-4 rounded-lg border border-gray-700 custom-scrollbar focus:border-purple-500 transition-colors" 
+                                class="w-full h-[580px] font-mono text-[11px] bg-black text-green-500 p-4 rounded-lg border border-gray-700 custom-scrollbar focus:border-purple-500 transition-colors resize-none" 
                                 @change="saveScreen(screen)"
                                 :placeholder="screen.type === 'dynamic' ? '// Enter logic or dynamic data configuration...' : 'Enter HTML structure...'"
                             ></textarea>
                         </div>
 
-                        <div v-if="screen.type === 'custom'" class="flex flex-col items-center">
-                            <label class="text-[10px] text-gray-500 font-mono mb-2 self-start uppercase">Mobile Viewport</label>
-                            <div class="relative w-[280px] h-[580px] bg-black rounded-[3rem] border-[8px] border-gray-700 shadow-2xl overflow-hidden ring-4 ring-gray-900">
+                        <div class="flex flex-col items-center">
+                            <label class="text-[10px] text-gray-500 font-mono mb-2 self-start uppercase">Preview Output</label>
+                            
+                            <div v-if="screen.type === 'custom'" class="relative w-[280px] h-[580px] bg-black rounded-[3rem] border-[8px] border-gray-700 shadow-2xl overflow-hidden ring-4 ring-gray-900">
                                 <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-700 rounded-b-2xl z-10"></div>
                                 <iframe 
                                     :srcdoc="screen.content_data"
@@ -69,6 +71,10 @@
                                     loading="lazy"
                                 ></iframe>
                                 <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-20 h-1 bg-gray-400/50 rounded-full"></div>
+                            </div>
+
+                            <div v-else class="w-full h-[580px] bg-gray-950 border border-gray-700 rounded-lg p-4 overflow-auto custom-scrollbar">
+                                <pre class="text-[11px] font-mono text-blue-400 leading-relaxed">{{ formatJson(screen.content_data) }}</pre>
                             </div>
                         </div>
                     </div>
@@ -187,6 +193,17 @@ const filteredScreens = computed(() => {
     return props.screens.filter(s => s.type === 'custom' || s.type === 'dynamic');
 });
 
+// JSON Beautifier for Preview
+const formatJson = (data) => {
+    try {
+        if (!data) return '';
+        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+        return JSON.stringify(parsed, null, 4);
+    } catch (e) {
+        return data; // Return raw string if not valid JSON
+    }
+};
+
 const openModal = (type, item = null) => {
     modalType.value = type;
     isEditing.value = !!item;
@@ -226,5 +243,9 @@ iframe {
 }
 iframe::-webkit-scrollbar {
     display: none;
+}
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 </style>
