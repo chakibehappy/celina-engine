@@ -63,7 +63,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-12">
-                        <div class="lg:col-span-7 bg-[#0d1117] flex border-r border-gray-700 relative h-[650px] overflow-hidden">
+                        <div class="lg:col-span-7 bg-[#0d1117] flex border-r border-gray-700 relative h-[720px] overflow-hidden">
                             <div :id="'lines-' + screen.id" class="w-12 bg-[#0d1117] border-r border-gray-800/50 py-6 text-right pr-3 select-none overflow-hidden">
                                 <div v-for="n in (screen.content_data?.split('\n').length || 1)" :key="n" 
                                      class="text-[11px] font-mono text-gray-600 leading-[20px] h-[20px]">
@@ -90,7 +90,7 @@
                             </div>
                         </div>
 
-                        <div class="lg:col-span-5 bg-gray-900 flex flex-col h-[650px]">
+                        <div class="lg:col-span-5 bg-gray-900 flex flex-col h-[720px]">
                             <div class="bg-gray-800/50 px-4 py-2 border-b border-gray-700 text-[10px] font-mono text-gray-400 flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <span class="material-symbols-outlined text-[12px]">play_arrow</span> LIVE_OUTPUT
@@ -98,12 +98,12 @@
                             </div>
                             
                             <div class="flex-1 p-6 flex justify-center items-start overflow-hidden">
-                                <div v-if="screen.type === 'custom'" class="relative w-[280px] h-[540px] scale-90 origin-top bg-black rounded-[3rem] border-[8px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10">
+                                <div v-if="screen.type === 'custom'" class="relative w-[300px] h-[600px] scale-95 origin-top bg-black rounded-[3rem] border-[8px] border-gray-800 shadow-2xl overflow-hidden ring-1 ring-white/10">
                                     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-800 rounded-b-2xl z-10"></div>
                                     <iframe :srcdoc="screen.content_data" class="w-full h-full bg-white border-none"></iframe>
                                 </div>
 
-                                <div v-else class="w-full h-[540px] bg-black/40 border border-gray-800 rounded-xl p-6 font-mono text-xs overflow-auto custom-scrollbar shadow-inner">
+                                <div v-else class="w-full h-full bg-black/40 border border-gray-800 rounded-xl p-6 font-mono text-xs overflow-auto custom-scrollbar shadow-inner">
                                     <ul v-if="getParsedJson(screen.content_data)" class="space-y-1">
                                         <TreeItem :item="getParsedJson(screen.content_data)" name="root" :depth="0" />
                                     </ul>
@@ -164,7 +164,6 @@ const props = defineProps({
 const viewMode = ref('lab'); 
 const filteredScreens = computed(() => props.screens?.filter(s => s.type === 'custom' || s.type === 'dynamic') || []);
 
-// Scroll Syncing: Ensures line numbers and highlights move with textarea
 const syncScroll = (e, id) => {
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
@@ -179,19 +178,24 @@ const syncScroll = (e, id) => {
 
 const highlightCode = (code, type) => {
     if (!code) return '';
+    // Escape HTML first
     let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    if (type === 'dynamic') { // JSON THEME
+    if (type === 'dynamic') { 
         return res
             .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")(\s*:)/g, '<span class="text-purple-400">$1</span>$3') 
             .replace(/:\s*("(?:\\.|[^\\"])*")/g, ': <span class="text-green-300">$1</span>') 
             .replace(/:\s*(\d+)/g, ': <span class="text-orange-300">$1</span>') 
             .replace(/:\s*(true|false|null)/g, ': <span class="text-blue-400">$1</span>'); 
-    } else { // HTML & JS THEME
+    } else { 
+        // Improved HTML Highlighter to avoid "text-orange" span collision
         return res
-            .replace(/(&lt;\/?)([a-z0-9-]+)/gi, '$1<span class="text-pink-500">$2</span>') 
-            .replace(/(\s)([a-z-]+)(=)/gi, '$1<span class="text-orange-300">$2</span>$3') 
-            .replace(/"([^"]*)"/g, '<span class="text-green-300">"$1"</span>')
+            .replace(/(&lt;\/?)([a-z0-9-]+)/gi, '$1<span class="text-pink-500">$2</span>') // Tags
+            .replace(/(\s)([a-z-]+)(=)(")/gi, '$1<span class="text-orange-300">$2</span>$3$4') // Attributes (ensures it's an attribute name)
+            .replace(/"([^"]*)"/g, (match) => {
+                // Only wrap in green if it's not already inside a highlight span's class attribute
+                return match.includes('text-') ? match : `<span class="text-green-300">${match}</span>`;
+            })
             .replace(/\b(function|var|let|const|return|if|else|for|while)\b/g, '<span class="text-purple-400">$1</span>')
             .replace(/\b(true|false|null|undefined)\b/g, '<span class="text-blue-400">$1</span>');
     }
@@ -243,7 +247,6 @@ const deleteNav = (id) => deleteData('nav', id);
 <style>
 .bg-gray-850 { background-color: #161b22; }
 
-/* Fixed Typography for Perfect Sync */
 textarea, pre {
     line-height: 20px !important;
     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
@@ -255,7 +258,6 @@ pre {
     word-wrap: normal !important;
 }
 
-/* Custom IDE Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: #0d1117; }
 .custom-scrollbar::-webkit-scrollbar-thumb { 
