@@ -52,11 +52,14 @@
                             </div>
                             <div class="bg-[#0d1117] px-4 py-1 rounded-t-lg border-x border-t border-gray-700 -mb-[13px] z-10 flex items-center gap-2">
                                 <span class="material-symbols-outlined text-sm text-orange-400">{{ screen.type === 'custom' ? 'html' : 'settings' }}</span>
-                                <input v-model="screen.title" @change="saveScreen(screen)" class="bg-transparent border-none font-mono text-xs focus:ring-0 p-0 text-gray-300 w-auto min-w-[120px]" spellcheck="false">
+                                <input v-model="screen.title" class="bg-transparent border-none font-mono text-xs focus:ring-0 p-0 text-gray-300 w-auto min-w-[120px]" spellcheck="false">
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-mono text-gray-500">UTF-8</span>
+                            <button @click="saveScreen(screen)" class="flex items-center gap-1.5 px-3 py-1 bg-purple-600 hover:bg-purple-500 rounded text-[10px] font-bold transition uppercase tracking-wider">
+                                <span class="material-symbols-outlined text-[14px]">save</span>
+                                Save
+                            </button>
                             <div class="h-4 w-[1px] bg-gray-700"></div>
                             <span class="text-[10px] font-mono text-pink-500 uppercase font-bold">{{ screen.type }}</span>
                         </div>
@@ -75,7 +78,6 @@
                                 <textarea 
                                     v-model="screen.content_data" 
                                     class="absolute inset-0 w-full h-full font-mono text-[13px] bg-transparent text-transparent caret-white p-6 focus:ring-0 outline-none z-20 resize-none leading-[20px] overflow-auto custom-scrollbar whitespace-pre" 
-                                    @input="saveScreen(screen)"
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                 ></textarea>
@@ -178,8 +180,6 @@ const syncScroll = (e, id) => {
 
 const highlightCode = (code, type) => {
     if (!code) return '';
-    
-    // 1. Escape HTML first to prevent injection
     let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     if (type === 'dynamic') { 
@@ -189,8 +189,6 @@ const highlightCode = (code, type) => {
             .replace(/:\s*(\d+)/g, ': <span class="text-orange-300">$1</span>') 
             .replace(/:\s*(true|false|null)/g, ': <span class="text-blue-400">$1</span>'); 
     } else { 
-        // 2. Combined HTML/JS Regex to prevent overlapping matches
-        // Order matters: we match strings first so we don't highlight tags inside them.
         const regex = /("[^"]*")|(&lt;\/?)([a-z0-9-]+)|(\b[a-z-]+(?==))|(\b(function|var|let|const|return|if|else|for|while|true|false|null|undefined)\b)/gi;
 
         return res.replace(regex, (match, string, tagStart, tagName, attrName, keyword) => {
@@ -241,8 +239,16 @@ const TreeItem = defineComponent({
     }
 });
 
-const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav);
-const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen);
+const saveNav = (nav) => router.put(route('test-dashboard.nav.update', { id: nav.id }), nav, {
+    preserveScroll: true,
+    preserveState: true
+});
+
+const saveScreen = (screen) => router.put(route('test-dashboard.screen.update', { id: screen.id }), screen, {
+    preserveScroll: true,
+    preserveState: true
+});
+
 const deleteData = (type, id) => {
     if(confirm(`Permanent delete ${type} #${id}?`)) router.delete(route('test-dashboard.delete', { type, id }));
 };
