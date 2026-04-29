@@ -135,6 +135,7 @@ class MobileDashboardTestController extends Controller
     {
         $screen = AppScreen::findOrFail($id);
         $screen->update($request->validate([
+            'route' => 'required|string',
             'title' => 'required|string',
             'type' => 'required|string',
             'content_data' => 'nullable|string',
