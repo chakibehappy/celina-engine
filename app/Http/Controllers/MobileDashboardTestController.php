@@ -25,6 +25,8 @@ class MobileDashboardTestController extends Controller
                     $dbType = Schema::getColumnType($tableName, $col);
                     
                     $uiType = match(true) {
+                        // ONLY for app_screens table, make the type column a special dropdown
+                        $tableName === 'app_screens' && $col === 'type' => 'select_screen_type',
                         str_contains($col, 'email') => 'email',
                         str_contains($col, 'password') => 'password',
                         str_contains($col, '_id') => 'select',

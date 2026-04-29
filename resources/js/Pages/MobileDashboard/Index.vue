@@ -117,6 +117,12 @@
                         <template v-if="field.key !== 'id' || (!isEditing && modalType === 'system_icon')">
                             <label class="text-[10px] text-gray-500 block mb-1 uppercase font-bold tracking-tighter">{{ field.label }}</label>
                             
+                            <select v-if="field.type === 'select_screen_type'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
+                                <option value="standard">Standard</option>
+                                <option value="custom">Custom</option>
+                                <option value="dynamic">Dynamic</option>
+                            </select>
+
                             <select v-if="field.type === 'select'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
                                 <option v-for="opt in props[field.options]" :key="opt.id" :value="opt.id">
                                     {{ opt.name || opt.label || opt.title || opt.id }}
