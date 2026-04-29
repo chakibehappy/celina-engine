@@ -123,13 +123,18 @@
                                 <option value="dynamic">Dynamic</option>
                             </select>
 
-                            <select v-if="field.type === 'select'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
+                            <select v-else-if="field.type === 'select'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
                                 <option v-for="opt in props[field.options]" :key="opt.id" :value="opt.id">
                                     {{ opt.name || opt.label || opt.title || opt.id }}
                                 </option>
                             </select>
 
                             <textarea v-else-if="field.type === 'textarea'" v-model="formData[field.key]" rows="3" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white font-mono text-xs"></textarea>
+
+                            <div v-else-if="field.type === 'checkbox'" class="flex items-center gap-2 p-3 bg-gray-900 rounded border border-gray-700">
+                                <input type="checkbox" v-model="formData[field.key]" class="rounded border-gray-700 text-purple-600 focus:ring-purple-500">
+                                <span class="text-xs text-gray-400">Enabled / Active</span>
+                            </div>
 
                             <input v-else :type="field.type" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">
                         </template>
