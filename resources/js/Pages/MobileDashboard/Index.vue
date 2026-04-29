@@ -214,7 +214,7 @@ const TreeItem = defineComponent({
     name: 'TreeItem',
     props: ['item', 'name', 'depth'],
     setup(props) {
-        const isOpen = ref(props.depth < 2);
+        const isOpen = ref(props.depth < 3);
         const isObject = computed(() => typeof props.item === 'object' && props.item !== null);
         const isArray = computed(() => Array.isArray(props.item));
 
