@@ -26,5 +26,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/app/navigation', [MobileAppController::class, 'getNavigation']);
     Route::get('/app/screen/{route}', [MobileAppController::class, 'getScreenData']);
 
-    Route::get('/app/get-screen-details/{screen_id}', [App\Http\Controllers\Api\ScreenController::class, 'getScreenDetails']);
+    Route::get('/app/get-screen-details/{screen_id}', [MobileAppController::class, 'getDynamicScreenContent']);
 });

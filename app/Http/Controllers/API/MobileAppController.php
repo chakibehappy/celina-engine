@@ -189,7 +189,7 @@ class MobileAppController extends Controller
         }
     }
 
-    public function getScreenDetails(Request $request, $screen_id)
+    public function getDynamicScreenContent(Request $request, $screen_id)
     {
         try {
             $screen = AppScreen::where('id', $screen_id)
@@ -199,14 +199,7 @@ class MobileAppController extends Controller
             if (!$screen) {
                 return response()->json(['error' => 'Screen not found'], 404);
             }
-
-            // Force decode the JSON column so it's sent as an object/array
-            if (is_string($screen->content_data)) {
-                $screen->content_data = json_decode($screen->content_data, true);
-            }
-
-            // Return the whole model instance
-            return response()->json($screen);
+            return response()->json($screen->content_data);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
