@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProjectController;
 
 use App\Http\Controllers\MobileDashboardTestController;
+use App\Http\Controllers\TableArchitectController;
+use App\Http\Controllers\DynamicCrudController;
 use App\Http\Controllers\Auth\GoogleController;
 
 Route::get('/', function () {
@@ -53,6 +55,19 @@ Route::prefix('test-dashboard')->group(function () {
         $controller = app(MobileDashboardTestController::class);
         return $controller->deleteData($type, $id); 
     })->name('test-dashboard.delete');
+
+    // -- GENERIC TABLE --
+    Route::prefix('celina-synth')->group(function () {
+        // Meta-Architecture
+        Route::post('/create-table', [TableArchitectController::class, 'createTable'])->name('architect.create-table');
+        Route::get('/get-tables/{appId}', [TableArchitectController::class, 'getAppTables'])->name('architect.get-tables');
+
+        // Dynamic CRUD (The "Ghost" Routes)
+        Route::get('/data/{appId}/{tableName}', [DynamicCrudController::class, 'index'])->name('dynamic.index');
+        Route::post('/data/{appId}/{tableName}', [DynamicCrudController::class, 'store'])->name('dynamic.store');
+        Route::put('/data/{appId}/{tableName}/{id}', [DynamicCrudController::class, 'update'])->name('dynamic.update');
+        Route::delete('/data/{appId}/{tableName}/{id}', [DynamicCrudController::class, 'destroy'])->name('dynamic.delete');
+    });
 });
 
 // for register in Google Cloud Console

@@ -11,8 +11,8 @@
             <div class="flex gap-4">
                 <div class="bg-gray-800 p-1 rounded-lg flex border border-gray-700">
                     <button @click="viewMode = 'lab'" :class="viewMode === 'lab' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Visual Lab</button>
-                    <button @click="viewMode = 'details'" :class="viewMode === 'details' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">App Details</button>
                     <button @click="viewMode = 'tables'" :class="viewMode === 'tables' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Data Tables</button>
+                    <button @click="viewMode = 'synth'" :class="viewMode === 'synth' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Data Tables</button>
                 </div>
             </div>
         </div>
@@ -122,7 +122,7 @@
             </section>
         </div>
 
-        <div v-if="viewMode === 'details'" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div v-if="viewMode === 'tables'" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div v-for="(fields, type) in schemas" :key="type" class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden h-fit">
                 <div class="p-4 bg-gray-700/50 font-bold flex justify-between items-center border-b border-gray-700">
                     <span class="uppercase tracking-widest text-xs text-purple-300">{{ type.replace(/_/g, ' ') }}s</span>
@@ -153,52 +153,39 @@
             </div>
         </div>
 
-        <div v-if="viewMode === 'tables'" class="grid grid-cols-1 gap-8">
-            <div v-for="(fields, type) in schemas" :key="type" class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
-                <div class="p-4 bg-gray-700/30 flex justify-between items-center border-b border-gray-700">
-                    <div class="flex items-center gap-3">
-                        <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
-                            <span class="material-symbols-outlined text-sm">table_chart</span>
-                        </span>
-                        <h3 class="font-bold uppercase tracking-widest text-xs text-gray-100">{{ type.replace(/_/g, ' ') }}</h3>
+        <!-- The Synth View -->
+        <div v-if="viewMode === 'synth'" class="space-y-6">
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center justify-between shadow-2xl">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
+                        <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
+                            <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
+                        </select>
                     </div>
-                    <button @click="openModal(type)" class="text-[10px] bg-green-600 px-4 py-1.5 rounded-lg font-bold hover:bg-green-500 transition shadow-lg">
-                        + NEW ENTRY
+                    
+                    <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
+                    
+                    <button v-if="selectedAppId" @click="openTableGenerator" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                        <span class="material-symbols-outlined text-sm">add_box</span>
+                        SYNTHESIZE TABLE
                     </button>
                 </div>
+            </div>
 
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left text-[11px] border-collapse">
-                        <thead class="text-gray-500 bg-gray-900/80">
-                            <tr>
-                                <th v-for="f in fields" :key="f.key" class="p-4 font-mono uppercase tracking-tighter">{{ f.label }}</th>
-                                <th class="p-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700/50">
-                            <tr v-for="item in props[type === 'submodule' ? 'subModules' : (type === 'app' ? 'apps' : type + 's')]" 
-                                :key="item.id" 
-                                class="hover:bg-purple-500/5 transition group">
-                                <td v-for="f in fields" :key="f.key" class="p-4">
-                                    <span v-if="f.key === 'id'" class="text-gray-600 font-mono">#{{ item[f.key] }}</span>
-                                    <span v-else-if="f.type === 'checkbox'" :class="item[f.key] ? 'text-green-400' : 'text-gray-600'">
-                                        {{ item[f.key] ? '● Active' : '○ Inactive' }}
-                                    </span>
-                                    <span v-else class="text-gray-300 truncate max-w-[200px] block">{{ item[f.key] }}</span>
-                                </td>
-                                <td class="p-4 text-right">
-                                    <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition">
-                                        <button @click="openModal(type, item)" class="text-blue-400 hover:text-blue-300">
-                                            <span class="material-symbols-outlined text-sm">edit</span>
-                                        </button>
-                                        <button @click="deleteData(type, item.id)" class="text-gray-500 hover:text-red-500">
-                                            <span class="material-symbols-outlined text-sm">delete</span>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Generated Tables Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div v-for="table in appTables" :key="table" class="bg-gray-800 border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition group">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-purple-500/10 rounded text-purple-400">
+                            <span class="material-symbols-outlined text-sm">table_rows</span>
+                        </div>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                            <button @click="viewTableData(table)" class="text-blue-400"><span class="material-symbols-outlined text-sm">visibility</span></button>
+                        </div>
+                    </div>
+                    <h4 class="font-mono text-sm text-gray-200">{{ table }}</h4>
+                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Controller Created</p>
                 </div>
             </div>
         </div>
@@ -242,6 +229,76 @@
                     <button @click="showDataModal = false" class="text-gray-400 text-sm">Cancel</button>
                     <button @click="saveData" class="bg-purple-600 hover:bg-purple-500 px-8 py-2 rounded-lg font-bold shadow-lg transition">
                         Commit
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="showSynthModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
+            <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-3xl border border-purple-500/30 shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-purple-400 font-mono flex items-center gap-2">
+                        <span class="material-symbols-outlined">database</span> 
+                        SCHEMA_SYNTHESIZER
+                    </h3>
+                    <button @click="showSynthModal = false" class="text-gray-500 hover:text-white">✕</button>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <!-- Table Name -->
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Table Name (Snake Case)</label>
+                        <input v-model="synthData.table_name" placeholder="e.g. inventory_logs" 
+                            class="w-full bg-gray-900 border-gray-700 rounded-lg p-3 text-sm font-mono text-purple-300 focus:ring-1 focus:ring-purple-500 outline-none">
+                    </div>
+
+                    <!-- Dynamic Columns List -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b border-gray-700 pb-2">
+                            <label class="text-[10px] text-gray-500 uppercase font-bold">Architecture / Column Definitions</label>
+                            <button @click="addColumn" class="bg-purple-600/20 text-purple-400 px-3 py-1 rounded text-[10px] font-bold hover:bg-purple-600 hover:text-white transition">
+                                + ADD FIELD
+                            </button>
+                        </div>
+                        
+                        <div class="max-h-[350px] overflow-y-auto pr-2 custom-scrollbar space-y-2">
+                            <div v-for="(col, index) in synthData.columns" :key="index" 
+                                class="flex gap-2 items-center bg-gray-900 p-2 rounded-lg border border-gray-700 hover:border-gray-600 transition">
+                                
+                                <!-- Column Name -->
+                                <div class="flex-1">
+                                    <input v-model="col.name" placeholder="field_name" 
+                                        class="w-full bg-transparent border-none p-1 text-xs font-mono text-gray-200 focus:ring-0">
+                                </div>
+
+                                <!-- Data Type Selection -->
+                                <select v-model="col.type" class="bg-gray-850 border-gray-700 rounded p-1 text-[11px] text-orange-400 font-mono outline-none">
+                                    <option v-for="type in availableTypes" :key="type" :value="type">{{ type }}</option>
+                                </select>
+
+                                <!-- Nullable Toggle -->
+                                <button @click="col.nullable = !col.nullable" 
+                                        :class="col.nullable ? 'text-green-500 bg-green-500/10' : 'text-gray-600 bg-gray-800'"
+                                        class="px-2 py-1 rounded text-[9px] font-bold transition">
+                                    NULL
+                                </button>
+
+                                <!-- Remove Field -->
+                                <button @click="removeColumn(index)" class="text-gray-700 hover:text-red-500 px-2 transition">
+                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="flex justify-end gap-4 mt-8 pt-4 border-t border-gray-700">
+                    <button @click="showSynthModal = false" class="text-gray-400 text-sm hover:text-white">Cancel</button>
+                    <button @click="commitTableSynth" 
+                            :disabled="!synthData.table_name || synthData.columns.some(c => !c.name)"
+                            class="bg-gradient-to-r from-purple-600 to-blue-600 disabled:opacity-20 px-8 py-2 rounded-lg font-bold shadow-lg transition-all hover:scale-105 active:scale-95">
+                        EXECUTE GENERATION
                     </button>
                 </div>
             </div>
@@ -368,6 +425,63 @@ const TreeItem = defineComponent({
         ]);
     }
 });
+
+// --- CELINA-SYNTH STATE ---
+const selectedAppId = ref(null);
+const appTables = ref([]);
+const showSynthModal = ref(false);
+
+const synthData = ref({
+    app_id: null,
+    table_name: '',
+    columns: [
+        { name: 'name', type: 'string', nullable: false }
+    ]
+});
+
+// Map of supported Laravel data types for the UI dropdown
+const columnTypes = [
+    'string', 'text', 'integer', 'bigInteger', 
+    'boolean', 'decimal', 'float', 'date', 
+    'dateTime', 'timestamp', 'json', 'longText'
+];
+
+// --- ACTIONS ---
+
+const fetchTables = async () => {
+    if (!selectedAppId.value) return;
+    try {
+        // Targets getAppTables($appId) in the controller
+        const response = await fetch(`/architect/tables/${selectedAppId.value}`);
+        appTables.value = await response.json();
+    } catch (e) {
+        console.error("Database lookup failed", e);
+    }
+};
+
+const addColumn = () => {
+    synthData.value.columns.push({ name: '', type: 'string', nullable: false });
+};
+
+const removeColumn = (index) => {
+    if (synthData.value.columns.length > 1) {
+        synthData.value.columns.splice(index, 1);
+    }
+};
+
+const commitTableSynth = () => {
+    synthData.value.app_id = selectedAppId.value;
+    
+    // Inertia request to the createTable method
+    router.post(route('architect.create-table'), synthData.value, {
+        onSuccess: () => {
+            showSynthModal.value = false;
+            fetchTables();
+        },
+        preserveScroll: true
+    });
+};
+
 </script>
 
 <style>
