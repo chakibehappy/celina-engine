@@ -229,10 +229,10 @@ class MobileDashboardTestController extends Controller
             'user'       => AppUser::class,
             'menu'       => AppMenu::class,
             'submodule'  => AppSubModule::class,
-            'roles'       => AppRole::class,
+            'role'       => AppRole::class,
             'screen'     => AppScreen::class,
             'navigation' => AppNavigation::class,
-            'apps'        => App::class,
+            'app'        => App::class,
             'system_icon' => SystemIcon::class,
             default => abort(404),
         };
