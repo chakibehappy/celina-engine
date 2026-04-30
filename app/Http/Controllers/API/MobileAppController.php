@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\App\App;
 use App\Models\App\AppUser;
 use App\Models\App\AppScreen;
 use App\Models\App\AppNavigation;
@@ -13,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class MobileAppController extends Controller
 {
@@ -213,37 +215,32 @@ class MobileAppController extends Controller
         return response()->json(['success' => true]);
     }
 
-    
     public function googleLogin(Request $request) 
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
-            
-            // Find or create the user
-            $user = AppUser::with('app')->where('email', $googleUser->getEmail())->first();
-
-            if (!$user) {
-                $user = AppUser::create([
-                    'email' => $googleUser->getEmail(),
-                    'name'  => $googleUser->getName(),
-                    'app_id' => 2, // Ensure this ID actually exists in your 'apps' table
-                    'password' => Hash::make(Str::random(24)),
+            $user = AppUser::with('app')->updateOrCreate(
+                ['email' => $googleUser->getEmail()],
+                [
+                    'name'     => $googleUser->getName(),
+                    'app_id'   => 2, // Defaulting to your main Celina App
+                    'password' => Hash::make(Str::random(24)), 
                     'app_role_id' => 2,
-                ]);
-                $user->load('app');
-            }
+                    // 'google_id' => $googleUser->getId(), // Commented out for later
+                ]
+            );
 
-            // Generate the token
-            $token = $user->createToken($request->device_name ?: 'android_device')->plainTextToken;
-
+            $token = $user->createToken($request->device_name)->plainTextToken;
+            // Return the standard "Celina Envelope"
             return response()->json([
                 'success' => true,
                 'message' => 'Google Handshake Successful',
                 'data' => [
-                    'token' => $token, // This is the string you need for 'Bearer'
+                    'token'       => $token,
                     'app_context' => [
                         'app_id'   => $user->app_id,
-                        'app_name' => $user->app->name ?? 'Celina Engine',
+                        'app_name' => $user->app->name ?? 'Default App',
+                        'slug'     => $user->app->slug ?? 'default',
                     ],
                     'user' => [
                         'id'    => $user->id,
@@ -252,6 +249,7 @@ class MobileAppController extends Controller
                     ]
                 ]
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -259,6 +257,7 @@ class MobileAppController extends Controller
             ], 401);
         }
     }
+
 
     private function getTargetDatabase($appId)
     {
@@ -347,7 +346,6 @@ class MobileAppController extends Controller
             $appId = $user->app_id;
             $dbName = $this->getTargetDatabase($appId);
             DB::table("{$dbName}.{$tableName}")->where('id', $id)->delete();
-            return response()->json(['success' => true]);
             return response()->json(['success' => true]);
 
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
