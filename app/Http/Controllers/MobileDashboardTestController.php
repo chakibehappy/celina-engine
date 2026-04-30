@@ -141,6 +141,7 @@ class MobileDashboardTestController extends Controller
     {
         $screen = AppScreen::findOrFail($id);
         $screen->update($request->validate([
+            'app_id' => 'required|exists:apps,id',
             'route' => 'required|string',
             'title' => 'required|string',
             'type' => 'required|string',
