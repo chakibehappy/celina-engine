@@ -259,11 +259,49 @@
         </div>
         <!-- Empty State UI -->
         <div v-if="tableData.length === 0" class="p-12 text-center border-t border-gray-800">
-            <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">Empty_Sequence_Detected</p>
-            <button @click="openCreateModal" class="mt-4 text-purple-500 text-[10px] hover:underline uppercase font-bold">Initiate_Data_Entry</button>
+            <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">There's no data</p>
+            <button @click="openCreateModal" class="mt-4 text-purple-500 text-[10px] hover:underline uppercase font-bold">+ Create New Data</button>
         </div>
     </div>
 </div>
+
+<!-- Dynamic Data Entry Modal -->
+<div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-gray-800 border border-gray-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+            <h3 class="text-purple-400 font-mono font-bold uppercase tracking-wider">New_Entry: {{ activeTable }}</h3>
+            <button @click="showCreateModal = false" class="text-gray-500 hover:text-white transition">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div v-for="(value, key) in newData" :key="key">
+                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1 font-mono">{{ key }}</label>
+                <input 
+                    v-model="newData[key]" 
+                    type="text"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:ring-1 focus:ring-purple-500 outline-none transition"
+                    :placeholder="'Enter ' + key + '...'"
+                >
+            </div>
+        </div>
+
+        <div class="p-6 bg-gray-900/50 flex gap-3">
+            <button 
+                @click="commitNewData" 
+                :disabled="isProcessing"
+                class="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 py-3 rounded-xl text-xs font-bold hover:scale-[1.02] active:scale-95 transition disabled:opacity-50"
+            >
+                {{ isProcessing ? 'EXECUTING...' : 'COMMIT_DATA_SEQUENCE' }}
+            </button>
+            <button @click="showCreateModal = false" class="px-6 py-3 border border-gray-700 rounded-xl text-xs font-bold text-gray-400 hover:bg-gray-700 transition">
+                CANCEL
+            </button>
+        </div>
+    </div>
+</div>
+
 
         <div v-if="showSynthModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
             <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-3xl border border-purple-500/30 shadow-2xl">
@@ -563,6 +601,42 @@ const deleteRow = async (id) => {
         tableData.value = tableData.value.filter(item => item.id !== id);
     } catch (e) {
         console.error("Protocol Breach: Deletion failed.", e);
+    }
+};
+
+// --- DYNAMIC CREATE STATE ---
+const showCreateModal = ref(false);
+const newData = ref({});
+
+// --- ACTIONS ---
+
+const openCreateModal = () => {
+    // Reset and build the dynamic object based on detected columns
+    newData.value = {};
+    
+    // Filter out columns typically handled by the DB to keep entry clean
+    const skipColumns = ['id', 'created_at', 'updated_at', 'deleted_at'];
+    
+    tableColumns.value.forEach(col => {
+        if (!skipColumns.includes(col)) {
+            newData.value[col] = '';
+        }
+    });
+    
+    showCreateModal.value = true;
+};
+
+const commitNewData = async () => {
+    isProcessing.value = true;
+    try {
+        // reuse the saveRow logic for consistency
+        await saveRow(newData.value);
+        showCreateModal.value = false;
+        // Refresh is handled inside saveRow()
+    } catch (e) {
+        console.error("Initialization Failed: Data write aborted.", e);
+    } finally {
+        isProcessing.value = false;
     }
 };
 </script>
