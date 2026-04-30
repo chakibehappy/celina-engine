@@ -11,7 +11,7 @@
             <div class="flex gap-4">
                 <div class="bg-gray-800 p-1 rounded-lg flex border border-gray-700">
                     <button @click="viewMode = 'lab'" :class="viewMode === 'lab' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Visual Lab</button>
-                    <button @click="viewMode = 'details'" :class="viewMode === 'tables' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">App Details</button>
+                    <button @click="viewMode = 'details'" :class="viewMode === 'details' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">App Details</button>
                 </div>
             </div>
         </div>
