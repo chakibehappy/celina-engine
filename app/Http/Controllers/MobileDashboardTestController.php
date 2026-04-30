@@ -13,6 +13,8 @@ use App\Models\App\SystemIcon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MobileDashboardTestController extends Controller
 {
@@ -24,8 +26,11 @@ class MobileDashboardTestController extends Controller
                 ->map(function($col) use ($tableName) {
                     $dbType = Schema::getColumnType($tableName, $col);
                     
+                    // Define columns that should be READ-ONLY/HIDDEN in the form
+                    // but visible in the table
+                    $isHiddenFromForm = in_array($col, ['database_name', 'slug']);
+
                     $uiType = match(true) {
-                        // ONLY for app_screens table, make the type column a special dropdown
                         $tableName === 'app_screens' && $col === 'type' => 'select_screen_type',
                         str_contains($col, 'email') => 'email',
                         str_contains($col, 'password') => 'password',
@@ -36,13 +41,10 @@ class MobileDashboardTestController extends Controller
                     };
 
                     $optionsKey = null;
-                    
                     if (str_ends_with($col, '_id')) {
-                        // If it's specifically app_id, we want 'apps'
-                        if ($col === 'app_id') {   $optionsKey = 'apps'; } 
-                        else if ($col === 'system_icon_id') {  $optionsKey = 'system_icons'; } 
+                        if ($col === 'app_id') { $optionsKey = 'apps'; } 
+                        else if ($col === 'system_icon_id') { $optionsKey = 'system_icons'; } 
                         else {
-                            // For app_role_id -> roles, menu_id -> menus, etc.
                             $optionsKey = str_replace(['app_', '_id'], ['', 's'], $col);
                         }
                     }
@@ -51,7 +53,8 @@ class MobileDashboardTestController extends Controller
                         'key'     => $col,
                         'label'   => ucwords(str_replace('_', ' ', $col)),
                         'type'    => $uiType,
-                        'options' => $optionsKey
+                        'options' => $optionsKey,
+                        'hidden'  => $isHiddenFromForm // <--- Add this flag
                     ];
                 })->values();
         };
@@ -145,14 +148,60 @@ class MobileDashboardTestController extends Controller
         return back()->with('success', 'Screen content updated!');
     }
 
-   // --- GENERIC DATA CRUD ---
+    public function createApp(Request $request)
+    {
+        $originalSlug = Str::slug($request->name);
+        $finalSlug = $this->generateUniqueSlug($originalSlug);
+        $dbName = 'db_cc_' . str_replace('-', '_', $finalSlug);
+
+        // 2. Physical Provisioning
+        DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+
+        $folderName = 'CC' . Str::studly($finalSlug);
+        $path = app_path("Models/App/{$folderName}");
+
+        if (!File::isDirectory($path)) {
+            File::makeDirectory($path, 0755, true);
+            File::put("{$path}/.gitignore", "*\n!.gitignore");
+        }
+
+        // 3. Inject for the final model creation
+        $request->merge([
+            'slug' => $finalSlug,
+            'database_name' => $dbName
+        ]);
+    }
+
+    /**
+     * Checks the 'apps' table for existing slugs and increments
+     */
+    private function generateUniqueSlug($slug)
+    {
+        $newSlug = $slug;
+        $counter = 1;
+        // Check if the slug already exists in our database records
+        while (App::where('slug', $newSlug)->exists()) {
+            $newSlug = $slug . '-' . $counter;
+            $counter++;
+        }
+        return $newSlug;
+    }
+
+    // --- GENERIC DATA CRUD ---
     public function storeData(Request $request, $type)
     {
-        $model = $this->getModelByType($type);
+        // Intercept if we are creating a new App record
+        if ($type === 'apps' || $type === 'app') {
+            $this->createApp($request);
+        }
+        // Proceed with standard model creation
+        $model = $this->getModelByType($request, $type);
         $data = $request->all();
-        // Auto-inject app_id if missing
-        if (!isset($data['app_id']) && App::exists()) { 
-            $data['app_id'] = App::first()->id; 
+        // Auto-inject app_id logic for non-app models
+        if ($type !== 'apps' && $type !== 'app') {
+            if (!isset($data['app_id']) && App::exists()) { 
+                $data['app_id'] = App::first()->id; 
+            }
         }
         $model::create($data);
         return back()->with('success', ucfirst($type) . ' created!');

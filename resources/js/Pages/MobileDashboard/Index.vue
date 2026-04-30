@@ -160,7 +160,7 @@
                 
                 <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                     <div v-for="field in schemas[modalType]" :key="field.key">
-                        <template v-if="field.key !== 'id' || (!isEditing && modalType === 'system_icon')">
+                        <template v-if="(field.key !== 'id' && !field.hidden) || (!isEditing && modalType === 'system_icon')">
                             <label class="text-[10px] text-gray-500 block mb-1 uppercase font-bold tracking-tighter">{{ field.label }}</label>
                             
                             <select v-if="field.type === 'select_screen_type'" v-model="formData[field.key]" class="w-full bg-gray-900 p-3 rounded border border-gray-700 text-white">

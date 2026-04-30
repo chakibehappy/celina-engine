@@ -189,7 +189,7 @@ class MobileAppController extends Controller
         }
     }
 
-    public function getDynamicScreenContent(Request $request, $screen_id)
+    public function getScreenContentData(Request $request, $screen_id)
     {
         try {
             $screen = AppScreen::where('id', $screen_id)
@@ -249,9 +249,6 @@ class MobileAppController extends Controller
         ]);
     }
 
-    /**
-     * Maintained your optimized helper for platform-specific icons.
-     */
     private function resolveIcon($icon, $platform = 'flutter')
     {
         if (!$icon) {
@@ -287,10 +284,7 @@ class MobileAppController extends Controller
     public function googleLogin(Request $request) 
     {
         try {
-            // 1. Verify the JWT from the Kotlin app
             $googleUser = Socialite::driver('google')->stateless()->userFromToken($request->token);
-
-            // 2. Find or Create based ONLY on email for now
             $user = AppUser::with('app')->updateOrCreate(
                 ['email' => $googleUser->getEmail()],
                 [
@@ -302,10 +296,8 @@ class MobileAppController extends Controller
                 ]
             );
 
-            // 3. Issue the Sanctum token
             $token = $user->createToken($request->device_name)->plainTextToken;
-
-            // 4. Return the standard "Celina Envelope"
+            // Return the standard "Celina Envelope"
             return response()->json([
                 'success' => true,
                 'message' => 'Google Handshake Successful',
@@ -331,4 +323,71 @@ class MobileAppController extends Controller
             ], 401);
         }
     }
+
+    // Generic table CRUD
+    private function getModelByType($type)
+    {
+        // Convert "system_icon" or "app_user" to PascalCase "SystemIcon" or "AppUser"
+        $modelName = str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $type)));
+        // Define the namespaces where the models live
+        $namespaces = [
+            "App\\Models\\App\\",
+            // "App\\Models\\",
+        ];
+        foreach ($namespaces as $namespace) {
+            $fullClass = $namespace . $modelName;
+            // Check if this class actually exists
+            if (class_exists($fullClass)) {
+                return $fullClass;
+            }
+        }
+        abort(404, "Model for {$type} not found.");
+    }
+
+    public function createData(Request $request, $type)
+    {
+        $model = $this->getModelByType($type);
+        $data = $request->all();
+        // Auto-inject app_id if missing
+        if (!isset($data['app_id']) && App::exists()) { 
+            $data['app_id'] = App::first()->id; 
+        }
+        $model::create($data);
+        return back()->with('success', ucfirst($type) . ' created!');
+    }
+
+    public function readData(Request $request, $type, $id = null)
+    {
+        $modelClass = $this->getModelByType($type);
+        
+        // 1. If an ID is provided, fetch specific record (Detail View)
+        if ($id) {
+            $data = $modelClass::findOrFail($id);
+        } else {
+            // 2. Fetch everything for the list
+            $data = $modelClass::all(); 
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'type' => $type,
+            'data' => $data
+        ]);
+    }
+
+    public function updateData(Request $request, $type, $id)
+    {
+        $model = $this->getModelByType($type);
+        $item = $model::findOrFail($id);
+        $item->update($request->all());
+        return back()->with('success', ucfirst($type) . ' updated!');
+    }
+
+    public function deleteData($type, $id)
+    {
+        $model = $this->getModelByType($type);
+        $model::findOrFail($id)->delete();
+        return back()->with('success', ucfirst($type) . ' deleted!');
+    }
+
 }
