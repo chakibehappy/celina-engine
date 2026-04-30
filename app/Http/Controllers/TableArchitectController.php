@@ -83,8 +83,7 @@ class TableArchitectController extends Controller
         $tables = DB::select("
             SELECT TABLE_NAME 
             FROM information_schema.tables 
-            WHERE table_schema = ?
-        ", [$dbName]);
+            WHERE table_schema = 'db_cc_test_celina_app'");
         return response()->json(array_column($tables, 'table_name'));
     }
 }
