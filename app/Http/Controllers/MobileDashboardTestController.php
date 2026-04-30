@@ -192,9 +192,9 @@ class MobileDashboardTestController extends Controller
     public function storeData(Request $request, $type)
     {
         // Intercept if we are creating a new App record
-        // if ($type === 'apps' || $type === 'app') {
-        //     $this->createApp($request);
-        // }
+        if ($type === 'apps' || $type === 'app') {
+            $this->createApp($request);
+        }
         // Proceed with standard model creation
         $model = $this->getModelByType($type);
         $data = $request->all();
