@@ -155,19 +155,16 @@ class MobileDashboardTestController extends Controller
         $originalSlug = Str::slug($request->name);
         $finalSlug = $this->generateUniqueSlug($originalSlug);
         $dbName = 'db_cc_' . str_replace('-', '_', $finalSlug);
-
-        // 2. Physical Provisioning
+        // Physical Provisioning, make sure already run :
+        // DB::statement("GRANT ALL PRIVILEGES ON *.* TO '{$db_username}'@'{$db_host}' WITH GRANT OPTION");
         DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-
         $folderName = 'CC' . Str::studly($finalSlug);
         $path = app_path("Models/App/{$folderName}");
-
         if (!File::isDirectory($path)) {
             File::makeDirectory($path, 0775, true);
             File::put("{$path}/.gitignore", "*\n!.gitignore");
         }
-
-        // 3. Inject for the final model creation
+        // Inject for the final model creation
         $request->merge([
             'slug' => $finalSlug,
             'database_name' => $dbName
