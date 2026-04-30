@@ -205,11 +205,12 @@
         <div class="flex items-center gap-6">
             <div v-if="!activeTable">
                 <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
-                <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500 outline-none">
+                <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
                     <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
                 </select>
             </div>
             
+            <!-- Breadcrumb Navigation if a table is open -->
             <div v-else class="flex items-center gap-3">
                 <button @click="activeTable = null" class="p-2 hover:bg-gray-700 rounded-full transition text-gray-400">
                     <span class="material-symbols-outlined">arrow_back</span>
@@ -219,6 +220,13 @@
                     <p class="text-[9px] text-gray-500 mt-1 uppercase tracking-widest">Live Data Explorer</p>
                 </div>
             </div>
+
+            <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
+            
+            <button v-if="selectedAppId && !activeTable" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                <span class="material-symbols-outlined text-sm">add_box</span>
+                SYNTHESIZE TABLE
+            </button>
         </div>
     </div>
 
