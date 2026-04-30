@@ -221,12 +221,17 @@
                 </div>
             </div>
 
-            <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
+            <div v-if="selectedAppId" class="h-15 w-[1px] bg-gray-700"></div>
             
-            <button v-if="selectedAppId && !activeTable" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
-                <span class="material-symbols-outlined text-sm">add_box</span>
-                SYNTHESIZE TABLE
-            </button>
+            <div v-if="!activeTable">
+                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Create New Table</label>
+                 <button v-if="selectedAppId && !activeTable" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                    <span class="material-symbols-outlined text-sm">add_box</span>
+                    SYNTHESIZE TABLE
+                </button>
+            </div>
+
+           
         </div>
     </div>
 
