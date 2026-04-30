@@ -158,12 +158,6 @@ class MobileDashboardTestController extends Controller
         // 2. Physical Provisioning
         DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
-        $db_username = env('DB_USERNAME');
-        $db_host = env('DB_HOST', 'localhost');
-        // This is a safety net if your global wildcards aren't set up
-        DB::statement("GRANT ALL PRIVILEGES ON `{$dbName}`.* TO '{$db_username}'@'{$db_host}'");
-        DB::statement("FLUSH PRIVILEGES");
-        
         $folderName = 'CC' . Str::studly($finalSlug);
         $path = app_path("Models/App/{$folderName}");
 
