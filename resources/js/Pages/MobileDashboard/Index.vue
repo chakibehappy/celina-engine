@@ -210,6 +210,12 @@
                 </select>
             </div>
             
+            <button v-if="selectedAppId && !activeTable" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                <span class="material-symbols-outlined text-sm">add_box</span>
+                SYNTHESIZE TABLE
+            </button>
+
+            
             <div v-else class="flex items-center gap-3">
                 <button @click="activeTable = null" class="p-2 hover:bg-gray-700 rounded-full transition text-gray-400">
                     <span class="material-symbols-outlined">arrow_back</span>
