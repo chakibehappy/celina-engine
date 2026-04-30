@@ -262,6 +262,11 @@
                     <tr v-for="row in tableData" :key="row.id" class="hover:bg-purple-500/5 transition-colors">
                         <td v-for="col in tableColumns" :key="col" class="p-4 text-xs font-mono text-gray-300">{{ row[col] }}</td>
                         <td class="p-4 text-right">
+                            <!-- Edit Button -->
+                            <button @click="openEditModal(row)" class="text-gray-600 hover:text-blue-400 transition">
+                                <span class="material-symbols-outlined text-sm">edit</span>
+                            </button>
+                            <!-- Delete Button -->
                             <button @click="deleteRow(row.id)" class="text-gray-600 hover:text-red-500 transition">
                                 <span class="material-symbols-outlined text-sm">delete</span>
                             </button>
@@ -651,6 +656,14 @@ const openCreateModal = () => {
         }
     });
     
+    showCreateModal.value = true;
+};
+
+const openEditModal = (row) => {
+    // Clone the row data into our buffer
+    newData.value = { ...row };    
+    // Ensure the modal title or logic knows we are in edit mode if needed
+    // but saveRow already handles the logic via !!rowData.id
     showCreateModal.value = true;
 };
 
