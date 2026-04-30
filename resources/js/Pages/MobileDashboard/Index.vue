@@ -203,9 +203,10 @@
     <!-- Header/Action Bar -->
     <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center justify-between shadow-2xl">
         <div class="flex items-center gap-6">
+            <!-- App Selector -->
             <div v-if="!activeTable">
                 <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
-                <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
+                <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500 outline-none">
                     <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
                 </select>
             </div>
@@ -221,17 +222,25 @@
                 </div>
             </div>
 
-            <div v-if="selectedAppId" class="h-15 w-[1px] bg-gray-700"></div>
+            <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
             
+            <!-- Action: Synthesize Table (Only on App View) -->
             <div v-if="selectedAppId && !activeTable">
-                <label class="text-[10px] text-gray-500 text-center uppercase font-bold block mb-1">Create New Table</label>
-                 <button  @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Structure</label>
+                 <button @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
                     <span class="material-symbols-outlined text-sm">add_box</span>
                     SYNTHESIZE TABLE
                 </button>
             </div>
 
-           
+            <!-- Action: Create New Data (Only when table is active and NOT empty) -->
+            <div v-if="activeTable && tableData.length > 0">
+                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Record Entry</label>
+                 <button @click="openCreateModal" class="flex items-center gap-2 bg-gray-900 border border-purple-500/50 text-purple-400 px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-500/10 transition">
+                    <span class="material-symbols-outlined text-sm">post_add</span>
+                    INSERT DATA
+                </button>
+            </div>
         </div>
     </div>
 
@@ -262,20 +271,23 @@
                     <tr v-for="row in tableData" :key="row.id" class="hover:bg-purple-500/5 transition-colors">
                         <td v-for="col in tableColumns" :key="col" class="p-4 text-xs font-mono text-gray-300">{{ row[col] }}</td>
                         <td class="p-4 text-right">
-                            <!-- Edit Button -->
-                            <button @click="openEditModal(row)" class="text-gray-600 hover:text-blue-400 transition">
-                                <span class="material-symbols-outlined text-sm">edit</span>
-                            </button>
-                            <!-- Delete Button -->
-                            <button @click="deleteRow(row.id)" class="text-gray-600 hover:text-red-500 transition">
-                                <span class="material-symbols-outlined text-sm">delete</span>
-                            </button>
+                            <div class="flex justify-end gap-3">
+                                <!-- Edit Button -->
+                                <button @click="openEditModal(row)" class="text-gray-600 hover:text-blue-400 transition">
+                                    <span class="material-symbols-outlined text-sm">edit</span>
+                                </button>
+                                <!-- Delete Button -->
+                                <button @click="deleteRow(row.id)" class="text-gray-600 hover:text-red-500 transition">
+                                    <span class="material-symbols-outlined text-sm">delete</span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <!-- Empty State UI -->
+
+        <!-- Empty State UI (Kept as is for UX) -->
         <div v-if="tableData.length === 0" class="p-12 text-center border-t border-gray-800">
             <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">There's no data</p>
             <button @click="openCreateModal" class="mt-4 text-purple-500 text-[10px] hover:underline uppercase font-bold">+ Create New Data</button>
