@@ -80,10 +80,13 @@ class TableArchitectController extends Controller
     {
         $app = App::findOrFail($appId);
         $dbName = $app->database_name;
-        $tables = DB::select("
-            SELECT TABLE_NAME 
-            FROM information_schema.tables 
-            WHERE table_schema = 'db_cc_test_celina_app'");
-        return response()->json(array_column($tables, 'table_name'));
+
+        $tables = DB::select("SHOW TABLES FROM `$dbName`");
+
+        $tables = array_map(function ($item) {
+            return array_values((array) $item)[0];
+        }, $tables);
+
+        return response()->json($tables);
     }
 }
