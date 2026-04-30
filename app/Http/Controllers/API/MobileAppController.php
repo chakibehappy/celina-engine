@@ -221,7 +221,7 @@ class MobileAppController extends Controller
                 ['email' => $googleUser->getEmail()],
                 [
                     'name'     => $googleUser->getName(),
-                    'app_id'   => 1, // Defaulting to your main Celina App
+                    'app_id'   => 2, // Defaulting to your main Celina App
                     'password' => Hash::make(Str::random(24)), 
                     'app_role_id' => 2,
                     // 'google_id' => $googleUser->getId(), // Commented out for later
