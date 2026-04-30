@@ -299,7 +299,10 @@
 <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
     <div class="bg-gray-800 border border-gray-700 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
         <div class="p-6 border-b border-gray-700 flex justify-between items-center">
-            <h3 class="text-purple-400 font-mono font-bold uppercase tracking-wider">New_Entry: {{ activeTable }}</h3>
+            <!-- Title switches based on mode -->
+            <h3 class="text-purple-400 font-mono font-bold uppercase tracking-wider">
+                {{ newData.id ? 'Update_Entry' : 'New_Entry' }}: {{ activeTable }}
+            </h3>
             <button @click="showCreateModal = false" class="text-gray-500 hover:text-white transition">
                 <span class="material-symbols-outlined">close</span>
             </button>
@@ -307,12 +310,22 @@
 
         <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
             <div v-for="(value, key) in newData" :key="key">
-                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1 font-mono">{{ key }}</label>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] text-gray-500 uppercase font-bold font-mono">{{ key }}</label>
+                    <!-- Visual indicator for protected fields -->
+                    <span v-if="key === 'id'" class="text-[9px] text-amber-500/70 font-mono flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[12px]">lock</span> 
+                        READ_ONLY
+                    </span>
+                </div>
+                
                 <input 
                     v-model="newData[key]" 
                     type="text"
-                    class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:ring-1 focus:ring-purple-500 outline-none transition"
+                    class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    :class="key === 'id' ? 'border-amber-500/20 text-amber-500/50' : 'focus:ring-1 focus:ring-purple-500'"
                     :placeholder="'Enter ' + key + '...'"
+                    :disabled="key === 'id'"
                 >
             </div>
         </div>
@@ -331,7 +344,6 @@
         </div>
     </div>
 </div>
-
 
         <div v-if="showSynthModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
             <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-3xl border border-purple-500/30 shadow-2xl">
@@ -672,10 +684,14 @@ const openCreateModal = () => {
 };
 
 const openEditModal = (row) => {
-    // Clone the row data into our buffer
-    newData.value = { ...row };    
-    // Ensure the modal title or logic knows we are in edit mode if needed
-    // but saveRow already handles the logic via !!rowData.id
+    const skipColumns = ['created_at', 'updated_at', 'deleted_at'];
+    const buffer = {};
+    Object.keys(row).forEach(key => {
+        if (!skipColumns.includes(key)) {
+            buffer[key] = row[key];
+        }
+    });
+    newData.value = buffer;
     showCreateModal.value = true;
 };
 
