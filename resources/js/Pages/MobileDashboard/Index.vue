@@ -12,7 +12,7 @@
                 <div class="bg-gray-800 p-1 rounded-lg flex border border-gray-700">
                     <button @click="viewMode = 'lab'" :class="viewMode === 'lab' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Visual Lab</button>
                     <button @click="viewMode = 'tables'" :class="viewMode === 'tables' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Data Tables</button>
-                    <button @click="viewMode = 'synth'" :class="viewMode === 'synth' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Data Tables</button>
+                    <button @click="viewMode = 'synth'" :class="viewMode === 'synth' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Database Synth</button>
                 </div>
             </div>
         </div>
@@ -166,7 +166,7 @@
                     
                     <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
                     
-                    <button v-if="selectedAppId" @click="openTableGenerator" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                    <button v-if="selectedAppId" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
                         <span class="material-symbols-outlined text-sm">add_box</span>
                         SYNTHESIZE TABLE
                     </button>
