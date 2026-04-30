@@ -381,6 +381,7 @@
 <script setup>
 import { ref, computed, defineComponent, h } from 'vue';
 import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 const props = defineProps({ 
     navigations: Array, screens: Array, apps: Array, users: Array, 
