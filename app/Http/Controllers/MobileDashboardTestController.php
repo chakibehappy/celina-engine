@@ -196,7 +196,7 @@ class MobileDashboardTestController extends Controller
         //     $this->createApp($request);
         // }
         // Proceed with standard model creation
-        $model = $this->getModelByType($request, $type);
+        $model = $this->getModelByType($type);
         $data = $request->all();
         // Auto-inject app_id logic for non-app models
         if ($type !== 'apps' && $type !== 'app') {
