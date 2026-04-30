@@ -155,6 +155,12 @@ class MobileDashboardTestController extends Controller
         $finalSlug = $this->generateUniqueSlug($originalSlug);
         $dbName = 'db_cc_' . str_replace('-', '_', $finalSlug);
 
+        $db_username = env('DB_USERNAME');
+        $db_host = env('DB_HOST', 'localhost');
+        // This is a safety net if your global wildcards aren't set up
+        DB::statement("GRANT ALL PRIVILEGES ON *.* TO '{$db_username}'@'{$db_host}' WITH GRANT OPTION");
+        DB::statement("FLUSH PRIVILEGES");
+        
         // 2. Physical Provisioning
         DB::statement("CREATE DATABASE IF NOT EXISTS `{$dbName}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
@@ -162,7 +168,7 @@ class MobileDashboardTestController extends Controller
         $path = app_path("Models/App/{$folderName}");
 
         if (!File::isDirectory($path)) {
-            File::makeDirectory($path, 0755, true);
+            File::makeDirectory($path, 0775, true);
             File::put("{$path}/.gitignore", "*\n!.gitignore");
         }
 
