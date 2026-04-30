@@ -80,13 +80,10 @@ class TableArchitectController extends Controller
     {
         $app = App::findOrFail($appId);
         $dbName = $app->database_name;
-
         $tables = DB::select("SHOW TABLES FROM `$dbName`");
-
         $tables = array_map(function ($item) {
             return array_values((array) $item)[0];
         }, $tables);
-
         return response()->json($tables);
     }
 }

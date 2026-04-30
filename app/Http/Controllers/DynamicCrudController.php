@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/DynamicCrudController.php
 
 namespace App\Http\Controllers;
 
@@ -9,20 +10,19 @@ use Illuminate\Support\Facades\Schema;
 
 class DynamicCrudController extends Controller
 {
-    private function getTableQuery($appId, $tableName)
+    private function getTargetDatabase($appId)
     {
-        $app = App::findOrFail($appId);
-        $fullPath = "{$app->database_name}.{$tableName}";
-        return DB::table($fullPath);
+        return App::findOrFail($appId)->database_name;
     }
 
     public function index($appId, $tableName)
     {
-        // Get columns to build the dynamic table headers on frontend
-        $app = App::findOrFail($appId);
-        $columns = Schema::getColumnListing($tableName); // Note: Ensure connection handles cross-db
+        $dbName = $this->getTargetDatabase($appId);
         
-        $data = $this->getTableQuery($appId, $tableName)
+        // Force Schema to look at the target synthesized database for headers
+        $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
+        
+        $data = DB::table("{$dbName}.{$tableName}")
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -34,19 +34,29 @@ class DynamicCrudController extends Controller
 
     public function store(Request $request, $appId, $tableName)
     {
-        // Filter out ID and timestamps for the insert
+        $dbName = $this->getTargetDatabase($appId);
         $data = $request->except(['id', 'created_at', 'updated_at']);
         $data['created_at'] = now();
         $data['updated_at'] = now();
 
-        $this->getTableQuery($appId, $tableName)->insert($data);
+        DB::table("{$dbName}.{$tableName}")->insert($data);
+        return response()->json(['success' => true]);
+    }
 
+    public function update(Request $request, $appId, $tableName, $id)
+    {
+        $dbName = $this->getTargetDatabase($appId);
+        $data = $request->except(['id', 'created_at', 'updated_at']);
+        $data['updated_at'] = now();
+
+        DB::table("{$dbName}.{$tableName}")->where('id', $id)->update($data);
         return response()->json(['success' => true]);
     }
 
     public function destroy($appId, $tableName, $id)
     {
-        $this->getTableQuery($appId, $tableName)->where('id', $id)->delete();
+        $dbName = $this->getTargetDatabase($appId);
+        DB::table("{$dbName}.{$tableName}")->where('id', $id)->delete();
         return response()->json(['success' => true]);
     }
 }
