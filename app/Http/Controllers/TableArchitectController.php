@@ -80,9 +80,11 @@ class TableArchitectController extends Controller
     {
         $app = App::findOrFail($appId);
         $dbName = $app->database_name;
-        
-        $tables = DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = ?", [$dbName]);
-        
+        $tables = DB::select("
+            SELECT TABLE_NAME 
+            FROM information_schema.tables 
+            WHERE table_schema = ?
+        ", [$dbName]);
         return response()->json(array_column($tables, 'table_name'));
     }
 }
