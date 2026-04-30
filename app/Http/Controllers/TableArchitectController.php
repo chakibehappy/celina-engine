@@ -2,7 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\App;
+use App\Models\App\App;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\DB;
@@ -18,27 +18,21 @@ class TableArchitectController extends Controller
         $tableName = Str::snake($request->table_name);
         $columns = $request->columns;
 
-        // Use the db name directly in the Schema statement
+        // 1. Execute Migration directly in target DB
         Schema::create("{$dbName}.{$tableName}", function (Blueprint $table) use ($columns) {
             $table->id();
-            
             foreach ($columns as $col) {
                 $name = Str::snake($col['name']);
                 $type = $col['type'];
-                
-                // Map the dynamic column type directly
                 $field = $table->$type($name);
-                
-                if (!empty($col['nullable'])) {
-                    $field->nullable();
-                }
+                if (!empty($col['nullable'])) { $field->nullable(); }
             }
-            
             $table->timestamps();
         });
 
-        // Generate the Controller file to the project's generated folder
-        $this->generateController($app, $tableName);
+        // 2. Generate the Controller with $fillable property
+        $fillableColumns = array_map(fn($c) => Str::snake($c['name']), $columns);
+        $this->generateController($app, $tableName, $fillableColumns);
 
         return back()->with('success', "Synthesized {$tableName} in {$dbName} successfully.");
     }
@@ -54,7 +48,7 @@ class TableArchitectController extends Controller
         return response()->json(array_column($tables, 'table_name'));
     }
 
-    private function generateController($app, $tableName)
+    private function generateController($app, $tableName, $fillable)
     {
         $folderName = 'CC' . Str::studly($app->slug);
         $path = app_path("Http/Controllers/App/{$folderName}");
@@ -63,11 +57,18 @@ class TableArchitectController extends Controller
             File::makeDirectory($path, 0775, true);
         }
 
+        // Format fillable array for the PHP template
+        $fillableString = "['" . implode("', '", $fillable) . "']";
         $controllerName = Str::studly($tableName) . "Controller";
+
         $template = "<?php\n\nnamespace App\Http\Controllers\App\\{$folderName};\n\n" .
                     "use App\Http\Controllers\Controller;\n\n" .
                     "class {$controllerName} extends Controller\n{\n" .
-                    "    // CELINA-SYNTH Generated\n" .
+                    "    /**\n" .
+                    "     * CELINA-SYNTH Generated Fillable Attributes\n" .
+                    "     */\n" .
+                    "    protected \$fillable = {$fillableString};\n\n" .
+                    "    // Add synthesis logic below\n" .
                     "}";
 
         File::put("{$path}/{$controllerName}.php", $template);

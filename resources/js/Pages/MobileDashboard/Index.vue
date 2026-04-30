@@ -153,43 +153,7 @@
             </div>
         </div>
 
-        <!-- The Synth View -->
-        <div v-if="viewMode === 'synth'" class="space-y-6">
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center justify-between shadow-2xl">
-                <div class="flex items-center gap-6">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
-                        <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
-                            <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
-                        </select>
-                    </div>
-                    
-                    <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
-                    
-                    <button v-if="selectedAppId" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
-                        <span class="material-symbols-outlined text-sm">add_box</span>
-                        SYNTHESIZE TABLE
-                    </button>
-                </div>
-            </div>
-
-            <!-- Generated Tables Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div v-for="table in appTables" :key="table" class="bg-gray-800 border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition group">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="p-2 bg-purple-500/10 rounded text-purple-400">
-                            <span class="material-symbols-outlined text-sm">table_rows</span>
-                        </div>
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                            <button @click="viewTableData(table)" class="text-blue-400"><span class="material-symbols-outlined text-sm">visibility</span></button>
-                        </div>
-                    </div>
-                    <h4 class="font-mono text-sm text-gray-200">{{ table }}</h4>
-                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Controller Created</p>
-                </div>
-            </div>
-        </div>
-
+        
         <div v-if="showDataModal" class="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-md border border-gray-600 shadow-2xl">
                 <h3 class="text-xl font-bold mb-6 capitalize text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
@@ -234,6 +198,43 @@
             </div>
         </div>
 
+        <!-- The Synth View -->
+        <div v-if="viewMode === 'synth'" class="space-y-6">
+            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center justify-between shadow-2xl">
+                <div class="flex items-center gap-6">
+                    <div>
+                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
+                        <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
+                            <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
+                        </select>
+                    </div>
+                    
+                    <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
+                    
+                    <button v-if="selectedAppId" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                        <span class="material-symbols-outlined text-sm">add_box</span>
+                        SYNTHESIZE TABLE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Generated Tables Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div v-for="table in appTables" :key="table" class="bg-gray-800 border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition group">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="p-2 bg-purple-500/10 rounded text-purple-400">
+                            <span class="material-symbols-outlined text-sm">table_rows</span>
+                        </div>
+                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                            <button @click="viewTableData(table)" class="text-blue-400"><span class="material-symbols-outlined text-sm">visibility</span></button>
+                        </div>
+                    </div>
+                    <h4 class="font-mono text-sm text-gray-200">{{ table }}</h4>
+                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Controller Created</p>
+                </div>
+            </div>
+        </div>
+
         <div v-if="showSynthModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
             <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-3xl border border-purple-500/30 shadow-2xl">
                 <div class="flex justify-between items-center mb-6">
@@ -271,9 +272,12 @@
                                         class="w-full bg-transparent border-none p-1 text-xs font-mono text-gray-200 focus:ring-0">
                                 </div>
 
+                                <
                                 <!-- Data Type Selection -->
                                 <select v-model="col.type" class="bg-gray-850 border-gray-700 rounded p-1 text-[11px] text-orange-400 font-mono outline-none">
-                                    <option v-for="type in availableTypes" :key="type" :value="type">{{ type }}</option>
+                                    <option v-for="type in availableTypes" :key="type" :value="type">
+                                        {{ type }}
+                                    </option>
                                 </select>
 
                                 <!-- Nullable Toggle -->
@@ -435,15 +439,17 @@ const synthData = ref({
     app_id: null,
     table_name: '',
     columns: [
-        { name: 'name', type: 'string', nullable: false }
+        { name: '', type: 'string', nullable: false }
     ]
 });
 
 // Map of supported Laravel data types for the UI dropdown
-const columnTypes = [
-    'string', 'text', 'integer', 'bigInteger', 
-    'boolean', 'decimal', 'float', 'date', 
-    'dateTime', 'timestamp', 'json', 'longText'
+const availableTypes = [
+    'string', 'text', 'mediumText', 'longText', 
+    'integer', 'bigInteger', 'mediumInteger', 'smallInteger', 'tinyInteger',
+    'boolean', 'decimal', 'float', 'double',
+    'date', 'dateTime', 'timestamp', 'time', 'year',
+    'json', 'jsonb', 'binary', 'uuid', 'ipAddress'
 ];
 
 // --- ACTIONS ---
