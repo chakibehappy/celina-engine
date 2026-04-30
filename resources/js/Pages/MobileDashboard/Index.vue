@@ -483,26 +483,6 @@ const availableTypes = [
 ];
 
 // --- ACTIONS ---
-
-const fetchTables = async () => {
-    if (!selectedAppId.value) return;
-    
-    try {
-        // Targets architect.get-tables($appId) using the route helper
-        const url = route('architect.get-tables', { 
-            appId: selectedAppId.value 
-        });
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) throw new Error('Network response was not ok');
-        
-        appTables.value = await response.json();
-    } catch (e) {
-        console.error("Database lookup failed: Link to CELINA-SYNTH broken.", e);
-    }
-};
-
 const addColumn = () => {
     synthData.value.columns.push({ name: '', type: 'string', nullable: false });
 };
