@@ -73,8 +73,8 @@ class MobileDashboardTestController extends Controller
             
             // Auto-generated schemas for the frontend
             'schemas' => [
-                'app'           => $getSchema('apps'), 
-                'role'          => $getSchema('app_roles'),
+                'apps'           => $getSchema('apps'), 
+                'roles'          => $getSchema('app_roles'),
                 'user'          => $getSchema('app_users'),
                 'menu'          => $getSchema('app_menus'),
                 'submodule'     => $getSchema('app_sub_modules'),
@@ -229,10 +229,10 @@ class MobileDashboardTestController extends Controller
             'user'       => AppUser::class,
             'menu'       => AppMenu::class,
             'submodule'  => AppSubModule::class,
-            'role'       => AppRole::class,
+            'roles'       => AppRole::class,
             'screen'     => AppScreen::class,
             'navigation' => AppNavigation::class,
-            'app'        => App::class,
+            'apps'        => App::class,
             'system_icon' => SystemIcon::class,
             default => abort(404),
         };
