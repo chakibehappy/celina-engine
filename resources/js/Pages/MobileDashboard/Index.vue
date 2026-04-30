@@ -501,12 +501,20 @@ const availableTypes = [
 
 const fetchTables = async () => {
     if (!selectedAppId.value) return;
+    
     try {
-        // Targets getAppTables($appId) in the controller
-        const response = await fetch(`/architect/tables/${selectedAppId.value}`);
+        // Targets architect.get-tables($appId) using the route helper
+        const url = route('architect.get-tables', { 
+            appId: selectedAppId.value 
+        });
+        
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
         appTables.value = await response.json();
     } catch (e) {
-        console.error("Database lookup failed", e);
+        console.error("Database lookup failed: Link to CELINA-SYNTH broken.", e);
     }
 };
 
