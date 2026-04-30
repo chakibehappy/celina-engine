@@ -12,6 +12,7 @@
                 <div class="bg-gray-800 p-1 rounded-lg flex border border-gray-700">
                     <button @click="viewMode = 'lab'" :class="viewMode === 'lab' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Visual Lab</button>
                     <button @click="viewMode = 'details'" :class="viewMode === 'details' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">App Details</button>
+                    <button @click="viewMode = 'tables'" :class="viewMode === 'tables' ? 'bg-purple-600' : ''" class="px-4 py-1 rounded-md text-xs transition">Data Tables</button>
                 </div>
             </div>
         </div>
@@ -121,7 +122,7 @@
             </section>
         </div>
 
-        <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div v-if="viewMode === 'details'" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div v-for="(fields, type) in schemas" :key="type" class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden h-fit">
                 <div class="p-4 bg-gray-700/50 font-bold flex justify-between items-center border-b border-gray-700">
                     <span class="uppercase tracking-widest text-xs text-purple-300">{{ type.replace(/_/g, ' ') }}s</span>
@@ -144,6 +145,56 @@
                                 <td class="p-3 text-right whitespace-nowrap">
                                     <button @click="openModal(type, item)" class="text-blue-400 mr-3">Edit</button>
                                     <button @click="deleteData(type, item.id)" class="text-gray-600 hover:text-red-500">✕</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="viewMode === 'tables'" class="grid grid-cols-1 gap-8">
+            <div v-for="(fields, type) in schemas" :key="type" class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-xl">
+                <div class="p-4 bg-gray-700/30 flex justify-between items-center border-b border-gray-700">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
+                            <span class="material-symbols-outlined text-sm">table_chart</span>
+                        </span>
+                        <h3 class="font-bold uppercase tracking-widest text-xs text-gray-100">{{ type.replace(/_/g, ' ') }}</h3>
+                    </div>
+                    <button @click="openModal(type)" class="text-[10px] bg-green-600 px-4 py-1.5 rounded-lg font-bold hover:bg-green-500 transition shadow-lg">
+                        + NEW ENTRY
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-[11px] border-collapse">
+                        <thead class="text-gray-500 bg-gray-900/80">
+                            <tr>
+                                <th v-for="f in fields" :key="f.key" class="p-4 font-mono uppercase tracking-tighter">{{ f.label }}</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700/50">
+                            <tr v-for="item in props[type === 'submodule' ? 'subModules' : (type === 'app' ? 'apps' : type + 's')]" 
+                                :key="item.id" 
+                                class="hover:bg-purple-500/5 transition group">
+                                <td v-for="f in fields" :key="f.key" class="p-4">
+                                    <span v-if="f.key === 'id'" class="text-gray-600 font-mono">#{{ item[f.key] }}</span>
+                                    <span v-else-if="f.type === 'checkbox'" :class="item[f.key] ? 'text-green-400' : 'text-gray-600'">
+                                        {{ item[f.key] ? '● Active' : '○ Inactive' }}
+                                    </span>
+                                    <span v-else class="text-gray-300 truncate max-w-[200px] block">{{ item[f.key] }}</span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition">
+                                        <button @click="openModal(type, item)" class="text-blue-400 hover:text-blue-300">
+                                            <span class="material-symbols-outlined text-sm">edit</span>
+                                        </button>
+                                        <button @click="deleteData(type, item.id)" class="text-gray-500 hover:text-red-500">
+                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
