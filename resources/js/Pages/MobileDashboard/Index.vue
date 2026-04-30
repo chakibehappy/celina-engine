@@ -199,41 +199,86 @@
         </div>
 
         <!-- The Synth View -->
-        <div v-if="viewMode === 'synth'" class="space-y-6">
-            <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center justify-between shadow-2xl">
-                <div class="flex items-center gap-6">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
-                        <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
-                            <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
-                        </select>
-                    </div>
-                    
-                    <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
-                    
-                    <button v-if="selectedAppId" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
-                        <span class="material-symbols-outlined text-sm">add_box</span>
-                        SYNTHESIZE TABLE
-                    </button>
+<div v-if="viewMode === 'synth'" class="space-y-6">
+    <!-- Header/Action Bar -->
+    <div class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex items-center justify-between shadow-2xl">
+        <div class="flex items-center gap-6">
+            <div v-if="!activeTable">
+                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Target Application</label>
+                <select v-model="selectedAppId" @change="fetchTables" class="bg-gray-900 border-gray-700 rounded-lg text-sm p-2 w-64 focus:ring-purple-500">
+                    <option v-for="app in apps" :key="app.id" :value="app.id">{{ app.name }}</option>
+                </select>
+            </div>
+            
+            <!-- Breadcrumb Navigation if a table is open -->
+            <div v-else class="flex items-center gap-3">
+                <button @click="activeTable = null" class="p-2 hover:bg-gray-700 rounded-full transition text-gray-400">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <div>
+                    <h3 class="text-purple-400 font-mono font-bold leading-none uppercase">{{ activeTable }}</h3>
+                    <p class="text-[9px] text-gray-500 mt-1 uppercase tracking-widest">Live Data Explorer</p>
                 </div>
             </div>
 
-            <!-- Generated Tables Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div v-for="table in appTables" :key="table" class="bg-gray-800 border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition group">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="p-2 bg-purple-500/10 rounded text-purple-400">
-                            <span class="material-symbols-outlined text-sm">table_rows</span>
-                        </div>
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                            <button @click="viewTableData(table)" class="text-blue-400"><span class="material-symbols-outlined text-sm">visibility</span></button>
-                        </div>
-                    </div>
-                    <h4 class="font-mono text-sm text-gray-200">{{ table }}</h4>
-                    <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Controller Created</p>
+            <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
+            
+            <button v-if="selectedAppId && !activeTable" @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                <span class="material-symbols-outlined text-sm">add_box</span>
+                SYNTHESIZE TABLE
+            </button>
+        </div>
+    </div>
+
+    <!-- State A: Table Selection Grid -->
+    <div v-if="!activeTable" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div v-for="table in appTables" :key="table" class="bg-gray-800 border border-gray-700 rounded-xl p-4 hover:border-purple-500/50 transition group">
+            <div class="flex justify-between items-start mb-3">
+                <div class="p-2 bg-purple-500/10 rounded text-purple-400">
+                    <span class="material-symbols-outlined text-sm">table_rows</span>
+                </div>
+                <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <button @click="viewTableData(table)" class="text-blue-400">
+                        <span class="material-symbols-outlined text-sm">database_search</span>
+                    </button>
                 </div>
             </div>
+            <h4 class="font-mono text-sm text-gray-200">{{ table }}</h4>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">Model Synchronized</p>
         </div>
+    </div>
+
+    <!-- State B: Dynamic Data Explorer -->
+    <div v-else class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-800/50 border-b border-gray-800">
+                    <tr>
+                        <th v-for="col in tableColumns" :key="col" class="p-4 text-[10px] font-bold text-gray-500 uppercase font-mono">
+                            {{ col }}
+                        </th>
+                        <th class="p-4 text-right"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800">
+                    <tr v-for="row in tableData" :key="row.id" class="hover:bg-purple-500/5 transition-colors">
+                        <td v-for="col in tableColumns" :key="col" class="p-4 text-xs font-mono text-gray-300">
+                            {{ row[col] }}
+                        </td>
+                        <td class="p-4 text-right">
+                            <button @click="deleteRow(row.id)" class="text-gray-600 hover:text-red-500 transition">
+                                <span class="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div v-if="tableData.length === 0" class="p-12 text-center text-gray-600 font-mono text-[10px] uppercase">
+            Empty_Sequence_Detected
+        </div>
+    </div>
+</div>
 
         <div v-if="showSynthModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
             <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-3xl border border-purple-500/30 shadow-2xl">
@@ -486,6 +531,52 @@ const commitTableSynth = () => {
         },
         preserveScroll: true
     });
+};
+
+// --- DYNAMIC GENERIC TABLE CRUD STATE ---
+const activeTable = ref(null); 
+const tableData = ref([]);
+const tableColumns = ref([]);
+
+// --- ACTIONS ---
+
+const viewTableData = async (tableName) => {
+    activeTable.value = tableName;
+    try {
+        // Using named route: dynamic.index
+        const url = route('dynamic.index', { 
+            appId: selectedAppId.value, 
+            tableName: tableName 
+        });
+        
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        tableColumns.value = result.columns;
+        tableData.value = result.data;
+    } catch (e) {
+        console.error("Transmission Interrupted: Data link failed.", e);
+    }
+};
+
+const deleteRow = async (id) => {
+    if(!confirm('Execute sequence: PERMANENT_DELETE?')) return;
+    
+    try {
+        // Using named route: dynamic.delete
+        const url = route('dynamic.delete', { 
+            appId: selectedAppId.value, 
+            tableName: activeTable.value, 
+            id: id 
+        });
+
+        await axios.delete(url);
+        
+        // Instant local state update for that "experimental" speed
+        tableData.value = tableData.value.filter(item => item.id !== id);
+    } catch (e) {
+        console.error("Protocol Breach: Deletion failed.", e);
+    }
 };
 
 </script>
