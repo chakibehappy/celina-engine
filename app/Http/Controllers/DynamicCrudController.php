@@ -32,14 +32,29 @@ class DynamicCrudController extends Controller
         ]);
     }
 
+    // public function store(Request $request, $appId, $tableName)
+    // {
+    //     $dbName = $this->getTargetDatabase($appId);
+    //     $data = $request->except(['id', 'created_at', 'updated_at']);
+    //     $data['created_at'] = now();
+    //     $data['updated_at'] = now();
+
+    //     DB::table("{$dbName}.{$tableName}")->insert($data);
+    //     return response()->json(['success' => true]);
+    // }
+
     public function store(Request $request, $appId, $tableName)
     {
-        $dbName = $this->getTargetDatabase($appId);
-        $data = $request->except(['id', 'created_at', 'updated_at']);
-        $data['created_at'] = now();
-        $data['updated_at'] = now();
+        $dbName = App::findOrFail($appId)->database_name;
+        
+        // Manual insert to bypass Model requirements for synthesized tables
+        DB::table("{$dbName}.{$tableName}")->insert(
+            $request->except(['id', 'created_at', 'updated_at']) + [
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
+        );
 
-        DB::table("{$dbName}.{$tableName}")->insert($data);
         return response()->json(['success' => true]);
     }
 

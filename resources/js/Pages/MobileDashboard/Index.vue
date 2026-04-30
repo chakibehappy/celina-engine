@@ -580,14 +580,29 @@ const saveRow = async (rowData) => {
     isProcessing.value = true;
     try {
         const isUpdate = !!rowData.id;
+        
+        // Ensure params are correctly mapped for Ziggy
         const url = isUpdate 
             ? route('dynamic.update', { appId: selectedAppId.value, tableName: activeTable.value, id: rowData.id })
             : route('dynamic.store', { appId: selectedAppId.value, tableName: activeTable.value });
 
-        await axios[isUpdate ? 'put' : 'post'](url, rowData);
-        await viewTableData(activeTable.value);
+        // Use a standard axios call to ensure data is sent in the body
+        const response = await axios({
+            method: isUpdate ? 'put' : 'post',
+            url: url,
+            data: rowData
+        });
+
+        if (response.data.success) {
+            // Re-fetch the entire dataset to sync the frontend with the DB
+            await viewTableData(activeTable.value);
+            return true;
+        }
     } catch (e) {
-        console.error("Transmission Interrupted", e);
+        // Log the actual server error to the console
+        console.error("DATA_WRITE_ERROR:", e.response?.data || e.message);
+        alert("Transmission Failed: Check console for logs.");
+        return false;
     } finally {
         isProcessing.value = false;
     }
@@ -627,16 +642,15 @@ const openCreateModal = () => {
 };
 
 const commitNewData = async () => {
-    isProcessing.value = true;
-    try {
-        // reuse the saveRow logic for consistency
-        await saveRow(newData.value);
+    // Basic validation to prevent sending empty objects
+    if (Object.values(newData.value).every(v => v === '')) {
+        console.warn("ABORT: Empty dataset.");
+        return;
+    }
+    const success = await saveRow(newData.value);
+    if (success) {
         showCreateModal.value = false;
-        // Refresh is handled inside saveRow()
-    } catch (e) {
-        console.error("Initialization Failed: Data write aborted.", e);
-    } finally {
-        isProcessing.value = false;
+        newData.value = {}; // Clear the buffer
     }
 };
 </script>
