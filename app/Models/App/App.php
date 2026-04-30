@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class App extends Model
 {
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'slug', 'database_name'];
 
     public function users() { return $this->hasMany(AppUser::class); }
     public function screens() { return $this->hasMany(AppScreen::class); }
