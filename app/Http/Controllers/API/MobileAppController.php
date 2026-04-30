@@ -22,7 +22,7 @@ class MobileAppController extends Controller
    public function login(Request $request)
     {
         try {
-            // 1. Manual Validation to ensure consistent JSON even on failure
+            // Manual Validation to ensure consistent JSON even on failure
             $validator = \Validator::make($request->all(), [
                 'email'       => 'required|email',
                 'password'    => 'required',
@@ -37,10 +37,10 @@ class MobileAppController extends Controller
                 ], 422);
             }
 
-            // 2. Find User
+            // Find User
             $user = AppUser::with('app')->where('email', $request->email)->first();
 
-            // 3. Check Credentials
+            // Check Credentials
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'success' => false,
@@ -49,10 +49,9 @@ class MobileAppController extends Controller
                 ], 401);
             }
 
-            // 4. Generate Token
+            // Generate Token
             $token = $user->createToken($request->device_name)->plainTextToken;
 
-            // 5. Success Response (The Perfect Envelope)
             return response()->json([
                 'success' => true,
                 'message' => 'Handshake Successful',
@@ -80,72 +79,7 @@ class MobileAppController extends Controller
             ], 500);
         }
     }
-    /**
-     * Fetch navigation tabs scoped strictly to the user's assigned App.
-     */
-    // public function getNavigation(Request $request)
-    // {
-    //     try {
-    //         $user = $request->user();
-            
-    //         $navs = AppNavigation::with(['screen', 'icon']) 
-    //             ->where('app_id', $user->app_id)
-    //             ->orderBy('order')
-    //             ->get();
-    //         // should be on test controller :
-    //         //     return response()->json([
-    //         //     [
-    //         //         'label'      => 'Home',
-    //         //         'icon'       => 'home',
-    //         //         'route'      => 'home_screen',
-    //         //         'icon_size'  => '24',
-    //         //         'show_label' => 'false',
-    //         //         'content_data' => '' 
-    //         //     ],
-    //         //     [
-    //         //         'label'      => 'Chat',
-    //         //         'icon'       => 'chat_bubble',
-    //         //         'route'      => 'chat_screen',
-    //         //         'icon_size'  => '24',
-    //         //         'show_label' => 'false',
-    //         //         'content_data' => ''
-    //         //     ],
-    //         //     [
-    //         //         'label'      => 'Account',
-    //         //         'icon'       => 'person',
-    //         //         'route'      => 'account_screen',
-    //         //         'icon_size'  => '24',
-    //         //         'show_label' => 'false',
-    //         //         'content_data' => ''
-    //         //     ],
-    //         //     [
-    //         //         'label'      => 'Live',
-    //         //         'icon'       => 'edit_note',
-    //         //         'route'      => 'custom_webview_screen',
-    //         //         'icon_size'  => '24',
-    //         //         'show_label' => 'false',
-    //         //         'content_data' => $html 
-    //         //     ],
-    //         // ]);
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Navigation loaded',
-    //             'data'    => $navs->map(fn($nav) => [
-    //                 'label'        => $nav->label,
-    //                 'icon'         => $this->resolveIcon($nav->icon, $platform),
-    //                 'route'        => $nav->screen->route,
-    //                 'icon_size'    => (string)$nav->icon_size, // Cast to string for Map<String, String>
-    //                 'font_size'    => (string)$nav->font_size,
-    //                 'show_label'   => $nav->show_label ? 'true' : 'false',
-    //                 'type'         => $nav->screen->type,
-    //                 'content_data' => $nav->screen->type === 'custom' ? $nav->screen->content_data : ''
-    //             ])
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-    //     }
-    // }
-
+    
     public function getNavigation(Request $request)
     {
         try {
@@ -169,15 +103,13 @@ class MobileAppController extends Controller
                     'icon_size'    => (string)($nav->icon_size ?? '24'),
                     'show_label'   => $nav->show_label ? 'true' : 'false',
                     'content_data' => ($nav->screen && $nav->screen->type === 'custom') 
-                                    ? $nav->screen->content_data 
-                                    : ''
+                                    ? $nav->screen->content_data : ''
                 ];
             });
 
             return response()->json($formattedNavs);
 
         } catch (\Exception $e) {
-            // This is what caught the "Call to undefined relationship" error earlier
             return response()->json([
                 [
                     'label' => 'Error', 
@@ -324,70 +256,101 @@ class MobileAppController extends Controller
         }
     }
 
-    // Generic table CRUD
-    private function getModelByType($type)
+
+    private function getTargetDatabase($appId)
     {
-        // Convert "system_icon" or "app_user" to PascalCase "SystemIcon" or "AppUser"
-        $modelName = str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $type)));
-        // Define the namespaces where the models live
-        $namespaces = [
-            "App\\Models\\App\\",
-            // "App\\Models\\",
-        ];
-        foreach ($namespaces as $namespace) {
-            $fullClass = $namespace . $modelName;
-            // Check if this class actually exists
-            if (class_exists($fullClass)) {
-                return $fullClass;
+        return App::findOrFail($appId)->database_name;
+    }
+
+    public function createData(Request $request, $tableName)
+    {
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
             }
+            $appId = $user->app_id;
+            $dbName = App::findOrFail($appId)->database_name;
+            DB::table("{$dbName}.{$tableName}")->insert(
+                $request->except(['id', 'created_at', 'updated_at']) + [
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]
+            );
+            return response()->json(['success' => true]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Database or table not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-        abort(404, "Model for {$type} not found.");
     }
 
-    public function createData(Request $request, $type)
+    public function readData(Request $request, $tableName, $id = null)
     {
-        $model = $this->getModelByType($type);
-        $data = $request->all();
-        // Auto-inject app_id if missing
-        if (!isset($data['app_id']) && App::exists()) { 
-            $data['app_id'] = App::first()->id; 
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+            }
+
+            $appId = $user->app_id;
+            $dbName = $this->getTargetDatabase($appId);
+            if ($id) {
+                $data = DB::table("{$dbName}.{$tableName}")->findOrFail($id);
+            } else {
+                $data = DB::table("{$dbName}.{$tableName}")->orderBy('created_at', 'desc')->get();
+            }
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Record not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-        $model::create($data);
-        return back()->with('success', ucfirst($type) . ' created!');
     }
 
-    public function readData(Request $request, $type, $id = null)
+    public function updateData(Request $request, $tableName, $id)
     {
-        $modelClass = $this->getModelByType($type);
-        
-        // 1. If an ID is provided, fetch specific record (Detail View)
-        if ($id) {
-            $data = $modelClass::findOrFail($id);
-        } else {
-            // 2. Fetch everything for the list
-            $data = $modelClass::all(); 
+         try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+            }
+            $appId = $user->app_id;
+            $dbName = App::findOrFail($appId)->database_name;
+            $data = $request->except(['id', 'created_at', 'updated_at']);
+            $data['updated_at'] = now();
+            DB::table("{$dbName}.{$tableName}")->where('id', $id)->update($data);
+            return response()->json(['success' => true]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Database or table not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-
-        return response()->json([
-            'status' => 'success',
-            'type' => $type,
-            'data' => $data
-        ]);
     }
 
-    public function updateData(Request $request, $type, $id)
+    public function deleteData($tableName, $id)
     {
-        $model = $this->getModelByType($type);
-        $item = $model::findOrFail($id);
-        $item->update($request->all());
-        return back()->with('success', ucfirst($type) . ' updated!');
-    }
+         try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+            }
+            $appId = $user->app_id;
+            $dbName = $this->getTargetDatabase($appId);
+            DB::table("{$dbName}.{$tableName}")->where('id', $id)->delete();
+            return response()->json(['success' => true]);
+            return response()->json(['success' => true]);
 
-    public function deleteData($type, $id)
-    {
-        $model = $this->getModelByType($type);
-        $model::findOrFail($id)->delete();
-        return back()->with('success', ucfirst($type) . ' deleted!');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['success' => false, 'message' => 'Database or table not found'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
-
 }

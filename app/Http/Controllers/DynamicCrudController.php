@@ -18,14 +18,11 @@ class DynamicCrudController extends Controller
     public function index($appId, $tableName)
     {
         $dbName = $this->getTargetDatabase($appId);
-        
-        // Force Schema to look at the target synthesized database for headers
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
         
         $data = DB::table("{$dbName}.{$tableName}")
             ->orderBy('created_at', 'desc')
             ->get();
-
         return response()->json([
             'columns' => $columns,
             'data' => $data
@@ -36,14 +33,12 @@ class DynamicCrudController extends Controller
     {
         $dbName = App::findOrFail($appId)->database_name;
         
-        // Manual insert to bypass Model requirements for synthesized tables
         DB::table("{$dbName}.{$tableName}")->insert(
             $request->except(['id', 'created_at', 'updated_at']) + [
                 'created_at' => now(),
                 'updated_at' => now()
             ]
         );
-
         return response()->json(['success' => true]);
     }
 
@@ -52,7 +47,6 @@ class DynamicCrudController extends Controller
         $dbName = $this->getTargetDatabase($appId);
         $data = $request->except(['id', 'created_at', 'updated_at']);
         $data['updated_at'] = now();
-
         DB::table("{$dbName}.{$tableName}")->where('id', $id)->update($data);
         return response()->json(['success' => true]);
     }
