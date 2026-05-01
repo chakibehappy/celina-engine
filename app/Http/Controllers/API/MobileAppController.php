@@ -340,7 +340,7 @@ class MobileAppController extends Controller
                 ->where('id', $id)
                 ->update($data);
 
-            return response()->json(['success' => true, 'affected' => $id]);
+            return response()->json(['success' => true, 'affected' => $data]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
