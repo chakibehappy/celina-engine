@@ -332,15 +332,11 @@ class MobileAppController extends Controller
             // Ensure we only update columns that actually exist in your dynamic table
             $data = $request->except(['created_at', 'updated_at']);
             $data['updated_at'] = now();
-
-            // Log the data here to verify it's not empty in your Laravel logs
-            // \Log::info("Updating $tableName ID $id with:", $data);
-
             $affected = DB::table("{$dbName}.{$tableName}")
                 ->where('id', $id)
                 ->update($data);
 
-            return response()->json(['success' => true, 'affected' => $request]);
+            return response()->json(['success' => true, 'message' => 'Data succesfully updated']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
