@@ -31,6 +31,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dynamic CRUD (The "Ghost" Routes)
     Route::post('/data-source/{tableName}', [MobileAppController::class, 'createData'])->name('data-source.create');
     Route::get('/data-source/{tableName}/{id?}', [MobileAppController::class, 'readData'])->name('data-source.read');
-    Route::put('/data-source/{tableName}/{id}', [MobileAppController::class, 'updateData'])->name('data-source.update');
+    Route::post('/data-source/{tableName}/{id}', [MobileAppController::class, 'updateData'])->name('data-source.update');
     Route::delete('/data-source/{tableName}/{id}', [MobileAppController::class, 'deleteData'])->name('data-source.delete');
 });
