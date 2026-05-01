@@ -330,7 +330,7 @@ class MobileAppController extends Controller
             $dbName = App::findOrFail($appId)->database_name;
 
             // Ensure we only update columns that actually exist in your dynamic table
-            $data = $request->except(['id', 'created_at', 'updated_at', '_method']);
+            $data = $request->except(['created_at', 'updated_at']);
             $data['updated_at'] = now();
 
             // Log the data here to verify it's not empty in your Laravel logs
