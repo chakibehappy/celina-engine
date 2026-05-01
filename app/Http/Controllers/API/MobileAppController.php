@@ -316,7 +316,7 @@ class MobileAppController extends Controller
                     return response()->json(['success' => false, 'message' => 'Record not found'], 404);
                 }
             } else {
-                $data = DB::table("{$dbName}.{$tableName}")->orderBy('created_at', 'desc')->get();
+                $data = DB::table("{$dbName}.{$tableName}")->orderBy('updated_at', 'desc')->get();
             }
 
             return response()->json([
@@ -338,14 +338,45 @@ class MobileAppController extends Controller
             $appId = $user->app_id;
             $dbName = App::findOrFail($appId)->database_name;
 
-            // Ensure we only update columns that actually exist in your dynamic table
-            $data = $request->except(['created_at', 'updated_at']);
+            // 1. Grab the existing record to check for old images
+            $existingRecord = DB::table("{$dbName}.{$tableName}")->where('id', $id)->first();
+            if (!$existingRecord) {
+                return response()->json(['success' => false, 'message' => 'Record not found'], 404);
+            }
+
+            // 2. Prepare data, stripping internal/spoof fields
+            $data = $request->except(['id', 'created_at', 'updated_at', '_method']);
             $data['updated_at'] = now();
+
+            // 3. Handle New Image Upload
+            if ($request->hasFile('image')) {
+                // Delete old physical file if it exists
+                if (!empty($existingRecord->image)) {
+                    // Convert URL back to relative path for Storage::delete
+                    $oldPath = str_replace(asset('storage/'), '', $existingRecord->image);
+                    \Storage::disk('public')->delete($oldPath);
+                }
+
+                // Store the new one
+                $path = env('CELINA_UPLOAD_PATH', 'uploads/general');
+                $file = $request->file('image');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $finalPath = $file->storeAs($path, $fileName, 'public');
+                
+                $data['image'] = asset('storage/' . $finalPath);
+            }
+
+            // 4. Update the database
             $affected = DB::table("{$dbName}.{$tableName}")
                 ->where('id', $id)
                 ->update($data);
 
-            return response()->json(['success' => true, 'message' => 'Data succesfully updated']);
+            return response()->json([
+                'success' => true, 
+                'message' => 'Data successfully updated',
+                'image_url' => $data['image'] ?? null
+            ]);
+
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
