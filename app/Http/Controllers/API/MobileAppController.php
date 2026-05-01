@@ -322,20 +322,25 @@ class MobileAppController extends Controller
 
     public function updateData(Request $request, $tableName, $id)
     {
-         try {
+        try {
             $user = $request->user();
-            if (!$user) {
-                return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
-            }
+            if (!$user) return response()->json(['success' => false], 401);
+
             $appId = $user->app_id;
             $dbName = App::findOrFail($appId)->database_name;
-            $data = $request->except(['id', 'created_at', 'updated_at']);
-            $data['updated_at'] = now();
-            DB::table("{$dbName}.{$tableName}")->where('id', $id)->update($data);
-            return response()->json(['success' => true]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => 'Database or table not found'], 404);
+            // Ensure we only update columns that actually exist in your dynamic table
+            $data = $request->except(['id', 'created_at', 'updated_at', '_method']);
+            $data['updated_at'] = now();
+
+            // Log the data here to verify it's not empty in your Laravel logs
+            // \Log::info("Updating $tableName ID $id with:", $data);
+
+            $affected = DB::table("{$dbName}.{$tableName}")
+                ->where('id', $id)
+                ->update($data);
+
+            return response()->json(['success' => true, 'affected' => $affected]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
