@@ -346,7 +346,7 @@ class MobileAppController extends Controller
         }
     }
 
-    public function deleteData($tableName, $id)
+    public function deleteData(Request $request, $tableName, $id)
     {
          try {
             $user = $request->user();
