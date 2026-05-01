@@ -312,7 +312,7 @@ class MobileAppController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $data // Always an array now
+                'data' => $data
             ]);
 
         } catch (\Exception $e) {
