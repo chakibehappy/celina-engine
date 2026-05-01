@@ -298,18 +298,23 @@ class MobileAppController extends Controller
 
             $appId = $user->app_id;
             $dbName = $this->getTargetDatabase($appId);
+
             if ($id) {
-                $data = DB::table("{$dbName}.{$tableName}")->findOrFail($id);
+                // Use ->where()->get() so it returns an array [ {...} ]
+                $data = DB::table("{$dbName}.{$tableName}")->where('id', $id)->get();
+                
+                if ($data->isEmpty()) {
+                    return response()->json(['success' => false, 'message' => 'Record not found'], 404);
+                }
             } else {
                 $data = DB::table("{$dbName}.{$tableName}")->orderBy('created_at', 'desc')->get();
             }
+
             return response()->json([
                 'success' => true,
-                'data' => $data
+                'data' => $data // Always an array now
             ]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => 'Record not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
