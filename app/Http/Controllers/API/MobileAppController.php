@@ -268,21 +268,32 @@ class MobileAppController extends Controller
     {
         try {
             $user = $request->user();
-            if (!$user) {
-                return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
-            }
+            if (!$user) return response()->json(['success' => false], 401);
+
             $appId = $user->app_id;
             $dbName = App::findOrFail($appId)->database_name;
+
+            $data = $request->except(['id', 'created_at', 'updated_at']);
+
+            // Handle File Upload
+            if ($request->hasFile('image')) {
+                $path = env('CELINA_UPLOAD_PATH', 'uploads/general');
+                // Store file in 'public' disk so it's accessible via URL
+                $file = $request->file('image');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $finalPath = $file->storeAs($path, $fileName, 'public');
+                // Set the path to be saved in DB
+                $data['image'] = asset('storage/' . $finalPath);
+            }
+            // Insert into dynamic DB
             DB::table("{$dbName}.{$tableName}")->insert(
-                $request->except(['id', 'created_at', 'updated_at']) + [
+                $data + [
                     'created_at' => now(),
                     'updated_at' => now()
                 ]
             );
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'path' => $data['image'] ?? null]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['success' => false, 'message' => 'Database or table not found'], 404);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -300,9 +311,7 @@ class MobileAppController extends Controller
             $dbName = $this->getTargetDatabase($appId);
 
             if ($id) {
-                // Use ->where()->get() so it returns an array [ {...} ]
                 $data = DB::table("{$dbName}.{$tableName}")->where('id', $id)->get();
-                
                 if ($data->isEmpty()) {
                     return response()->json(['success' => false, 'message' => 'Record not found'], 404);
                 }
