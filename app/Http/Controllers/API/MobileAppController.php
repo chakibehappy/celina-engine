@@ -345,7 +345,7 @@ class MobileAppController extends Controller
             }
 
             // 2. Prepare data, stripping internal/spoof fields
-            $data = $request->except(['id', 'created_at', 'updated_at', '_method']);
+            $data = $request->except(['id', 'created_at', 'updated_at']);
             $data['updated_at'] = now();
 
             // 3. Handle New Image Upload
