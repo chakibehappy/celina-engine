@@ -756,5 +756,7 @@ textarea, pre {
   box-sizing: border-box !important;
   border: none !important;
   outline: none !important;
+  scrollbar-gutter: stable;
+  overflow: auto !important;
 }
 </style>
