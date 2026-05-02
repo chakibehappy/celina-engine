@@ -75,14 +75,11 @@
                                 </div>
                             </div>
                             
-                            
-                            <div 
-                            class="flex-1 relative overflow-auto custom-scrollbar"
-                            @scroll="syncScroll($event, screen.id)"
-                            >
+                            <div class="flex-1 relative overflow-hidden">
                                 <textarea 
                                     v-model="screen.content_data" 
                                     class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-auto whitespace-pre border-none custom-scrollbar" 
+                                    @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                 ></textarea>
 
@@ -447,9 +444,11 @@ const syncScroll = (e, id) => {
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
 
-    if (pre) {
-        pre.style.transform = `translate(${-t.scrollLeft}px, ${-t.scrollTop}px)`;
-    }
+    if (!pre) return;
+
+    // sync vertical + horizontal
+    pre.scrollTop = t.scrollTop;
+    pre.scrollLeft = t.scrollLeft;
 
     if (lines) {
         lines.scrollTop = t.scrollTop;
@@ -753,6 +752,7 @@ textarea {
 pre {
     will-change: transform;
 }
+
 /* Hide scrollbars for the pre layer so it doesn't push the text */
 pre::-webkit-scrollbar {
     display: none;
