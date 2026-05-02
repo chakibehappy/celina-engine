@@ -484,13 +484,19 @@ const handleTab = (e) => {
 const highlightCode = (code, type) => {
     if (!code) return '';
     let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    
     if (type === 'dynamic') { 
         return res
+            // 1. Highlight keys: captures the key and any trailing space before the colon
             .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")(\s*:)/g, '<span class="text-purple-400">$1</span>$3') 
-            .replace(/:\s*("(?:\\.|[^\\"])*")/g, ': <span class="text-green-300">$1</span>') 
-            .replace(/:\s*(\d+)/g, ': <span class="text-orange-300">$1</span>') 
-            .replace(/:\s*(true|false|null)/g, ': <span class="text-blue-400">$1</span>'); 
+            // 2. Highlight string values: captures the colon and original whitespace
+            .replace(/(:\s*)("(?:\\.|[^\\"])*")/g, '$1<span class="text-green-300">$2</span>') 
+            // 3. Highlight numbers
+            .replace(/(:\s*)(\d+)/g, '$1<span class="text-orange-300">$2</span>') 
+            // 4. Highlight booleans/null
+            .replace(/(:\s*)(true|false|null)/g, '$1<span class="text-blue-400">$2</span>'); 
     } else { 
+        // ... rest of your code for HTML/JS
         const regex = /("[^"]*")|(&lt;\/?)([a-z0-9-]+)|(\b[a-z-]+(?==))|(\b(function|var|let|const|return|if|else|for|while|true|false|null|undefined)\b)/gi;
         return res.replace(regex, (match, string, tagStart, tagName, attrName, keyword) => {
             if (string) return `<span class="text-green-300">${string}</span>`;
