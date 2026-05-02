@@ -262,6 +262,16 @@
     <!-- State B: Dynamic Explorer -->
     <div v-else class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto custom-scrollbar">
+            <div v-if="activeTable" class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">search</span>
+                <input 
+                    v-model="searchQuery" 
+                    @input="handleSearch"
+                    type="text" 
+                    placeholder="Search records..." 
+                    class="bg-gray-900 border-gray-700 rounded-lg text-xs pl-9 pr-4 py-2 w-64 focus:ring-purple-500 focus:border-purple-500 outline-none text-gray-300 transition-all border"
+                />
+            </div>
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-800/50 border-b border-gray-800">
                     <tr>
@@ -659,6 +669,7 @@ const isProcessing = ref(false);
 
 const paginationData = ref(null);
 const currentPage = ref(1);
+const searchQuery = ref('');
 // --- ACTIONS ---
 
 const fetchTables = async () => {
@@ -672,29 +683,34 @@ const fetchTables = async () => {
     }
 };
 
+// Updated viewTableData
 const viewTableData = async (tableName, page = 1) => {
     activeTable.value = tableName;
-    currentPage.value = page; // Sync the state
+    currentPage.value = page;
     
     try {
-        // Construct URL with page parameter
-        const url = route('dynamic.index', { 
-            appId: selectedAppId.value, 
-            tableName,
-            page: page // Laravel looks for the ?page= parameter
+        // Construct URL with both page and search params
+        const params = new URLSearchParams({
+            page: page,
+            search: searchQuery.value
         });
 
+        const url = `${route('dynamic.index', { appId: selectedAppId.value, tableName })}?${params.toString()}`;
+        
         const response = await fetch(url);
         const result = await response.json();
         
         tableColumns.value = result.columns;
         tableData.value = result.data;
-        
-        // Store the pagination metadata (total, last_page, etc.)
         paginationData.value = result.pagination;
     } catch (e) {
-        console.error("Data link failed.", e);
+        console.error("Search/Data link failed.", e);
     }
+};
+
+// Trigger search when user types (you can add a debounce later)
+const handleSearch = () => {
+    viewTableData(activeTable.value, 1); // Always reset to page 1 on search
 };
 
 const saveRow = async (rowData) => {

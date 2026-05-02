@@ -18,14 +18,23 @@ class DynamicCrudController extends Controller
     public function index(Request $request, $appId, $tableName)
     {
         $dbName = $this->getTargetDatabase($appId);
-        
-        // Get columns for the specific table in the target database
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
         
-        // The paginate() method automatically looks for the 'page' query param from the request
-        $paginated = DB::table("{$dbName}.{$tableName}")
-            ->orderBy('id', 'desc')
-            ->paginate(15);
+        // Get the search query from the request
+        $search = $request->query('search');
+
+        $query = DB::table("{$dbName}.{$tableName}");
+
+        // Apply Global Search across all columns
+        if (!empty($search)) {
+            $query->where(function($q) use ($columns, $search) {
+                foreach ($columns as $column) {
+                    $q->orWhere($column, 'LIKE', '%' . $search . '%');
+                }
+            });
+        }
+
+        $paginated = $query->orderBy('id', 'desc')->paginate(8);
 
         return response()->json([
             'columns' => $columns,
