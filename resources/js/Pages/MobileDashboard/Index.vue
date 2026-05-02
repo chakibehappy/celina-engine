@@ -780,12 +780,6 @@ textarea, pre {
     word-wrap: normal !important;
     overflow-wrap: normal !important;
     padding-right: 48px !important;
-
-    /* This prevents the "Quote Bug" - it stops the browser from 
-       trying to smooth fonts differently inside spans */
-    -webkit-font-smoothing: antialiased !important; 
-    -moz-osx-font-smoothing: grayscale !important;
-    text-rendering: optimizeLegibility !important;
 }
 
 
