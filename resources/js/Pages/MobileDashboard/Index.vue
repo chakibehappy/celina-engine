@@ -81,6 +81,7 @@
                                     class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll custom-scrollbar whitespace-pre border-none" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
+                                    @keydown.tab="handleTab"
                                     wrap="off"
                                 ></textarea>
 
@@ -458,6 +459,23 @@ const syncScroll = (e, id) => {
     });
 };
 
+const handleTab = (e) => {
+    e.preventDefault();
+    const t = e.target;
+    const start = t.selectionStart;
+    const end = t.selectionEnd;
+
+    // Set textarea value to: text before caret + 4 spaces + text after caret
+    t.value = t.value.substring(0, start) + "    " + t.value.substring(end);
+
+    // Put caret in right position
+    t.selectionStart = t.selectionEnd = start + 4;
+    
+    // Trigger Vue's v-model update manually since we modified the DOM directly
+    const event = new Event('input', { bubbles: true });
+    t.dispatchEvent(event);
+};
+
 const highlightCode = (code, type) => {
     if (!code) return '';
     let res = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -757,6 +775,12 @@ textarea, pre {
     word-wrap: normal !important;
     overflow-wrap: normal !important;
     padding-right: 48px !important;
+
+    /* This prevents the "Quote Bug" - it stops the browser from 
+       trying to smooth fonts differently inside spans */
+    -webkit-font-smoothing: antialiased !important; 
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
 }
 
 
