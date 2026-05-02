@@ -751,21 +751,36 @@ pre {
 }
 
 /* 3. THE VISIBLE SCROLLBAR (Textarea) */
-/* Apply this class to your textarea */
 .custom-scrollbar::-webkit-scrollbar { 
     width: 10px; 
     height: 10px; 
 }
+
+/* The track (background of the scrollbar) */
 .custom-scrollbar::-webkit-scrollbar-track { 
+    /* Match your darkest background */
     background: #0d1117; 
 }
+
+/* The handle (the part you grab) */
 .custom-scrollbar::-webkit-scrollbar-thumb { 
+    /* A subtle charcoal that stands out against #0d1117 but isn't white */
     background: #30363d; 
     border-radius: 10px;
-    border: 2px solid #0d1117;
+    /* This 'border' trick creates a padding effect inside the track */
+    border: 2px solid #0d1117; 
 }
+
+/* When you hover over the scrollbar handle */
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+    /* Slightly lighter to show interaction */
     background: #484f58; 
+}
+
+/* For Firefox support (it uses different properties) */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #30363d #0d1117;
 }
 
 /* 4. THE INVISIBLE SYNC SCROLLBAR (Highlight Layer) */
