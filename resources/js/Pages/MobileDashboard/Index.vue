@@ -78,14 +78,15 @@
                             <div class="flex-1 relative overflow-hidden">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-auto whitespace-pre border-none custom-scrollbar" 
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll whitespace-pre border-none" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
+                                    wrap="off"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-auto select-none border-none"    
-                                v-html="highlightCode(screen.content_data, screen.type)"></pre>
+                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 whitespace-pre select-none border-none overflow-hidden scrollbar-hide"
+                                    v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
                                     {{ screen.type === 'custom' ? 'HTML5' : 'JSON' }}
@@ -444,15 +445,17 @@ const syncScroll = (e, id) => {
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
 
-    if (!pre) return;
-
-    // sync vertical + horizontal
-    pre.scrollTop = t.scrollTop;
-    pre.scrollLeft = t.scrollLeft;
-
-    if (lines) {
-        lines.scrollTop = t.scrollTop;
-    }
+    // Using requestAnimationFrame removes the "jitter" 
+    // by syncing the scroll before the next repaint
+    window.requestAnimationFrame(() => {
+        if (pre) {
+            pre.scrollTop = t.scrollTop;
+            pre.scrollLeft = t.scrollLeft;
+        }
+        if (lines) {
+            lines.scrollTop = t.scrollTop;
+        }
+    });
 };
 
 const highlightCode = (code, type) => {
@@ -730,31 +733,28 @@ pre { white-space: pre !important; word-wrap: normal !important; }
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
 iframe::-webkit-scrollbar { display: none; }
+/* Force identical font rendering and line heights */
+textarea, pre, .line-numbers {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  line-height: 20px !important;
+  font-size: 13px !important;
+  tab-size: 4;
+  -webkit-font-smoothing: antialiased;
+}
 
+/* Hide scrollbars but keep functionality on the highlight layer */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Ensure textarea and pre have the EXACT same padding and box model */
 textarea, pre {
-    font-family: 'JetBrains Mono', monospace !important;
-    font-size: 13px !important;
-    line-height: 20px !important;
-
-    letter-spacing: 0 !important;
-    word-spacing: 0 !important;
-
-    tab-size: 4;
-}
-textarea {
-    color: transparent;
-    caret-color: white;
-
-    /* fix Chrome misalignment */
-    transform: translateZ(0);
-}
-
-pre {
-    will-change: transform;
-}
-
-/* Hide scrollbars for the pre layer so it doesn't push the text */
-pre::-webkit-scrollbar {
-    display: none;
+  box-sizing: border-box !important;
+  border: none !important;
+  outline: none !important;
 }
 </style>
