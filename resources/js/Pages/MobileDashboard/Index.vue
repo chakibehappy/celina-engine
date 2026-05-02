@@ -82,12 +82,12 @@
                             >
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-hidden whitespace-pre border-none custom-scrollbar" 
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-auto whitespace-pre border-none custom-scrollbar" 
                                     spellcheck="false"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-hidden select-none border-none"    
+                                class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-auto select-none border-none"    
                                 v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
