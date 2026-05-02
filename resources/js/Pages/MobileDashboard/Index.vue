@@ -719,81 +719,109 @@ const commitNewData = async () => {
 <style>
 .bg-gray-850 { background-color: #161b22; }
 
-/* 1. ATOMIC SYNC: Font and Rendering */
+/* 1. SHARED BASE STYLES: Precision is key here */
 textarea, pre, .line-numbers {
     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
     line-height: 20px !important;
     font-size: 13px !important;
     tab-size: 4;
-    /* Disable all font 'smarts' that cause variable widths */
-    -webkit-font-smoothing: none !important;
-    font-kerning: none !important;
-    text-rendering: optimizeSpeed !important;
-    letter-spacing: 0px !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
-/* 2. THE SCROLLING CONTAINER */
-/* Apply 'custom-scrollbar' to the PARENT div, not the textarea */
-.editor-scroll-container {
-    overflow: auto !important;
-    position: relative;
-    flex: 1;
-}
-
-/* 3. LAYER ALIGNMENT */
+/* 2. LAYOUT SYNC: Forcing identical boxes */
 textarea, pre {
     box-sizing: border-box !important;
     border: none !important;
     outline: none !important;
-    padding: 24px !important;
-    /* Huge right padding ensures the cursor never triggers its own scroll logic */
-    padding-right: 100px !important; 
-    padding-bottom: 60px !important;
+    /* Use 'scroll' to force the gutter to exist even when content is short */
+    overflow: auto !important; 
+    scrollbar-gutter: stable !important;
+    /* Padding must be identical on all sides */
+    padding: 24px !important; 
+    /* Extra bottom padding to stay clear of the horizontal scrollbar */
+    padding-bottom: 60px !important; 
     margin: 0 !important;
-    /* Force both to expand to the width of the code */
-    width: max-content !important;
-    min-width: 100% !important;
-    /* Stop layers from scrolling themselves; the parent does it */
-    overflow: hidden !important; 
+    /* 1. Force the exact same letter spacing (crucial for long lines) */
+    letter-spacing: 0px !important;
+    word-spacing: 0px !important;
+
+    /* 2. Disable ligatures (prevents '=>' or '==' from changing width) */
+    font-variant-ligatures: none !important;
+    font-feature-settings: "liga" 0 !important;
+
+    /* 3. Force the browser to treat every character as a fixed block */
+    text-rendering: crispEdges !important;
     white-space: pre !important;
     word-wrap: normal !important;
+    overflow-wrap: normal !important;
+    padding-right: 48px !important;
 }
 
-/* 4. THE VISIBLE SCROLLBAR (On the Parent) */
+
+/* 3. THE VISIBLE SCROLLBAR (Textarea) */
 .custom-scrollbar::-webkit-scrollbar { 
     width: 10px; 
     height: 10px; 
 }
+
+/* The track (background of the scrollbar) */
 .custom-scrollbar::-webkit-scrollbar-track { 
+    /* Match your darkest background */
     background: #0d1117; 
 }
+
+/* The handle (the part you grab) */
 .custom-scrollbar::-webkit-scrollbar-thumb { 
+    /* A subtle charcoal that stands out against #0d1117 but isn't white */
     background: #30363d; 
     border-radius: 10px;
-    border: 2px solid #0d1117;
+    /* This 'border' trick creates a padding effect inside the track */
+    border: 2px solid #0d1117; 
 }
+
+/* When you hover over the scrollbar handle */
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+    /* Slightly lighter to show interaction */
     background: #484f58; 
 }
 
-/* 5. FIXING THE TEXTAREA 'GHOST' */
-textarea {
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    z-index: 2;
+/* For Firefox support (it uses different properties) */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #30363d #0d1117;
+}
+
+/* 4. THE INVISIBLE SYNC SCROLLBAR (Highlight Layer) */
+.scrollbar-sync-invisible::-webkit-scrollbar {
+    width: 10px;  /* MUST MATCH .custom-scrollbar width */
+    height: 10px; /* MUST MATCH .custom-scrollbar height */
+}
+
+/* We keep the scrollbar but make it 100% transparent */
+.scrollbar-sync-invisible::-webkit-scrollbar-thumb,
+.scrollbar-sync-invisible::-webkit-scrollbar-track {
     background: transparent !important;
-    color: transparent !important;
-    caret-color: white !important;
-    resize: none !important;
+    border: none !important;
 }
 
-pre {
-    position: relative !important;
-    z-index: 1;
-    pointer-events: none !important;
+/* Cross-browser visibility sync */
+.scrollbar-sync-invisible {
+    -ms-overflow-style: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: transparent transparent !important;
+}
+/* The "Right-Side Ghost" - Add padding to the END of the lines */
+/* This prevents the text from hitting the 'wall' and wrapping/shifting */
+pre::after {
+    content: " ";
+    display: inline-block;
+    width: 2ch; /* Adds 2 characters of invisible space at the end of every line */
 }
 
-/* 6. UTILS */
-iframe::-webkit-scrollbar { display: none; }
+/* 5. IFRAME & UTILS */
+iframe::-webkit-scrollbar { 
+    display: none; 
+}
 </style>
