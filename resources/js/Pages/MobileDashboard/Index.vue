@@ -722,6 +722,14 @@ textarea, pre {
     line-height: 20px !important;
     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
     tab-size: 4;
+    
+    box-sizing: border-box !important;
+    border: none !important;
+    outline: none !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    scrollbar-gutter: stable;
+    padding-bottom: 40px !important;
 }
 pre { white-space: pre !important; word-wrap: normal !important; }
 .custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -751,12 +759,4 @@ textarea, pre, .line-numbers {
   scrollbar-width: none;
 }
 
-/* Ensure textarea and pre have the EXACT same padding and box model */
-textarea, pre {
-  box-sizing: border-box !important;
-  border: none !important;
-  outline: none !important;
-  scrollbar-gutter: stable;
-  overflow: auto !important;
-}
 </style>
