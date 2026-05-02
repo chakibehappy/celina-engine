@@ -78,14 +78,14 @@
                             <div class="flex-1 relative overflow-hidden">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll whitespace-pre border-none" 
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll custom-scrollbar whitespace-pre border-none" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                     wrap="off"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 whitespace-pre select-none border-none overflow-hidden scrollbar-hide"
+                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 whitespace-pre select-none border-none overflow-hidden scrollbar-sync-invisible"
                                     v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
