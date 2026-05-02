@@ -81,11 +81,14 @@
                                     class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-auto whitespace-pre border-none custom-scrollbar" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
+                                    wrap="off"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-hidden select-none border-none"
-                                    v-html="highlightCode(screen.content_data, screen.type)"></pre>
+                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre select-none border-none overflow-y-scroll scrollbar-hide"
+                                    v-html="highlightCode(screen.content_data, screen.type)"
+                                    style="scrollbar-width: none; -ms-overflow-style: none;">
+                                </pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
                                     {{ screen.type === 'custom' ? 'HTML5' : 'JSON' }}
@@ -442,14 +445,14 @@ const formData = ref({});
 const syncScroll = (e, id) => {
     const textarea = e.target;
     const pre = document.getElementById('pre-' + id);
-    const lines = document.getElementById('lines-' + id);
     
     if (pre) {
-        pre.scrollTop = textarea.scrollTop;
-        pre.scrollLeft = textarea.scrollLeft;
-    }
-    if (lines) {
-        lines.scrollTop = textarea.scrollTop;
+        // requestAnimationFrame ensures the sync happens 
+        // in step with the browser's paint cycle
+        requestAnimationFrame(() => {
+            pre.scrollTop = textarea.scrollTop;
+            pre.scrollLeft = textarea.scrollLeft;
+        });
     }
 };
 
@@ -729,16 +732,17 @@ pre { white-space: pre !important; word-wrap: normal !important; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
 iframe::-webkit-scrollbar { display: none; }
 
+/* Force both to use the exact same box-sizing and rendering */
 textarea, pre {
-    font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace !important;
-    letter-spacing: normal !important;
-    word-spacing: normal !important;
-    text-rendering: optimizeLegibility !important;
-    -webkit-font-smoothing: antialiased;
+  line-height: 20px !important;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+  box-sizing: border-box !important;
+  tab-size: 4;
 }
 
-/* Hide scrollbars for the pre layer so it doesn't push the text */
-pre::-webkit-scrollbar {
-    display: none;
+/* Chrome/Safari sometimes adds extra padding to textareas */
+textarea {
+  outline: none;
+  -webkit-text-fill-color: transparent; /* better than text-transparent for some browsers */
 }
 </style>
