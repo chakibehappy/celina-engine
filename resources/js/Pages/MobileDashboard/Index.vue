@@ -78,7 +78,7 @@
                             <div class="flex-1 relative overflow-hidden">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll scrollbar-custom whitespace-pre border-none" 
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll custom-scrollbar whitespace-pre border-none" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                     wrap="off"
