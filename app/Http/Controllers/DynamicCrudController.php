@@ -15,17 +15,45 @@ class DynamicCrudController extends Controller
         return App::findOrFail($appId)->database_name;
     }
 
-    public function index($appId, $tableName)
+    public function index(Request $request, $appId, $tableName)
     {
         $dbName = $this->getTargetDatabase($appId);
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
-        
-        $data = DB::table("{$dbName}.{$tableName}")
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return response()->json([
+
+        // Define search/sort parameters from request
+        $search = $request->query('search');
+        $sortCol = $request->query('sort', 'created_at'); // Default sort
+        $sortDir = $request->query('direction', 'desc');
+        $perPage = $request->query('per_page', 15);
+
+        $query = DB::table("{$dbName}.{$tableName}")
+            // Dynamic Search: check all columns for the search string
+            ->when($search, function ($q) use ($search, $columns) {
+                $q->where(function ($sub) use ($search, $columns) {
+                    foreach ($columns as $column) {
+                        $sub->orWhere($column, 'LIKE', "%{$search}%");
+                    }
+                });
+            })
+            // Dynamic Sort
+            ->orderBy($sortCol, $sortDir);
+
+        $paginated = $query->paginate($perPage);
+
+        return response::json([
             'columns' => $columns,
-            'data' => $data
+            'data' => $paginated->items(), // The current page records
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'total' => $paginated->total(),
+                'prev' => $paginated->previousPageUrl(),
+                'next' => $paginated->nextPageUrl(),
+            ],
+            'meta' => [
+                'sort' => $sortCol,
+                'direction' => $sortDir
+            ]
         ]);
     }
 
