@@ -131,17 +131,6 @@
                     <button @click="openModal(type)" class="text-[10px] bg-green-600 px-3 py-1 rounded hover:bg-green-500">+ NEW</button>
                 </div>
                 <div class="overflow-x-auto">
-                    <div v-if="activeTable" class="flex items-center gap-2">
-                        <div class="relative">
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">search</span>
-                            <input 
-                                v-model="searchQuery" 
-                                @keyup.enter="viewTableData(activeTable)"
-                                placeholder="Search records..." 
-                                class="bg-gray-900 border-gray-700 rounded-lg text-xs pl-9 pr-4 py-2 w-64 focus:ring-purple-500 focus:border-purple-500 outline-none text-gray-300"
-                            />
-                        </div>
-                    </div>
                     <table class="w-full text-left text-xs">
                         <thead class="text-gray-500 bg-gray-900/50">
                             <tr>
@@ -224,9 +213,9 @@
                 </select>
             </div>
             
-            <!-- Breadcrumb Navigation -->
+            <!-- Breadcrumb Navigation if a table is open -->
             <div v-else class="flex items-center gap-3">
-                <button @click="activeTable = null; searchQuery = '';" class="p-2 hover:bg-gray-700 rounded-full transition text-gray-400">
+                <button @click="activeTable = null" class="p-2 hover:bg-gray-700 rounded-full transition text-gray-400">
                     <span class="material-symbols-outlined">arrow_back</span>
                 </button>
                 <div>
@@ -237,33 +226,19 @@
 
             <div v-if="selectedAppId" class="h-10 w-[1px] bg-gray-700"></div>
             
-            <!-- Search Bar (Visible only when table is active) -->
-            <div v-if="activeTable" class="flex flex-col">
-                <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Search Registry</label>
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">search</span>
-                    <input 
-                        v-model="searchQuery" 
-                        @keyup.enter="viewTableData(activeTable)"
-                        placeholder="Filter records..." 
-                        class="bg-gray-900 border-gray-700 rounded-lg text-[11px] pl-9 pr-4 py-2 w-64 focus:ring-1 focus:ring-purple-500 outline-none text-gray-300 transition-all"
-                    />
-                </div>
-            </div>
-
-            <!-- Action: Synthesize Table -->
+            <!-- Action: Synthesize Table (Only on App View) -->
             <div v-if="selectedAppId && !activeTable">
                 <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Structure</label>
-                <button @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
+                 <button @click="showSynthModal = true" class="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-lg text-xs font-bold hover:scale-105 transition">
                     <span class="material-symbols-outlined text-sm">add_box</span>
                     SYNTHESIZE TABLE
                 </button>
             </div>
 
-            <!-- Action: Create New Data -->
-            <div v-if="activeTable">
+            <!-- Action: Create New Data (Only when table is active and NOT empty) -->
+            <div v-if="activeTable && tableData.length > 0">
                 <label class="text-[10px] text-gray-500 uppercase font-bold block mb-1">Record Entry</label>
-                <button @click="openCreateModal" class="flex items-center gap-2 bg-gray-900 border border-purple-500/50 text-purple-400 px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-500/10 transition">
+                 <button @click="openCreateModal" class="flex items-center gap-2 bg-gray-900 border border-purple-500/50 text-purple-400 px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-500/10 transition">
                     <span class="material-symbols-outlined text-sm">post_add</span>
                     INSERT DATA
                 </button>
@@ -290,30 +265,20 @@
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-800/50 border-b border-gray-800">
                     <tr>
-                        <th v-for="col in tableColumns" :key="col" 
-                            @click="toggleSort(col)"
-                            class="p-4 text-[10px] font-bold text-gray-500 uppercase font-mono cursor-pointer hover:text-purple-400 transition-colors group/th">
-                            <div class="flex items-center gap-2">
-                                {{ col }}
-                                <span class="material-symbols-outlined text-[14px] transition-opacity"
-                                    :class="sortConfig.column === col ? 'opacity-100 text-purple-400' : 'opacity-0 group-hover/th:opacity-50'">
-                                    {{ sortConfig.direction === 'asc' ? 'stat_1' : 'stat_minus_1' }}
-                                </span>
-                            </div>
-                        </th>
+                        <th v-for="col in tableColumns" :key="col" class="p-4 text-[10px] font-bold text-gray-500 uppercase font-mono">{{ col }}</th>
                         <th class="p-4 text-right"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-800">
                     <tr v-for="row in tableData" :key="row.id" class="hover:bg-purple-500/5 transition-colors">
-                        <td v-for="col in tableColumns" :key="col" class="p-4 text-xs font-mono text-gray-300">
-                            {{ row[col] }}
-                        </td>
+                        <td v-for="col in tableColumns" :key="col" class="p-4 text-xs font-mono text-gray-300">{{ row[col] }}</td>
                         <td class="p-4 text-right">
                             <div class="flex justify-end gap-3">
+                                <!-- Edit Button -->
                                 <button @click="openEditModal(row)" class="text-gray-600 hover:text-blue-400 transition">
                                     <span class="material-symbols-outlined text-sm">edit</span>
                                 </button>
+                                <!-- Delete Button -->
                                 <button @click="deleteRow(row.id)" class="text-gray-600 hover:text-red-500 transition">
                                     <span class="material-symbols-outlined text-sm">delete</span>
                                 </button>
@@ -324,46 +289,10 @@
             </table>
         </div>
 
-        <!-- Pagination Footer -->
-        <div v-if="paginationData" class="bg-gray-800/30 border-t border-gray-800 p-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <p class="text-[10px] text-gray-500 font-mono uppercase">
-                    Total Records: <span class="text-gray-300">{{ paginationData.total }}</span>
-                </p>
-                <div class="h-3 w-[1px] bg-gray-700"></div>
-                <p class="text-[10px] text-gray-500 font-mono uppercase">
-                    Sort: <span class="text-purple-400">{{ sortConfig.column }} ({{ sortConfig.direction }})</span>
-                </p>
-            </div>
-
-            <div class="flex gap-2">
-                <button 
-                    @click="viewTableData(activeTable, paginationData.current_page - 1)"
-                    :disabled="paginationData.current_page === 1"
-                    class="flex items-center gap-1 px-3 py-1 bg-gray-900 border border-gray-700 rounded text-[10px] font-bold text-gray-400 hover:border-purple-500/50 disabled:opacity-20 disabled:cursor-not-allowed transition">
-                    <span class="material-symbols-outlined text-xs">chevron_left</span> PREV
-                </button>
-                
-                <div class="flex items-center px-4 bg-gray-900/50 border border-gray-800 rounded text-[10px] font-mono text-gray-400">
-                    <span class="text-purple-400 font-bold mr-1">{{ paginationData.current_page }}</span> / {{ paginationData.last_page }}
-                </div>
-
-                <button 
-                    @click="viewTableData(activeTable, paginationData.current_page + 1)"
-                    :disabled="paginationData.current_page === paginationData.last_page"
-                    class="flex items-center gap-1 px-3 py-1 bg-gray-900 border border-gray-700 rounded text-[10px] font-bold text-gray-400 hover:border-purple-500/50 disabled:opacity-20 disabled:cursor-not-allowed transition">
-                    NEXT <span class="material-symbols-outlined text-xs">chevron_right</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Empty State UI -->
-        <div v-if="tableData.length === 0" class="p-12 text-center border-t border-gray-800 bg-gray-900/50">
-            <span class="material-symbols-outlined text-gray-700 text-4xl mb-2">database_off</span>
-            <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">No matching records found</p>
-            <button @click="openCreateModal" class="mt-4 text-purple-500 text-[10px] hover:underline uppercase font-bold tracking-tighter">
-                + Initiate Primary Record
-            </button>
+        <!-- Empty State UI (Kept as is for UX) -->
+        <div v-if="tableData.length === 0" class="p-12 text-center border-t border-gray-800">
+            <p class="text-gray-600 font-mono text-[10px] uppercase tracking-widest">There's no data</p>
+            <button @click="openCreateModal" class="mt-4 text-purple-500 text-[10px] hover:underline uppercase font-bold">+ Create New Data</button>
         </div>
     </div>
 </div>
@@ -581,7 +510,6 @@ const highlightCode = (code, type) => {
         });
     }
 };
-
 const getParsedJson = (data) => {
     try { return typeof data === 'string' ? JSON.parse(data) : data; } catch (e) { return null; }
 };
@@ -712,46 +640,17 @@ const fetchTables = async () => {
     }
 };
 
-const searchQuery = ref('');
-const currentPage = ref(1);
-const paginationData = ref(null);
-const sortConfig = ref({ column: 'created_at', direction: 'desc' });
-
-const viewTableData = async (tableName, page = 1) => {
+const viewTableData = async (tableName) => {
     activeTable.value = tableName;
-    currentPage.value = page;
-    
     try {
-        // Construct query params
-        const params = new URLSearchParams({
-            page: page,
-            search: searchQuery.value,
-            sort: sortConfig.value.column,
-            direction: sortConfig.value.direction
-        });
-
-        const url = `${route('dynamic.index', { appId: selectedAppId.value, tableName })}?${params.toString()}`;
-        
+        const url = route('dynamic.index', { appId: selectedAppId.value, tableName });
         const response = await fetch(url);
         const result = await response.json();
-        
         tableColumns.value = result.columns;
         tableData.value = result.data;
-        paginationData.value = result.pagination;
     } catch (e) {
         console.error("Data link failed.", e);
     }
-};
-
-// Helper for sorting
-const toggleSort = (column) => {
-    if (sortConfig.value.column === column) {
-        sortConfig.value.direction = sortConfig.value.direction === 'asc' ? 'desc' : 'asc';
-    } else {
-        sortConfig.value.column = column;
-        sortConfig.value.direction = 'asc';
-    }
-    viewTableData(activeTable.value);
 };
 
 const saveRow = async (rowData) => {

@@ -21,7 +21,7 @@ class DynamicCrudController extends Controller
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
 
         // Define search/sort parameters from request
-        $search = $request->query('search');
+        $search = $request->query('search', '');
         $sortCol = $request->query('sort', 'created_at'); // Default sort
         $sortDir = $request->query('direction', 'desc');
         $perPage = $request->query('per_page', 15);
