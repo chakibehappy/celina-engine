@@ -718,45 +718,79 @@ const commitNewData = async () => {
 
 <style>
 .bg-gray-850 { background-color: #161b22; }
-textarea, pre {
-    line-height: 20px !important;
+
+/* 1. SHARED BASE STYLES: Precision is key here */
+textarea, pre, .line-numbers {
     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    line-height: 20px !important;
+    font-size: 13px !important;
     tab-size: 4;
-    
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 2. LAYOUT SYNC: Forcing identical boxes */
+textarea, pre {
     box-sizing: border-box !important;
     border: none !important;
     outline: none !important;
-    overflow-x: auto !important;
-    overflow-y: auto !important;
-    scrollbar-gutter: stable;
-    padding-bottom: 40px !important;
+    /* Use 'scroll' to force the gutter to exist even when content is short */
+    overflow: auto !important; 
+    scrollbar-gutter: stable !important;
+    /* Padding must be identical on all sides */
+    padding: 24px !important; 
+    /* Extra bottom padding to stay clear of the horizontal scrollbar */
+    padding-bottom: 60px !important; 
+    margin: 0 !important;
 }
-pre { white-space: pre !important; word-wrap: normal !important; }
-.custom-scrollbar::-webkit-scrollbar { width: 10px; height: 10px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: #0d1117; }
+
+pre { 
+    white-space: pre !important; 
+    word-wrap: normal !important; 
+}
+
+/* 3. THE VISIBLE SCROLLBAR (Textarea) */
+/* Apply this class to your textarea */
+.custom-scrollbar::-webkit-scrollbar { 
+    width: 10px; 
+    height: 10px; 
+}
+.custom-scrollbar::-webkit-scrollbar-track { 
+    background: #0d1117; 
+}
 .custom-scrollbar::-webkit-scrollbar-thumb { 
     background: #30363d; 
     border-radius: 10px;
     border: 2px solid #0d1117;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
-iframe::-webkit-scrollbar { display: none; }
-/* Force identical font rendering and line heights */
-textarea, pre, .line-numbers {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
-  line-height: 20px !important;
-  font-size: 13px !important;
-  tab-size: 4;
-  -webkit-font-smoothing: antialiased;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+    background: #484f58; 
 }
 
-/* Hide scrollbars but keep functionality on the highlight layer */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* 4. THE INVISIBLE SYNC SCROLLBAR (Highlight Layer) */
+/* Apply this class to your PRE tag instead of 'scrollbar-hide' */
+.scrollbar-sync-invisible::-webkit-scrollbar {
+    width: 10px;  /* MUST MATCH .custom-scrollbar width */
+    height: 10px; /* MUST MATCH .custom-scrollbar height */
 }
 
+/* We keep the scrollbar but make it 100% transparent */
+.scrollbar-sync-invisible::-webkit-scrollbar-thumb,
+.scrollbar-sync-invisible::-webkit-scrollbar-track {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Cross-browser visibility sync */
+.scrollbar-sync-invisible {
+    -ms-overflow-style: auto !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: transparent transparent !important;
+}
+
+/* 5. IFRAME & UTILS */
+iframe::-webkit-scrollbar { 
+    display: none; 
+}
 </style>
