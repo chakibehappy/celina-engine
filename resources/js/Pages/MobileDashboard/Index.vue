@@ -75,16 +75,19 @@
                                 </div>
                             </div>
                             
-                            <div class="flex-1 relative overflow-hidden">
+                            
+                            <div 
+                            class="flex-1 relative overflow-auto custom-scrollbar"
+                            @scroll="syncScroll($event, screen.id)"
+                            >
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-auto whitespace-pre border-none custom-scrollbar" 
-                                    @scroll="syncScroll($event, screen.id)"
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-hidden whitespace-pre border-none custom-scrollbar" 
                                     spellcheck="false"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-auto select-none border-none"    
+                                class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-hidden select-none border-none"    
                                 v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
@@ -444,11 +447,9 @@ const syncScroll = (e, id) => {
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
 
-    if (!pre) return;
-
-    // sync vertical + horizontal
-    pre.scrollTop = t.scrollTop;
-    pre.scrollLeft = t.scrollLeft;
+    if (pre) {
+        pre.style.transform = `translate(${-t.scrollLeft}px, ${-t.scrollTop}px)`;
+    }
 
     if (lines) {
         lines.scrollTop = t.scrollTop;
@@ -741,7 +742,17 @@ textarea, pre {
 
     tab-size: 4;
 }
+textarea {
+    color: transparent;
+    caret-color: white;
 
+    /* fix Chrome misalignment */
+    transform: translateZ(0);
+}
+
+pre {
+    will-change: transform;
+}
 /* Hide scrollbars for the pre layer so it doesn't push the text */
 pre::-webkit-scrollbar {
     display: none;
