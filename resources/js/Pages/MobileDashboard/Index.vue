@@ -287,6 +287,36 @@
                     </tr>
                 </tbody>
             </table>
+            <div v-if="paginationData && paginationData.last_page > 1" class="bg-gray-800/30 border-t border-gray-800 p-4 flex items-center justify-between">
+                <div class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+                    Total Records: {{ paginationData.total }}
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Previous Button -->
+                    <button 
+                        @click="viewTableData(activeTable, currentPage - 1)"
+                        :disabled="currentPage === 1"
+                        class="p-2 rounded-lg border border-gray-700 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition text-gray-400"
+                    >
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </button>
+
+                    <!-- Page Indicator -->
+                    <div class="px-4 py-1 bg-gray-900 border border-gray-700 rounded text-xs font-mono text-purple-400">
+                        {{ currentPage }} / {{ paginationData.last_page }}
+                    </div>
+
+                    <!-- Next Button -->
+                    <button 
+                        @click="viewTableData(activeTable, currentPage + 1)"
+                        :disabled="currentPage === paginationData.last_page"
+                        class="p-2 rounded-lg border border-gray-700 hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition text-gray-400"
+                    >
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Empty State UI (Kept as is for UX) -->
@@ -627,6 +657,8 @@ const tableData = ref([]);
 const tableColumns = ref([]);
 const isProcessing = ref(false);
 
+const paginationData = ref(null);
+const currentPage = ref(1);
 // --- ACTIONS ---
 
 const fetchTables = async () => {
@@ -640,14 +672,26 @@ const fetchTables = async () => {
     }
 };
 
-const viewTableData = async (tableName) => {
+const viewTableData = async (tableName, page = 1) => {
     activeTable.value = tableName;
+    currentPage.value = page; // Sync the state
+    
     try {
-        const url = route('dynamic.index', { appId: selectedAppId.value, tableName });
+        // Construct URL with page parameter
+        const url = route('dynamic.index', { 
+            appId: selectedAppId.value, 
+            tableName,
+            page: page // Laravel looks for the ?page= parameter
+        });
+
         const response = await fetch(url);
         const result = await response.json();
+        
         tableColumns.value = result.columns;
         tableData.value = result.data;
+        
+        // Store the pagination metadata (total, last_page, etc.)
+        paginationData.value = result.pagination;
     } catch (e) {
         console.error("Data link failed.", e);
     }

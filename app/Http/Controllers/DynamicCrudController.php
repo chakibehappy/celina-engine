@@ -15,26 +15,21 @@ class DynamicCrudController extends Controller
         return App::findOrFail($appId)->database_name;
     }
 
-    public function index($appId, $tableName)
+    public function index(Request $request, $appId, $tableName)
     {
         $dbName = $this->getTargetDatabase($appId);
+        
+        // Get columns for the specific table in the target database
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
         
-        // $data = DB::table("{$dbName}.{$tableName}")
-        //     ->orderBy('created_at', 'desc')
-        //     ->get();
-
-        // return response()->json([
-        //     'columns' => $columns,
-        //     'data' => $data
-        // ]);
+        // The paginate() method automatically looks for the 'page' query param from the request
         $paginated = DB::table("{$dbName}.{$tableName}")
             ->orderBy('id', 'desc')
             ->paginate(15);
 
         return response()->json([
             'columns' => $columns,
-            'data' => $paginated->items(), // This ensures result.data is still just the array
+            'data' => $paginated->items(), 
             'pagination' => [
                 'last_page' => $paginated->lastPage(),
                 'current_page' => $paginated->currentPage(),
