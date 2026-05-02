@@ -78,14 +78,14 @@
                             <div class="flex-1 relative overflow-hidden">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll whitespace-pre border-none" 
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll scrollbar-custom whitespace-pre border-none" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                     wrap="off"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 whitespace-pre select-none border-none overflow-hidden "
+                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 whitespace-pre select-none border-none overflow-hidden scrollbar-sync-invisible"
                                     v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
@@ -743,6 +743,16 @@ textarea, pre {
     /* Extra bottom padding to stay clear of the horizontal scrollbar */
     padding-bottom: 60px !important; 
     margin: 0 !important;
+    /* 1. Force the exact same letter spacing (crucial for long lines) */
+    letter-spacing: 0px !important;
+    word-spacing: 0px !important;
+
+    /* 2. Disable ligatures (prevents '=>' or '==' from changing width) */
+    font-variant-ligatures: none !important;
+    font-feature-settings: "liga" 0 !important;
+
+    /* 3. Force the browser to treat every character as a fixed block */
+    text-rendering: crispEdges !important;
 }
 
 pre { 
@@ -784,7 +794,6 @@ pre {
 }
 
 /* 4. THE INVISIBLE SYNC SCROLLBAR (Highlight Layer) */
-/* Apply this class to your PRE tag instead of 'scrollbar-hide' */
 .scrollbar-sync-invisible::-webkit-scrollbar {
     width: 10px;  /* MUST MATCH .custom-scrollbar width */
     height: 10px; /* MUST MATCH .custom-scrollbar height */
@@ -802,6 +811,13 @@ pre {
     -ms-overflow-style: auto !important;
     scrollbar-width: thin !important;
     scrollbar-color: transparent transparent !important;
+}
+/* The "Right-Side Ghost" - Add padding to the END of the lines */
+/* This prevents the text from hitting the 'wall' and wrapping/shifting */
+pre::after {
+    content: " ";
+    display: inline-block;
+    width: 2ch; /* Adds 2 characters of invisible space at the end of every line */
 }
 
 /* 5. IFRAME & UTILS */
