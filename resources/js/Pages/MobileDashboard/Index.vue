@@ -261,15 +261,17 @@
 
     <!-- State B: Dynamic Explorer -->
     <div v-else class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-2xl">
-        <div v-if="activeTable" class="relative m-3 flex-end">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">search</span>
-            <input 
-                v-model="searchQuery" 
-                @input="handleSearch"
-                type="text" 
-                placeholder="Search records..." 
-                class="bg-gray-900 border-gray-700 rounded-lg text-xs pl-9 pr-4 py-2 w-64 focus:ring-purple-500 focus:border-purple-500 outline-none text-gray-300 transition-all border"
-            />
+        <div v-if="activeTable" class="p-4 border-b border-gray-800 flex justify-end">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">search</span>
+                <input 
+                    v-model="searchQuery" 
+                    @input="handleSearch"
+                    type="text" 
+                    placeholder="Search records..." 
+                    class="bg-gray-900 border-gray-700 rounded-lg text-xs pl-9 pr-4 py-2 w-64 focus:ring-purple-500 focus:border-purple-500 outline-none text-gray-300 transition-all border"
+                />
+            </div>
         </div>
         <div class="overflow-x-auto custom-scrollbar">
             <table class="w-full text-left border-collapse">
