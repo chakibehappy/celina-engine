@@ -77,18 +77,15 @@
                             
                             <div class="flex-1 relative overflow-hidden">
                                 <textarea 
-                                    ref="codeArea"
                                     v-model="screen.content_data" 
                                     class="absolute inset-0 w-full h-full m-0 p-6 z-20 bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-y-scroll custom-scrollbar whitespace-pre border-none" 
                                     @scroll="syncScroll($event, screen.id)"
-                                    @input="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                     @keydown.tab="handleTab"
                                     wrap="off"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                    ref="preArea"
                                     class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 whitespace-pre select-none border-none overflow-hidden scrollbar-sync-invisible"
                                     v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
@@ -444,13 +441,7 @@ const isEditing = ref(false);
 const formData = ref({});
 
 // --- IDE Logic ---
-const codeArea = ref(null); // Ref for the textarea
-const preArea = ref(null);  // Ref for the <pre> tag
 const syncScroll = (e, id) => {
-    if (codeArea.value && preArea.value) {
-        preArea.value.scrollLeft = codeArea.value.scrollLeft;
-        preArea.value.scrollTop = codeArea.value.scrollTop;
-    }
     const t = e.target;
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
