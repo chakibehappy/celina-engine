@@ -87,8 +87,7 @@
                                 <pre :id="'pre-' + screen.id" 
                                     class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre select-none border-none overflow-y-scroll scrollbar-hide"
                                     v-html="highlightCode(screen.content_data, screen.type)"
-                                    style="scrollbar-width: none; -ms-overflow-style: none;">
-                                </pre>
+                                    style="scrollbar-width: none; -ms-overflow-style: none;" />
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
                                     {{ screen.type === 'custom' ? 'HTML5' : 'JSON' }}
