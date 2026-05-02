@@ -20,13 +20,26 @@ class DynamicCrudController extends Controller
         $dbName = $this->getTargetDatabase($appId);
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
         
-        $data = DB::table("{$dbName}.{$tableName}")
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // $data = DB::table("{$dbName}.{$tableName}")
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
+
+        // return response()->json([
+        //     'columns' => $columns,
+        //     'data' => $data
+        // ]);
+        $paginated = DB::table("{$dbName}.{$tableName}")
+            ->orderBy('id', 'desc')
+            ->paginate(15);
 
         return response()->json([
             'columns' => $columns,
-            'data' => $data
+            'data' => $paginated->items(), // This ensures result.data is still just the array
+            'pagination' => [
+                'last_page' => $paginated->lastPage(),
+                'current_page' => $paginated->currentPage(),
+                'total' => $paginated->total()
+            ]
         ]);
     }
 
