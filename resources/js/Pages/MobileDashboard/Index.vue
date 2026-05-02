@@ -78,14 +78,14 @@
                             <div class="flex-1 relative overflow-hidden">
                                 <textarea 
                                     v-model="screen.content_data" 
-                                    class="absolute inset-0 w-full h-full font-mono text-[13px] bg-transparent text-transparent caret-white p-6 focus:ring-0 outline-none z-20 resize-none leading-[20px] overflow-auto custom-scrollbar whitespace-pre" 
+                                    class="absolute inset-0 w-full h-full m-0 p-6 z-20 font-mono text-[13px] leading-[20px] bg-transparent text-transparent caret-white focus:ring-0 outline-none resize-none overflow-auto whitespace-pre border-none custom-scrollbar" 
                                     @scroll="syncScroll($event, screen.id)"
                                     spellcheck="false"
                                 ></textarea>
 
                                 <pre :id="'pre-' + screen.id" 
-                                     class="absolute inset-0 w-full h-full font-mono text-[13px] p-6 pointer-events-none z-10 leading-[20px] overflow-hidden whitespace-pre select-none"
-                                     v-html="highlightCode(screen.content_data, screen.type)"></pre>
+                                    class="absolute inset-0 w-full h-full m-0 p-6 pointer-events-none z-10 font-mono text-[13px] leading-[20px] whitespace-pre overflow-hidden select-none border-none"
+                                    v-html="highlightCode(screen.content_data, screen.type)"></pre>
                                 
                                 <div class="absolute bottom-4 right-6 text-[9px] text-gray-600 font-mono z-30 bg-[#0d1117]/80 px-2 py-1 rounded border border-gray-800">
                                     {{ screen.type === 'custom' ? 'HTML5' : 'JSON' }}
@@ -440,14 +440,16 @@ const formData = ref({});
 
 // --- IDE Logic ---
 const syncScroll = (e, id) => {
+    const textarea = e.target;
     const pre = document.getElementById('pre-' + id);
     const lines = document.getElementById('lines-' + id);
+    
     if (pre) {
-        pre.scrollTop = e.target.scrollTop;
-        pre.scrollLeft = e.target.scrollLeft;
+        pre.scrollTop = textarea.scrollTop;
+        pre.scrollLeft = textarea.scrollLeft;
     }
     if (lines) {
-        lines.scrollTop = e.target.scrollTop;
+        lines.scrollTop = textarea.scrollTop;
     }
 };
 
@@ -726,4 +728,17 @@ pre { white-space: pre !important; word-wrap: normal !important; }
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #484f58; }
 iframe::-webkit-scrollbar { display: none; }
+
+textarea, pre {
+    font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace !important;
+    letter-spacing: normal !important;
+    word-spacing: normal !important;
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Hide scrollbars for the pre layer so it doesn't push the text */
+pre::-webkit-scrollbar {
+    display: none;
+}
 </style>
