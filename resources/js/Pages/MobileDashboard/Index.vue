@@ -461,19 +461,24 @@ const syncScroll = (e, id) => {
 
 const handleTab = (e) => {
     e.preventDefault();
-    const t = e.target;
-    const start = t.selectionStart;
-    const end = t.selectionEnd;
-
-    // Set textarea value to: text before caret + 4 spaces + text after caret
-    t.value = t.value.substring(0, start) + "    " + t.value.substring(end);
-
-    // Put caret in right position
-    t.selectionStart = t.selectionEnd = start + 4;
     
-    // Trigger Vue's v-model update manually since we modified the DOM directly
-    const event = new Event('input', { bubbles: true });
-    t.dispatchEvent(event);
+    // This method inserts '    ' at the caret position 
+    // and natively integrates with the browser's undo/redo stack.
+    const tabSpaced = "    ";
+    
+    if (!document.execCommand('insertText', false, tabSpaced)) {
+        // Fallback for extreme edge cases, though execCommand 
+        // works in 99% of modern browser textareas
+        const t = e.target;
+        const start = t.selectionStart;
+        const end = t.selectionEnd;
+        t.value = t.value.substring(0, start) + tabSpaced + t.value.substring(end);
+        t.selectionStart = t.selectionEnd = start + tabSpaced.length;
+        
+        // Manual trigger for Vue v-model
+        const event = new Event('input', { bubbles: true });
+        t.dispatchEvent(event);
+    }
 };
 
 const highlightCode = (code, type) => {
