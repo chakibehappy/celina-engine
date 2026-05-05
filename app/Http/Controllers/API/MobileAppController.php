@@ -20,7 +20,7 @@ class MobileAppController extends Controller
 {
     public function getAppInfo(Request $request, $app_id)
     {
-        $app = App::where('id', $app_id)->get();
+        $app = App::where('id', $app_id)->first();
         if (!$app){
             return response()->json([
                 'success' => false,
