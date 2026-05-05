@@ -18,7 +18,7 @@ use App\Http\Controllers\API\MobileAppController;
 
 // Public routes
 
-Route::post('/app/info/{app_id}', [MobileAppController::class, 'getAppInfo']);
+Route::get('/app/info/{app_id}', [MobileAppController::class, 'getAppInfo']);
 Route::post('/app/login', [MobileAppController::class, 'login']);
 Route::post('/app/google-login', [MobileAppController::class, 'googleLogin']);
 
