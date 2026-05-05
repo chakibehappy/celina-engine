@@ -18,6 +18,27 @@ use Illuminate\Support\Facades\DB;
 
 class MobileAppController extends Controller
 {
+    public function getAppInfo(Request $request, $app_id)
+    {
+        $app = App::where('id', $app_id)
+                ->orderBy('order')
+                ->get();
+        if (!$app){
+            return response()->json([
+                'success' => false,
+                'message' => 'No App found',
+                'errors'  => null
+            ], 404);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'App data loaded',
+            'data'    => $app
+        ]);
+    }
+
+
+
     /**
      * Authenticate AppUser and return token + app branding + unique app_id.
      */
@@ -162,7 +183,7 @@ class MobileAppController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Screen data loaded',
-            'data'    => [ // <--- THE MISSING ENVELOPE
+            'data'    => [ 
                 'app_id'       => $user->app_id,
                 'title'        => $screen->title,
                 'type'         => $screen->type,

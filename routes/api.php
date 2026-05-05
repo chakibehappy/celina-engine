@@ -17,6 +17,8 @@ Route::get('/home-data', [MobileTestController::class, 'getHomeData']);
 use App\Http\Controllers\API\MobileAppController;
 
 // Public routes
+
+Route::post('/app/{app_id}', [MobileAppController::class, 'getAppInfo']);
 Route::post('/app/login', [MobileAppController::class, 'login']);
 Route::post('/app/google-login', [MobileAppController::class, 'googleLogin']);
 
