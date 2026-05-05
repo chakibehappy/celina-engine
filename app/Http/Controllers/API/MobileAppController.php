@@ -141,6 +141,18 @@ class MobileAppController extends Controller
         }
     }
 
+    public function getPublicScreenContentData(Request $request, $screen_id, $app_id)
+    {
+        $screen = AppScreen::where('id', $screen_id)
+            ->where('app_id', $app_id)
+            ->first();
+
+        if (!$screen) {
+            return response()->json(['error' => 'Screen not found'], 404);
+        }
+        return response()->json($screen->content_data);
+    }
+
     public function getScreenContentData(Request $request, $screen_id)
     {
         try {
@@ -165,8 +177,7 @@ class MobileAppController extends Controller
     {
         $user = $request->user();
 
-        $screen = AppScreen::with(['menus.icon', 'menus.subModules.icon'])
-            ->where('app_id', $user->app_id)
+        $screen = AppScreen::where('app_id', $user->app_id)
             ->where('route', $route)
             ->first();
 
@@ -184,19 +195,33 @@ class MobileAppController extends Controller
                 'app_id'       => $user->app_id,
                 'title'        => $screen->title,
                 'type'         => $screen->type,
-                'content_data' => $screen->content_data,
-                'menus'        => $screen->menus->map(fn($menu) => [
-                    'label' => $menu->label,
-                    'icon'  => $this->resolveIcon($menu->icon, $platform),
-                    'sub_modules' => $menu->subModules->map(fn($sub) => [
-                        'label' => $sub->label,
-                        'desc'  => $sub->description,
-                        'icon'  => $this->resolveIcon($sub->icon, $platform),
-                        'count' => $sub->count,
-                        'table' => $sub->table_name,
-                        'color' => $sub->color
-                    ])
-                ])
+                'content_data' => $screen->content_data
+            ]
+        ]);
+    }
+
+    public function getPublicScreenData(Request $request, $route, $appId)
+    {
+        // Fetch screen by app_id and route without requiring a user session
+        $screen = AppScreen::where('app_id', $appId)
+            ->where('route', $route)
+            ->first();
+
+        if (!$screen) {
+            return response()->json([
+                'success' => false, 
+                'message' => 'Screen Not Found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Public screen data loaded',
+            'data'    => [ 
+                'app_id'       => (int)$appId,
+                'title'        => $screen->title,
+                'type'         => $screen->type,
+                'content_data' => $screen->content_data
             ]
         ]);
     }

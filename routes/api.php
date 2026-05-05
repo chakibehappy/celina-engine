@@ -21,6 +21,8 @@ use App\Http\Controllers\API\MobileAppController;
 Route::get('/app/info/{app_id}', [MobileAppController::class, 'getAppInfo']);
 Route::post('/app/login', [MobileAppController::class, 'login']);
 Route::post('/app/google-login', [MobileAppController::class, 'googleLogin']);
+Route::get('/app/screen/{route}/{app_id}', [MobileAppController::class, 'getPublicScreenData']);
+Route::get('/app/get-screen-details/{screen_id}/{app_id}', [MobileAppController::class, 'getPublicScreenContentData']);
 
 // Protected routes (Requires Bearer Token)
 Route::middleware('auth:sanctum')->group(function () {
