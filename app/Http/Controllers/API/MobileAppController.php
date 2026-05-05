@@ -20,18 +20,17 @@ class MobileAppController extends Controller
 {
     public function getAppInfo(Request $request, $app_id)
     {
-        $app = App::where('id', $app_id)->first();
+        // Use findOrFail or first()
+        $app = App::find($app_id); 
+        
         if (!$app){
-            return response()->json([
-                'success' => false,
-                'message' => 'No App found',
-                'errors'  => null
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'No App found'], 404);
         }
+
         return response()->json([
             'success' => true,
             'message' => 'App data loaded',
-            'data'    => $app
+            'data'    => $app // Ensure this is not wrapped in an array []
         ]);
     }
 
