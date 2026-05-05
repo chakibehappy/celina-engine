@@ -56,35 +56,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        Schema::create('app_menus', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('app_id')->constrained();
-            $table->string('label');
-            $table->string('icon_id'); 
-            $table->integer('order')->default(0);
-            $table->timestamps();
-        });
-
-        Schema::create('screen_menus', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('screen_id')->constrained('app_screens')->onDelete('cascade');
-            $table->foreignId('menu_id')->constrained('app_menus')->onDelete('cascade');
-            $table->integer('order')->default(0); 
-            $table->timestamps();
-        });
-
-        Schema::create('app_sub_modules', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('menu_id')->constrained('app_menus')->onDelete('cascade');
-            $table->string('label');
-            $table->string('description')->nullable();
-            $table->foreignId('system_icon_id')->constrained('system_icons');
-            $table->integer('count')->default(0); 
-            $table->string('table_name')->nullable(); 
-            $table->string('color')->nullable();
-            $table->timestamps();
-        });
-
         Schema::create('app_navigations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('app_id')->constrained()->onDelete('cascade');
@@ -101,10 +72,7 @@ return new class extends Migration {
 
     public function down() {
         // Drop pivot tables and dependent tables first to avoid FK errors
-        Schema::dropIfExists('screen_menus');
         Schema::dropIfExists('app_navigations');
-        Schema::dropIfExists('app_sub_modules');
-        Schema::dropIfExists('app_menus');
         Schema::dropIfExists('app_screens');
         Schema::dropIfExists('system_icons');
         Schema::dropIfExists('app_users');

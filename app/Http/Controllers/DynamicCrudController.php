@@ -20,12 +20,8 @@ class DynamicCrudController extends Controller
         $dbName = $this->getTargetDatabase($appId);
         $columns = Schema::connection('mysql')->getColumnListing("{$dbName}.{$tableName}");
         
-        // Get the search query from the request
         $search = $request->query('search');
-
         $query = DB::table("{$dbName}.{$tableName}");
-
-        // Apply Global Search across all columns
         if (!empty($search)) {
             $query->where(function($q) use ($columns, $search) {
                 foreach ($columns as $column) {

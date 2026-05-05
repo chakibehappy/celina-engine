@@ -7,8 +7,6 @@ use App\Models\App\AppScreen;
 use App\Models\App\App;
 use App\Models\App\AppUser;
 use App\Models\App\AppRole;
-use App\Models\App\AppMenu;
-use App\Models\App\AppSubModule;
 use App\Models\App\SystemIcon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -67,8 +65,6 @@ class MobileDashboardTestController extends Controller
             'users'       => AppUser::with('role')->get(),
             'screens'     => AppScreen::all(),
             'navigations' => AppNavigation::with('screen')->orderBy('order')->get(),
-            'menus'       => AppMenu::all(),
-            'subModules'  => AppSubModule::with('menu')->get(),
             'system_icons'=> SystemIcon::all(),
             
             // Auto-generated schemas for the frontend
@@ -76,8 +72,6 @@ class MobileDashboardTestController extends Controller
                 'app'           => $getSchema('apps'), 
                 'role'          => $getSchema('app_roles'),
                 'user'          => $getSchema('app_users'),
-                'menu'          => $getSchema('app_menus'),
-                'submodule'     => $getSchema('app_sub_modules'),
                 'screen'        => $getSchema('app_screens'),
                 'navigation'    => $getSchema('app_navigations'),
                 'system_icon'   => $getSchema('system_icons'),
@@ -225,8 +219,6 @@ class MobileDashboardTestController extends Controller
     {
         return match($type) {
             'user'       => AppUser::class,
-            'menu'       => AppMenu::class,
-            'submodule'  => AppSubModule::class,
             'role'       => AppRole::class,
             'screen'     => AppScreen::class,
             'navigation' => AppNavigation::class,
