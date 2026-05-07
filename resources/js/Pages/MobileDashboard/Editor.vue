@@ -1,11 +1,12 @@
 <template>
   <div class="app">
     <div class="editor-panel">
+
       <div class="toolbar">
         <h2>Celina Engine Vue Runtime</h2>
 
         <button @click="loadExample">
-          Load Example
+          Reload
         </button>
       </div>
 
@@ -13,77 +14,48 @@
         v-model="jsonText"
         class="json-editor"
       />
+
     </div>
 
     <div class="preview-panel">
+
       <div class="phone-frame">
+
         <div
           class="phone-screen"
           :style="{
             background: parsedData?.theme?.bg || '#F8FAFC'
           }"
         >
+
           <template v-if="parsedData">
 
-            <!-- MAIN CONTENT -->
             <div class="screen-scroll">
+
               <template
                 v-for="(item,index) in parsedData.content"
                 :key="'main-'+index"
               >
                 <Renderer
-                  v-if="getElement(item).props?.layer == null"
                   :element="getElement(item)"
                 />
               </template>
-            </div>
 
-            <!-- HEADER -->
-            <div class="layer-header">
-              <template
-                v-for="(item,index) in parsedData.content"
-                :key="'header-'+index"
-              >
-                <Renderer
-                  v-if="getElement(item).props?.layer === 'header'"
-                  :element="getElement(item)"
-                />
-              </template>
-            </div>
-
-            <!-- FLOATING -->
-            <div class="layer-floating">
-              <template
-                v-for="(item,index) in parsedData.content"
-                :key="'floating-'+index"
-              >
-                <Renderer
-                  v-if="getElement(item).props?.layer === 'floating'"
-                  :element="getElement(item)"
-                />
-              </template>
-            </div>
-
-            <!-- FOOTER -->
-            <div class="layer-footer">
-              <template
-                v-for="(item,index) in parsedData.content"
-                :key="'footer-'+index"
-              >
-                <Renderer
-                  v-if="getElement(item).props?.layer === 'footer'"
-                  :element="getElement(item)"
-                />
-              </template>
             </div>
 
           </template>
 
-          <div v-else class="invalid-json">
+          <div
+            v-else
+            class="invalid-json"
+          >
             Invalid JSON
           </div>
+
         </div>
+
       </div>
+
     </div>
   </div>
 </template>
@@ -91,15 +63,15 @@
 <script setup>
 import {
   ref,
+  reactive,
   computed,
   defineComponent,
-  h,
-  reactive
+  h
 } from 'vue'
 
 /*
 |--------------------------------------------------------------------------
-| GLOBAL STATES
+| STATES
 |--------------------------------------------------------------------------
 */
 
@@ -109,394 +81,104 @@ const globalStates = reactive({})
 
 /*
 |--------------------------------------------------------------------------
-| JSON INPUT
+| ICON MAPPER
 |--------------------------------------------------------------------------
 */
 
-const jsonText = ref(`{
-  "theme": {
-    "bg": "#F8FAFC"
-  },
-  "content": [
-    {
-      "portrait": {
-        "type": "box-v",
-        "props": {
-          "layer": "header"
-        },
-        "children": [
-          {
-            "type": "box-banner",
-            "props": {
-              "name": "hero_banner",
-              "bgImage": "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=1200"
-            },
-            "styles": {
-              "h": "220",
-              "startRadius": "32",
-              "endRadius": "32"
-            },
-            "children": [
-              {
-                "type": "box-v",
-                "styles": {
-                  "p": "16",
-                  "pt": "50"
-                },
-                "children": [
-                  {
-                    "type": "text",
-                    "props": {
-                      "value": "CELINA ENGINE"
-                    },
-                    "styles": {
-                      "fontSize": "24",
-                      "bold": "true",
-                      "color": "#FFFFFF"
-                    }
-                  },
-                  {
-                    "type": "spacer",
-                    "styles": {
-                      "h": "12"
-                    }
-                  },
-                  {
-                    "type": "text",
-                    "props": {
-                      "value": "Vue 3 Runtime Renderer"
-                    },
-                    "styles": {
-                      "fontSize": "14",
-                      "color": "#FFFFFF"
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    },
+const iconMap = {
 
-    {
-      "portrait": {
-        "type": "box-v",
-        "styles": {
-          "bg": "#F8FAFC"
-        },
-        "children": [
-          {
-            "type": "spacer",
-            "styles": {
-              "h": "220"
-            }
-          },
+  // NAVIGATION
+  home: 'home',
+  chat: 'chat',
+  person: 'person',
+  globe: 'public',
+  menu: 'menu',
+  back: 'arrow_back',
+  chevron_right: 'chevron_right',
+  expand_more: 'expand_more',
 
-          {
-            "type": "box-v",
-            "styles": {
-              "bg": "#FFFFFF",
-              "radiusT": "24",
-              "p": "16"
-            },
-            "children": [
+  // POS
+  qr: 'qr_code_scanner',
+  wallet: 'account_balance_wallet',
+  cart: 'shopping_cart',
+  'cart-outline': 'shopping_cart',
+  store: 'storefront',
+  receipt: 'receipt',
+  inventory: 'inventory_2',
+  sell: 'sell',
+  visibility: 'visibility',
+  visibility_off: 'visibility_off',
+  payments: 'payments',
+  smartphone: 'smartphone',
+  badge: 'badge',
 
-              {
-                "type": "text",
-                "props": {
-                  "value": "Category"
-                },
-                "styles": {
-                  "fontSize": "16",
-                  "bold": "true"
-                }
-              },
+  // DASHBOARD
+  notifications: 'notifications',
+  search: 'search',
+  edit_note: 'edit_note',
+  account_tree: 'account_tree',
+  people: 'groups',
+  calendar: 'calendar_today',
+  description: 'description',
+  assignment: 'assignment',
+  chart: 'bar_chart',
+  campaign: 'campaign',
+  sticky_note: 'sticky_note_2',
+  settings: 'settings',
+  article: 'article',
+  help: 'help',
 
-              {
-                "type": "spacer",
-                "styles": {
-                  "h": "12"
-                }
-              },
+  // CATEGORY
+  shopping_bag: 'shopping_bag',
+  add_box: 'add_box',
+  confirmation_number: 'confirmation_number',
+  account_balance_wallet: 'account_balance_wallet',
 
-              {
-                "type": "tab-menu",
-                "props": {
-                  "state_key": "main_tab",
-                  "initial_tab": "TAB_1"
-                },
-                "styles": {
-                  "bg": "#EEF2FF",
-                  "radius": "12",
-                  "p": "4"
-                },
-                "control-elements": [
-                  {
-                    "target-name": "tab_content_1",
-                    "on-values": {
-                      "TAB_1": {
-                        "props": {
-                          "visibility": "on"
-                        }
-                      },
-                      "TAB_2": {
-                        "props": {
-                          "visibility": "off"
-                        }
-                      }
-                    }
-                  },
+  // ACTIONS
+  add_circle: 'add_circle',
+  delete: 'delete',
+  close: 'close',
 
-                  {
-                    "target-name": "tab_content_2",
-                    "on-values": {
-                      "TAB_1": {
-                        "props": {
-                          "visibility": "off"
-                        }
-                      },
-                      "TAB_2": {
-                        "props": {
-                          "visibility": "on"
-                        }
-                      }
-                    }
-                  }
-                ],
-                "children": [
-
-                  {
-                    "type": "box-v",
-                    "props": {
-                      "tab_id": "TAB_1"
-                    },
-                    "styles": {
-                      "weight": "1",
-                      "align": "center",
-                      "bg": "#2563EB",
-                      "radius": "8",
-                      "p": "8"
-                    },
-                    "children": [
-                      {
-                        "type": "text",
-                        "props": {
-                          "value": "PRODUCT"
-                        },
-                        "styles": {
-                          "color": "#FFFFFF",
-                          "bold": "true",
-                          "fontSize": "12"
-                        }
-                      }
-                    ]
-                  },
-
-                  {
-                    "type": "box-v",
-                    "props": {
-                      "tab_id": "TAB_2"
-                    },
-                    "styles": {
-                      "weight": "1",
-                      "align": "center",
-                      "radius": "8",
-                      "p": "8"
-                    },
-                    "children": [
-                      {
-                        "type": "text",
-                        "props": {
-                          "value": "TOPUP"
-                        },
-                        "styles": {
-                          "fontSize": "12"
-                        }
-                      }
-                    ]
-                  }
-
-                ]
-              },
-
-              {
-                "type": "spacer",
-                "styles": {
-                  "h": "20"
-                }
-              },
-
-              {
-                "type": "box-v",
-                "props": {
-                  "name": "tab_content_1"
-                },
-                "children": [
-                  {
-                    "type": "grid",
-                    "styles": {
-                      "columns": "2",
-                      "gapV": "12"
-                    },
-                    "children": [
-
-                      {
-                        "type": "card",
-                        "styles": {
-                          "bg": "#FFFFFF",
-                          "radius": "16",
-                          "p": "8",
-                          "border": "#E2E8F0"
-                        },
-                        "children": [
-                          {
-                            "type": "image",
-                            "props": {
-                              "url": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800"
-                            },
-                            "styles": {
-                              "h": "120",
-                              "radius": "12"
-                            }
-                          },
-
-                          {
-                            "type": "spacer",
-                            "styles": {
-                              "h": "8"
-                            }
-                          },
-
-                          {
-                            "type": "text",
-                            "props": {
-                              "value": "iPhone Product"
-                            },
-                            "styles": {
-                              "fontSize": "13",
-                              "bold": "true"
-                            }
-                          },
-
-                          {
-                            "type": "text",
-                            "props": {
-                              "value": "Rp 15.000.000"
-                            },
-                            "styles": {
-                              "fontSize": "12",
-                              "color": "#2563EB",
-                              "bold": "true"
-                            }
-                          }
-                        ]
-                      },
-
-                      {
-                        "type": "card",
-                        "styles": {
-                          "bg": "#FFFFFF",
-                          "radius": "16",
-                          "p": "8",
-                          "border": "#E2E8F0"
-                        },
-                        "children": [
-                          {
-                            "type": "image",
-                            "props": {
-                              "url": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800"
-                            },
-                            "styles": {
-                              "h": "120",
-                              "radius": "12"
-                            }
-                          },
-
-                          {
-                            "type": "spacer",
-                            "styles": {
-                              "h": "8"
-                            }
-                          },
-
-                          {
-                            "type": "text",
-                            "props": {
-                              "value": "Smart Watch"
-                            },
-                            "styles": {
-                              "fontSize": "13",
-                              "bold": "true"
-                            }
-                          },
-
-                          {
-                            "type": "text",
-                            "props": {
-                              "value": "Rp 5.000.000"
-                            },
-                            "styles": {
-                              "fontSize": "12",
-                              "color": "#2563EB",
-                              "bold": "true"
-                            }
-                          }
-                        ]
-                      }
-
-                    ]
-                  }
-                ]
-              },
-
-              {
-                "type": "box-v",
-                "props": {
-                  "name": "tab_content_2",
-                  "visibility": "off"
-                },
-                "children": [
-                  {
-                    "type": "text",
-                    "props": {
-                      "value": "Topup Content Here"
-                    },
-                    "styles": {
-                      "fontSize": "14",
-                      "bold": "true"
-                    }
-                  }
-                ]
-              }
-
-            ]
-          }
-        ]
-      }
-    }
-  ]
-}`)
+  // PAYMENTS
+  tunai: 'payments',
+  qr_code: 'qr_code',
+  account_balance: 'account_balance',
+  more_horiz: 'more_horiz'
+}
 
 /*
 |--------------------------------------------------------------------------
-| PARSED DATA
+| JSON
+|--------------------------------------------------------------------------
+*/
+
+const jsonText = ref(`PASTE YOUR JSON HERE`)
+
+/*
+|--------------------------------------------------------------------------
+| PARSED
 |--------------------------------------------------------------------------
 */
 
 const parsedData = computed(() => {
+
   try {
     return JSON.parse(jsonText.value)
-  } catch (e) {
+  }
+  catch (e) {
     return null
   }
 })
 
 /*
 |--------------------------------------------------------------------------
-| GET ACTIVE ELEMENT
+| HELPERS
 |--------------------------------------------------------------------------
 */
+
+function loadExample() {
+  jsonText.value = jsonText.value
+}
 
 function getElement(item) {
   return item.portrait || item
@@ -504,18 +186,7 @@ function getElement(item) {
 
 /*
 |--------------------------------------------------------------------------
-| PARSE COLOR
-|--------------------------------------------------------------------------
-*/
-
-function parseColor(color) {
-  if (!color) return undefined
-  return color
-}
-
-/*
-|--------------------------------------------------------------------------
-| APPLY STYLES
+| STYLES
 |--------------------------------------------------------------------------
 */
 
@@ -523,79 +194,255 @@ function styleObject(styles = {}) {
 
   const obj = {}
 
+  /*
+  |--------------------------------------------------------------------------
+  | SIZE
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.w) {
+
+    if (styles.w === 'fill') {
+      obj.width = '100%'
+    }
+    else if (
+      String(styles.w).includes('%')
+    ) {
+      obj.width = styles.w
+    }
+    else {
+      obj.width = styles.w + 'px'
+    }
+  }
+
+  if (styles.h) {
+
+    if (
+      String(styles.h).includes('%')
+    ) {
+      obj.height = styles.h
+    }
+    else {
+      obj.height = styles.h + 'px'
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | COLORS
+  |--------------------------------------------------------------------------
+  */
+
   if (styles.bg)
     obj.background = styles.bg
 
   if (styles.color)
     obj.color = styles.color
 
+  /*
+  |--------------------------------------------------------------------------
+  | TEXT
+  |--------------------------------------------------------------------------
+  */
+
   if (styles.fontSize)
-    obj.fontSize = styles.fontSize + 'px'
+    obj.fontSize =
+      styles.fontSize + 'px'
 
   if (styles.bold === 'true')
     obj.fontWeight = '700'
 
-  if (styles.w === 'fill')
-    obj.width = '100%'
+  if (styles.lineHeight)
+    obj.lineHeight =
+      styles.lineHeight + 'px'
 
-  if (styles.h)
-    obj.height = styles.h + 'px'
+  /*
+  |--------------------------------------------------------------------------
+  | TEXT ALIGN
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.align === 'center')
+    obj.textAlign = 'center'
+
+  if (styles.align === 'right')
+    obj.textAlign = 'right'
+
+  /*
+  |--------------------------------------------------------------------------
+  | LINE CLAMP
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.maxLines) {
+
+    obj.display = '-webkit-box'
+    obj.webkitLineClamp =
+      styles.maxLines
+
+    obj.webkitBoxOrient =
+      'vertical'
+
+    obj.overflow = 'hidden'
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | PADDING
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.p)
     obj.padding = styles.p + 'px'
 
   if (styles.pt)
-    obj.paddingTop = styles.pt + 'px'
+    obj.paddingTop =
+      styles.pt + 'px'
 
   if (styles.pb)
-    obj.paddingBottom = styles.pb + 'px'
+    obj.paddingBottom =
+      styles.pb + 'px'
 
   if (styles.pl)
-    obj.paddingLeft = styles.pl + 'px'
+    obj.paddingLeft =
+      styles.pl + 'px'
 
   if (styles.pr)
-    obj.paddingRight = styles.pr + 'px'
+    obj.paddingRight =
+      styles.pr + 'px'
+
+  /*
+  |--------------------------------------------------------------------------
+  | MARGIN
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.mt)
-    obj.marginTop = styles.mt + 'px'
+    obj.marginTop =
+      styles.mt + 'px'
 
   if (styles.mb)
-    obj.marginBottom = styles.mb + 'px'
+    obj.marginBottom =
+      styles.mb + 'px'
 
   if (styles.ml)
-    obj.marginLeft = styles.ml + 'px'
+    obj.marginLeft =
+      styles.ml + 'px'
 
   if (styles.mr)
-    obj.marginRight = styles.mr + 'px'
+    obj.marginRight =
+      styles.mr + 'px'
 
-  if (styles.radius)
-    obj.borderRadius = styles.radius + 'px'
-
-  if (styles.radiusT) {
-    obj.borderTopLeftRadius = styles.radiusT + 'px'
-    obj.borderTopRightRadius = styles.radiusT + 'px'
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | BORDER
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.border)
-    obj.border = '1px solid ' + styles.border
+    obj.border =
+      '1px solid ' + styles.border
 
-  if (styles.align === 'center')
-    obj.alignItems = 'center'
+  /*
+  |--------------------------------------------------------------------------
+  | RADIUS
+  |--------------------------------------------------------------------------
+  */
 
-  if (styles.distribute === 'between')
-    obj.justifyContent = 'space-between'
+  if (styles.radius)
+    obj.borderRadius =
+      styles.radius + 'px'
 
-  if (styles.gap)
-    obj.gap = styles.gap + 'px'
+  if (styles.radiusT) {
+
+    obj.borderTopLeftRadius =
+      styles.radiusT + 'px'
+
+    obj.borderTopRightRadius =
+      styles.radiusT + 'px'
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | FLEX
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.weight)
     obj.flex = styles.weight
 
-  if (styles.lineHeight)
-    obj.lineHeight = styles.lineHeight + 'px'
+  /*
+  |--------------------------------------------------------------------------
+  | ALIGN ITEMS
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.align === 'center')
-    obj.textAlign = 'center'
+    obj.alignItems = 'center'
+
+  if (styles.align === 'top')
+    obj.alignItems = 'flex-start'
+
+  /*
+  |--------------------------------------------------------------------------
+  | DISTRIBUTE
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.distribute === 'between')
+    obj.justifyContent =
+      'space-between'
+
+  if (styles.distribute === 'center')
+    obj.justifyContent =
+      'center'
+
+  /*
+  |--------------------------------------------------------------------------
+  | GAP
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.gap)
+    obj.gap = styles.gap + 'px'
+
+  /*
+  |--------------------------------------------------------------------------
+  | OFFSET
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    styles.offsetX ||
+    styles.offsetY
+  ) {
+
+    obj.position = 'relative'
+
+    const x =
+      styles.offsetX || 0
+
+    const y =
+      styles.offsetY || 0
+
+    obj.transform =
+      `translate(${x}px, ${y}px)`
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | SHADOW
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.elevation) {
+
+    const elevation =
+      Number(styles.elevation)
+
+    obj.boxShadow =
+      `0 ${elevation * 2}px ${elevation * 8}px rgba(0,0,0,0.12)`
+  }
 
   return obj
 }
@@ -616,26 +463,21 @@ const Renderer = defineComponent({
 
   setup(props) {
 
-    function renderChildren() {
-
-      if (!props.element.children)
-        return null
-
-      return props.element.children.map((child, index) =>
-        h(Renderer, {
-          element: child,
-          key: index
-        })
-      )
-    }
+    /*
+    |--------------------------------------------------------------------------
+    | MERGED PROPS
+    |--------------------------------------------------------------------------
+    */
 
     function getMergedProps() {
 
-      const name = props.element.props?.name
+      const name =
+        props.element.props?.name
 
-      const override = name
-        ? overrideMap[name]
-        : null
+      const override =
+        name
+          ? overrideMap[name]
+          : null
 
       return {
         ...(props.element.props || {}),
@@ -643,13 +485,21 @@ const Renderer = defineComponent({
       }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | MERGED STYLES
+    |--------------------------------------------------------------------------
+    */
+
     function getMergedStyles() {
 
-      const name = props.element.props?.name
+      const name =
+        props.element.props?.name
 
-      const override = name
-        ? overrideMap[name]
-        : null
+      const override =
+        name
+          ? overrideMap[name]
+          : null
 
       return {
         ...(props.element.styles || {}),
@@ -657,17 +507,47 @@ const Renderer = defineComponent({
       }
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CHILDREN
+    |--------------------------------------------------------------------------
+    */
+
+    function renderChildren() {
+
+      if (!props.element.children)
+        return null
+
+      return props.element.children.map(
+        (child, index) =>
+          h(Renderer, {
+            element: child,
+            key: index
+          })
+      )
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROL ELEMENTS
+    |--------------------------------------------------------------------------
+    */
+
     function applyControlElements(tabId) {
 
-      const controls = props.element['control-elements']
+      const controls =
+        props.element['control-elements']
 
-      if (!controls) return
+      if (!controls)
+        return
 
       controls.forEach(control => {
 
-        const target = control['target-name']
+        const target =
+          control['target-name']
 
-        const config = control['on-values'][tabId]
+        const config =
+          control['on-values'][tabId]
 
         if (config) {
           overrideMap[target] = config
@@ -675,10 +555,19 @@ const Renderer = defineComponent({
       })
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RENDER
+    |--------------------------------------------------------------------------
+    */
+
     return () => {
 
-      const mergedProps = getMergedProps()
-      const mergedStyles = getMergedStyles()
+      const mergedProps =
+        getMergedProps()
+
+      const mergedStyles =
+        getMergedStyles()
 
       /*
       |--------------------------------------------------------------------------
@@ -686,7 +575,9 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (mergedProps.visibility === 'off') {
+      if (
+        mergedProps.visibility === 'off'
+      ) {
         return null
       }
 
@@ -696,7 +587,9 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'box-h') {
+      if (
+        props.element.type === 'box-h'
+      ) {
 
         return h(
           'div',
@@ -705,9 +598,14 @@ const Renderer = defineComponent({
               display: 'flex',
               flexDirection: 'row',
               width: '100%',
-              ...styleObject(mergedStyles)
+              boxSizing: 'border-box',
+              alignItems: 'center',
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           renderChildren()
         )
       }
@@ -718,7 +616,9 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'box-v') {
+      if (
+        props.element.type === 'box-v'
+      ) {
 
         return h(
           'div',
@@ -728,9 +628,12 @@ const Renderer = defineComponent({
               flexDirection: 'column',
               width: '100%',
               boxSizing: 'border-box',
-              ...styleObject(mergedStyles)
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           renderChildren()
         )
       }
@@ -741,7 +644,9 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'box-stack') {
+      if (
+        props.element.type === 'box-stack'
+      ) {
 
         return h(
           'div',
@@ -749,9 +654,12 @@ const Renderer = defineComponent({
             style: {
               position: 'relative',
               width: '100%',
-              ...styleObject(mergedStyles)
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           renderChildren()
         )
       }
@@ -762,16 +670,21 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'text') {
+      if (
+        props.element.type === 'text'
+      ) {
 
         return h(
           'div',
           {
             style: {
               boxSizing: 'border-box',
-              ...styleObject(mergedStyles)
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           mergedProps.value || ''
         )
       }
@@ -782,17 +695,22 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'image') {
+      if (
+        props.element.type === 'image'
+      ) {
 
         return h(
           'img',
           {
             src: mergedProps.url,
+
             style: {
               width: '100%',
               objectFit: 'cover',
               display: 'block',
-              ...styleObject(mergedStyles)
+              ...styleObject(
+                mergedStyles
+              )
             }
           }
         )
@@ -804,13 +722,17 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'spacer') {
+      if (
+        props.element.type === 'spacer'
+      ) {
 
         return h(
           'div',
           {
             style: {
-              ...styleObject(mergedStyles)
+              ...styleObject(
+                mergedStyles
+              )
             }
           }
         )
@@ -822,17 +744,24 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'card') {
+      if (
+        props.element.type === 'card'
+      ) {
 
         return h(
           'div',
           {
             style: {
               boxSizing: 'border-box',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              ...styleObject(mergedStyles)
+              boxShadow:
+                '0 2px 10px rgba(0,0,0,0.04)',
+
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           renderChildren()
         )
       }
@@ -843,20 +772,32 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'grid') {
+      if (
+        props.element.type === 'grid'
+      ) {
 
-        const columns = mergedStyles.columns || 2
+        const columns =
+          Number(
+            mergedStyles.columns || 2
+          )
 
         return h(
           'div',
           {
             style: {
               display: 'grid',
-              gridTemplateColumns: `repeat(${columns},1fr)`,
-              gap: (mergedStyles.gapV || 8) + 'px',
+
+              gridTemplateColumns:
+                `repeat(${columns}, minmax(0,1fr))`,
+
+              gap:
+                (mergedStyles.gapV || 8)
+                + 'px',
+
               width: '100%'
             }
           },
+
           renderChildren()
         )
       }
@@ -867,7 +808,9 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'button') {
+      if (
+        props.element.type === 'button'
+      ) {
 
         return h(
           'button',
@@ -875,9 +818,13 @@ const Renderer = defineComponent({
             style: {
               border: 'none',
               cursor: 'pointer',
-              ...styleObject(mergedStyles)
+
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           mergedProps.value
         )
       }
@@ -888,24 +835,148 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'input') {
+      if (
+        props.element.type === 'input'
+      ) {
 
         return h(
           'input',
           {
-            value: formValues[mergedProps.name] || '',
-            placeholder: mergedProps.placeholder || '',
+            value:
+              formValues[
+                mergedProps.name
+              ] || '',
+
+            placeholder:
+              mergedProps.placeholder
+              || '',
+
             onInput: e => {
-              formValues[mergedProps.name] = e.target.value
+
+              formValues[
+                mergedProps.name
+              ] = e.target.value
             },
+
             style: {
               border: 'none',
               outline: 'none',
               width: '100%',
               boxSizing: 'border-box',
-              ...styleObject(mergedStyles)
+
+              ...styleObject(
+                mergedStyles
+              )
             }
           }
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | ICON
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'icon'
+      ) {
+
+        return h(
+          'span',
+          {
+            class:
+              'material-symbols-outlined',
+
+            style: {
+              fontSize:
+                (mergedStyles.size || 24)
+                + 'px',
+
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+
+              ...styleObject(
+                mergedStyles
+              )
+            }
+          },
+
+          iconMap[
+            (
+              mergedProps.name || ''
+            ).toLowerCase()
+          ] || 'flash_on'
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | ITEMS SCROLLER H
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'items-scroller-h'
+      ) {
+
+        return h(
+          'div',
+          {
+            style: {
+              display: 'flex',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              width: '100%',
+              boxSizing: 'border-box',
+              scrollbarWidth: 'none',
+
+              ...styleObject(
+                mergedStyles
+              )
+            }
+          },
+
+          renderChildren()
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | GESTURE
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'gesture'
+      ) {
+
+        return h(
+          'div',
+          {
+            style: {
+              cursor: 'pointer',
+              position: 'relative'
+            },
+
+            onClick: () => {
+
+              const stateKey =
+                mergedProps.state_key
+
+              const setValue =
+                mergedProps.set_value
+
+              globalStates[
+                stateKey
+              ] = setValue
+            }
+          },
+
+          renderChildren()
         )
       }
 
@@ -915,7 +986,10 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'box-banner') {
+      if (
+        props.element.type ===
+        'box-banner'
+      ) {
 
         return h(
           'div',
@@ -924,16 +998,32 @@ const Renderer = defineComponent({
               width: '100%',
               position: 'relative',
               overflow: 'hidden',
-              backgroundImage: `url(${mergedProps.bgImage})`,
+
+              backgroundImage:
+                `url(${mergedProps.bgImage})`,
+
               backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              backgroundPosition:
+                'center',
+
               borderBottomLeftRadius:
-                (mergedStyles.startRadius || 0) + 'px',
+                (
+                  mergedStyles
+                    .startRadius || 0
+                ) + 'px',
+
               borderBottomRightRadius:
-                (mergedStyles.endRadius || 0) + 'px',
-              ...styleObject(mergedStyles)
+                (
+                  mergedStyles
+                    .endRadius || 0
+                ) + 'px',
+
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
+
           renderChildren()
         )
       }
@@ -944,14 +1034,25 @@ const Renderer = defineComponent({
       |--------------------------------------------------------------------------
       */
 
-      if (props.element.type === 'tab-menu') {
+      if (
+        props.element.type ===
+        'tab-menu'
+      ) {
 
         const stateKey =
-          mergedProps.state_key || 'default_tab'
+          mergedProps.state_key
+          || 'default_tab'
 
-        if (!globalStates[stateKey]) {
+        if (
+          !globalStates[stateKey]
+        ) {
+
           globalStates[stateKey] =
             mergedProps.initial_tab
+
+          applyControlElements(
+            mergedProps.initial_tab
+          )
         }
 
         return h(
@@ -961,64 +1062,121 @@ const Renderer = defineComponent({
               display: 'flex',
               width: '100%',
               boxSizing: 'border-box',
-              ...styleObject(mergedStyles)
+
+              ...styleObject(
+                mergedStyles
+              )
             }
           },
 
-          props.element.children.map(child => {
+          props.element.children.map(
+            child => {
 
-            const tabId = child.props?.tab_id
+              const tabId =
+                child.props?.tab_id
 
-            return h(
-              'div',
-              {
-                style: {
-                  flex: 1,
-                  cursor: 'pointer'
+              return h(
+                'div',
+                {
+                  style: {
+                    flex: 1,
+                    cursor: 'pointer'
+                  },
+
+                  onClick: () => {
+
+                    globalStates[
+                      stateKey
+                    ] = tabId
+
+                    applyControlElements(
+                      tabId
+                    )
+                  }
                 },
 
-                onClick: () => {
-
-                  globalStates[stateKey] = tabId
-
-                  applyControlElements(tabId)
-                }
-              },
-
-              [
-                h(Renderer, {
-                  element: child
-                })
-              ]
-            )
-          })
+                [
+                  h(Renderer, {
+                    element: child
+                  })
+                ]
+              )
+            }
+          )
         )
       }
 
       /*
       |--------------------------------------------------------------------------
-      | DEFAULT
+      | BOTTOM DRAWER
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'bottom-drawer'
+      ) {
+
+        const stateKey =
+          mergedProps.state_key
+
+        const isOpen =
+          globalStates[stateKey]
+          === 'true'
+
+        if (!isOpen)
+          return null
+
+        return h(
+          'div',
+          {
+            style: {
+              position: 'fixed',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: '#FFFFFF',
+
+              borderTopLeftRadius:
+                '24px',
+
+              borderTopRightRadius:
+                '24px',
+
+              boxShadow:
+                '0 -10px 40px rgba(0,0,0,0.15)',
+
+              zIndex: 999,
+              maxHeight: '70%',
+              overflowY: 'auto'
+            }
+          },
+
+          renderChildren()
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | UNKNOWN
       |--------------------------------------------------------------------------
       */
 
       return h(
         'div',
-        {},
+        {
+          style: {
+            color: 'red',
+            fontSize: '12px',
+            padding: '4px'
+          }
+        },
+
         `UNKNOWN TYPE : ${props.element.type}`
       )
     }
   }
 })
-
-/*
-|--------------------------------------------------------------------------
-| LOAD EXAMPLE
-|--------------------------------------------------------------------------
-*/
-
-function loadExample() {
-  jsonText.value = jsonText.value
-}
 </script>
 
 <style scoped>
@@ -1089,10 +1247,13 @@ body {
   justify-content: center;
   align-items: center;
   overflow: auto;
+
   background:
-    radial-gradient(circle at top,
+    radial-gradient(
+      circle at top,
       #1e3a8a,
-      #0f172a);
+      #0f172a
+    );
 }
 
 .phone-frame {
@@ -1101,6 +1262,7 @@ body {
   background: black;
   border-radius: 40px;
   padding: 12px;
+
   box-shadow:
     0 20px 80px rgba(0,0,0,0.5);
 }
@@ -1119,34 +1281,23 @@ body {
   overflow-y: auto;
 }
 
-.layer-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 20;
-}
-
-.layer-floating {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 30;
-}
-
-.layer-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 20;
-}
-
 .invalid-json {
   color: red;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   height: 100%;
+}
+
+.material-symbols-outlined {
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.screen-scroll::-webkit-scrollbar,
+.items-scroll::-webkit-scrollbar {
+  display: none;
 }
 </style>
