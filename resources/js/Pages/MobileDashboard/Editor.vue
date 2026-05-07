@@ -151,13 +151,6 @@
 
           </template>
 
-          <div
-            v-else
-            class="invalid-json"
-          >
-            Invalid JSON
-          </div>
-
         </div>
 
       </div>
@@ -173,13 +166,12 @@ import {
   reactive,
   computed,
   defineComponent,
-  h,
-  onMounted
+  h
 } from 'vue'
 
 /*
 |--------------------------------------------------------------------------
-| GLOBAL STATES
+| GLOBAL
 |--------------------------------------------------------------------------
 */
 
@@ -298,39 +290,6 @@ function getLayer(element) {
 
 /*
 |--------------------------------------------------------------------------
-| DATA PLACEHOLDER
-|--------------------------------------------------------------------------
-*/
-
-function injectData(node,data) {
-
-  if (!node)
-    return
-
-  if (node.props) {
-
-    Object.keys(node.props)
-      .forEach(key => {
-
-        node.props[key] =
-          String(node.props[key])
-          .replace(
-            /\{\{(.*?)\}\}/g,
-            (_,k)=> data[k.trim()] || ''
-          )
-      })
-  }
-
-  if (node.children) {
-
-    node.children.forEach(
-      child => injectData(child,data)
-    )
-  }
-}
-
-/*
-|--------------------------------------------------------------------------
 | STYLE ENGINE
 |--------------------------------------------------------------------------
 */
@@ -339,40 +298,69 @@ function styleObject(styles = {}) {
 
   const obj = {}
 
+  obj.boxSizing = 'border-box'
+
   /*
   |--------------------------------------------------------------------------
-  | SIZE
+  | WIDTH
   |--------------------------------------------------------------------------
   */
 
-  if (styles.w) {
+  if (styles.w === 'fill') {
 
-    if (styles.w === 'fill') {
-      obj.width = '100%'
-    }
-    else if (
+    obj.width = '100%'
+  }
+  else if (styles.w) {
+
+    if (
       String(styles.w).includes('%')
     ) {
+
       obj.width = styles.w
     }
     else {
-      obj.width = styles.w + 'px'
+
+      obj.width =
+        styles.w + 'px'
     }
   }
 
-  if (styles.h) {
+  /*
+  |--------------------------------------------------------------------------
+  | HEIGHT
+  |--------------------------------------------------------------------------
+  */
 
-    if (styles.h === 'fill') {
-      obj.height = '100%'
-    }
-    else if (
+  if (styles.h === 'fill') {
+
+    obj.height = '100%'
+    obj.minHeight = '100%'
+  }
+  else if (styles.h) {
+
+    if (
       String(styles.h).includes('%')
     ) {
+
       obj.height = styles.h
     }
     else {
-      obj.height = styles.h + 'px'
+
+      obj.height =
+        styles.h + 'px'
     }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | FLEX
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.weight) {
+
+    obj.flex =
+      Number(styles.weight)
   }
 
   /*
@@ -381,16 +369,31 @@ function styleObject(styles = {}) {
   |--------------------------------------------------------------------------
   */
 
-  if (styles.bg)
-    obj.background = styles.bg
+  if (styles.bg) {
+
+    obj.background =
+      styles.bg
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | BG IMAGE
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.bgImage) {
 
     obj.backgroundImage =
       `url(${styles.bgImage})`
 
-    obj.backgroundSize = 'cover'
-    obj.backgroundPosition = 'center'
+    obj.backgroundSize =
+      'cover'
+
+    obj.backgroundPosition =
+      'center'
+
+    obj.backgroundRepeat =
+      'no-repeat'
   }
 
   /*
@@ -420,18 +423,21 @@ function styleObject(styles = {}) {
   */
 
   if (styles.align === 'center') {
+
     obj.alignItems = 'center'
     obj.textAlign = 'center'
   }
 
-  if (styles.align === 'right') {
-    obj.alignItems = 'flex-end'
-    obj.textAlign = 'right'
-  }
-
   if (styles.align === 'left') {
+
     obj.alignItems = 'flex-start'
     obj.textAlign = 'left'
+  }
+
+  if (styles.align === 'right') {
+
+    obj.alignItems = 'flex-end'
+    obj.textAlign = 'right'
   }
 
   /*
@@ -440,17 +446,45 @@ function styleObject(styles = {}) {
   |--------------------------------------------------------------------------
   */
 
-  if (styles.arrangement === 'center')
+  if (
+    styles.arrangement === 'center'
+  ) {
+
     obj.justifyContent = 'center'
+  }
 
-  if (styles.arrangement === 'between')
+  if (
+    styles.arrangement === 'between'
+  ) {
+
     obj.justifyContent = 'space-between'
+  }
 
-  if (styles.arrangement === 'around')
+  if (
+    styles.arrangement === 'around'
+  ) {
+
     obj.justifyContent = 'space-around'
+  }
 
-  if (styles.arrangement === 'evenly')
+  if (
+    styles.arrangement === 'evenly'
+  ) {
+
     obj.justifyContent = 'space-evenly'
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | GAP
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.gap) {
+
+    obj.gap =
+      styles.gap + 'px'
+  }
 
   /*
   |--------------------------------------------------------------------------
@@ -459,19 +493,24 @@ function styleObject(styles = {}) {
   */
 
   if (styles.p)
-    obj.padding = styles.p + 'px'
+    obj.padding =
+      styles.p + 'px'
 
   if (styles.pt)
-    obj.paddingTop = styles.pt + 'px'
+    obj.paddingTop =
+      styles.pt + 'px'
 
   if (styles.pb)
-    obj.paddingBottom = styles.pb + 'px'
+    obj.paddingBottom =
+      styles.pb + 'px'
 
   if (styles.pl)
-    obj.paddingLeft = styles.pl + 'px'
+    obj.paddingLeft =
+      styles.pl + 'px'
 
   if (styles.pr)
-    obj.paddingRight = styles.pr + 'px'
+    obj.paddingRight =
+      styles.pr + 'px'
 
   /*
   |--------------------------------------------------------------------------
@@ -479,26 +518,25 @@ function styleObject(styles = {}) {
   |--------------------------------------------------------------------------
   */
 
+  if (styles.m)
+    obj.margin =
+      styles.m + 'px'
+
   if (styles.mt)
-    obj.marginTop = styles.mt + 'px'
+    obj.marginTop =
+      styles.mt + 'px'
 
   if (styles.mb)
-    obj.marginBottom = styles.mb + 'px'
+    obj.marginBottom =
+      styles.mb + 'px'
 
   if (styles.ml)
-    obj.marginLeft = styles.ml + 'px'
+    obj.marginLeft =
+      styles.ml + 'px'
 
   if (styles.mr)
-    obj.marginRight = styles.mr + 'px'
-
-  /*
-  |--------------------------------------------------------------------------
-  | GAP
-  |--------------------------------------------------------------------------
-  */
-
-  if (styles.gap)
-    obj.gap = styles.gap + 'px'
+    obj.marginRight =
+      styles.mr + 'px'
 
   /*
   |--------------------------------------------------------------------------
@@ -506,9 +544,29 @@ function styleObject(styles = {}) {
   |--------------------------------------------------------------------------
   */
 
-  if (styles.radius)
+  if (styles.radius) {
+
     obj.borderRadius =
       styles.radius + 'px'
+  }
+
+  if (styles.radiusT) {
+
+    obj.borderTopLeftRadius =
+      styles.radiusT + 'px'
+
+    obj.borderTopRightRadius =
+      styles.radiusT + 'px'
+  }
+
+  if (styles.radiusB) {
+
+    obj.borderBottomLeftRadius =
+      styles.radiusB + 'px'
+
+    obj.borderBottomRightRadius =
+      styles.radiusB + 'px'
+  }
 
   /*
   |--------------------------------------------------------------------------
@@ -516,32 +574,37 @@ function styleObject(styles = {}) {
   |--------------------------------------------------------------------------
   */
 
-  if (styles.border)
+  if (styles.border) {
+
     obj.border =
-      '1px solid ' + styles.border
+      `1px solid ${styles.border}`
+  }
 
   /*
   |--------------------------------------------------------------------------
-  | FLEX
-  |--------------------------------------------------------------------------
-  */
-
-  if (styles.weight)
-    obj.flex = styles.weight
-
-  /*
-  |--------------------------------------------------------------------------
-  | SHADOW
+  | ELEVATION
   |--------------------------------------------------------------------------
   */
 
   if (styles.elevation) {
 
-    const elevation =
+    const e =
       Number(styles.elevation)
 
     obj.boxShadow =
-      `0 ${elevation * 2}px ${elevation * 8}px rgba(0,0,0,0.12)`
+      `0 ${e}px ${e*4}px rgba(0,0,0,0.15)`
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | ALPHA
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.alpha) {
+
+    obj.opacity =
+      Number(styles.alpha)
   }
 
   /*
@@ -555,55 +618,8 @@ function styleObject(styles = {}) {
     styles.offsetY
   ) {
 
-    const x =
-      styles.offsetX || 0
-
-    const y =
-      styles.offsetY || 0
-
     obj.transform =
-      `translate(${x}px,${y}px)`
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | ALPHA
-  |--------------------------------------------------------------------------
-  */
-
-  if (styles.alpha)
-    obj.opacity = styles.alpha
-
-  /*
-  |--------------------------------------------------------------------------
-  | SCROLLABLE
-  |--------------------------------------------------------------------------
-  */
-
-  if (
-    styles.scrollable === 'true'
-  ) {
-
-    obj.overflowY = 'auto'
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | MAXLINES
-  |--------------------------------------------------------------------------
-  */
-
-  if (styles.maxLines) {
-
-    obj.display = '-webkit-box'
-
-    obj.webkitLineClamp =
-      styles.maxLines
-
-    obj.webkitBoxOrient =
-      'vertical'
-
-    obj.overflow = 'hidden'
+      `translate(${styles.offsetX || 0}px, ${styles.offsetY || 0}px)`
   }
 
   /*
@@ -612,21 +628,27 @@ function styleObject(styles = {}) {
   |--------------------------------------------------------------------------
   */
 
-  if (styles.absolute === 'true') {
+  if (
+    styles.absolute === 'true'
+  ) {
 
     obj.position = 'absolute'
 
-    if (styles.top != null)
-      obj.top = styles.top + 'px'
+    if (styles.top)
+      obj.top =
+        styles.top + 'px'
 
-    if (styles.left != null)
-      obj.left = styles.left + 'px'
+    if (styles.left)
+      obj.left =
+        styles.left + 'px'
 
-    if (styles.right != null)
-      obj.right = styles.right + 'px'
+    if (styles.right)
+      obj.right =
+        styles.right + 'px'
 
-    if (styles.bottom != null)
-      obj.bottom = styles.bottom + 'px'
+    if (styles.bottom)
+      obj.bottom =
+        styles.bottom + 'px'
   }
 
   return obj
@@ -640,170 +662,28 @@ function styleObject(styles = {}) {
 
 const Renderer = defineComponent({
 
-  name: 'Renderer',
+  name:'Renderer',
 
-  props: {
-    element: Object,
-    form: Object,
-    overrides: Object,
-    parentActive: Boolean
+  props:{
+    element:Object,
+    parentActive:Boolean
   },
 
-  setup(props) {
+  setup(props){
 
-    const localForm =
-      props.form || formValues
+    return ()=>{
 
-    const localOverride =
-      props.overrides || overrideMap
+      const p =
+        props.element.props || {}
 
-    /*
-    |--------------------------------------------------------------------------
-    | MERGED
-    |--------------------------------------------------------------------------
-    */
-
-    function mergedProps() {
-
-      const name =
-        props.element.props?.name
-
-      const override =
-        name
-          ? localOverride[name]
-          : null
-
-      return {
-        ...(props.element.props || {}),
-        ...(override?.props || {})
-      }
-    }
-
-    function mergedStyles() {
-
-      const name =
-        props.element.props?.name
-
-      const override =
-        name
-          ? localOverride[name]
-          : null
-
-      return {
+      const s = {
 
         ...(props.element.styles || {}),
 
         ...(props.parentActive
           ? props.element.activeStyles || {}
           : {}
-        ),
-
-        ...(override?.styles || {})
-      }
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CHILDREN
-    |--------------------------------------------------------------------------
-    */
-
-    function renderChildren(
-      extra={}
-    ) {
-
-      if (!props.element.children)
-        return null
-
-      return props.element.children.map(
-        (child,index)=>
-          h(Renderer,{
-            key:index,
-            element:child,
-            form:localForm,
-            overrides:localOverride,
-            parentActive:
-              extra.parentActive
-          })
-      )
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROL ELEMENT
-    |--------------------------------------------------------------------------
-    */
-
-    function applyControlElements(tabId) {
-
-      const controls =
-        props.element['control-elements']
-
-      if (!controls)
-        return
-
-      controls.forEach(control=>{
-
-        const target =
-          control['target-name']
-
-        const config =
-          control['on-values']?.[tabId]
-
-        if (config) {
-          localOverride[target] =
-            config
-        }
-      })
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DATA SOURCE
-    |--------------------------------------------------------------------------
-    */
-
-    const dynamicItems = ref([])
-
-    onMounted(async()=>{
-
-      if (
-        props.element['data-source']
-      ) {
-
-        try {
-
-          const response =
-            await fetch(
-              props.element['data-source']
-            )
-
-          dynamicItems.value =
-            await response.json()
-        }
-        catch(e){
-          console.log(e)
-        }
-      }
-    })
-
-    return ()=> {
-
-      const p = mergedProps()
-      const s = mergedStyles()
-
-      /*
-      |--------------------------------------------------------------------------
-      | VISIBILITY
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        p.visibility === 'off'
-        ||
-        p.visibility === 'false'
-      ) {
-        return null
+        )
       }
 
       /*
@@ -823,12 +703,16 @@ const Renderer = defineComponent({
               display:'flex',
               flexDirection:'row',
               width:'100%',
-              boxSizing:'border-box',
               ...styleObject(s)
             }
           },
 
-          renderChildren()
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
         )
       }
 
@@ -842,57 +726,6 @@ const Renderer = defineComponent({
         props.element.type === 'box-v'
       ) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATA SOURCE
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-          props.element['data-source']
-          &&
-          props.element['data-container']
-        ) {
-
-          return h(
-            'div',
-            {
-              style:{
-                display:'flex',
-                flexDirection:'column',
-                width:'100%',
-                ...styleObject(s)
-              }
-            },
-
-            dynamicItems.value.map(
-              item => {
-
-                const cloned =
-                  JSON.parse(
-                    JSON.stringify(
-                      props.element['data-container']
-                    )
-                  )
-
-                injectData(
-                  cloned,
-                  item
-                )
-
-                return h(
-                  Renderer,
-                  {
-                    element:cloned,
-                    form:localForm,
-                    overrides:localOverride
-                  }
-                )
-              }
-            )
-          )
-        }
-
         return h(
           'div',
           {
@@ -900,61 +733,99 @@ const Renderer = defineComponent({
               display:'flex',
               flexDirection:'column',
               width:'100%',
-              boxSizing:'border-box',
               ...styleObject(s)
             }
           },
 
-          renderChildren()
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
         )
       }
 
       /*
-        |--------------------------------------------------------------------------
-        | BOX STACK
-        |--------------------------------------------------------------------------
-        */
+      |--------------------------------------------------------------------------
+      | BOX STACK
+      |--------------------------------------------------------------------------
+      */
 
-        if (
+      if (
         props.element.type === 'box-stack'
-        ) {
+      ) {
 
         return h(
-            'div',
-            {
+          'div',
+          {
             style:{
 
-                position:'relative',
+              position:'relative',
 
-                width:'100%',
-                height:'100%',
+              width:'100%',
 
-                overflow:'hidden',
+              minHeight:
+                s.h === 'fill'
+                  ? '100%'
+                  : undefined,
 
-                /*
-                |--------------------------------------------------------------------------
-                | BG IMAGE
-                |--------------------------------------------------------------------------
-                */
+              height:
+                s.h === 'fill'
+                  ? '100%'
+                  : (
+                      s.h
+                        ? (
+                            String(s.h).includes('%')
+                              ? s.h
+                              : s.h + 'px'
+                          )
+                        : undefined
+                    ),
 
-                backgroundImage:
+              overflow:'hidden',
+
+              backgroundImage:
                 p.bgImage
-                    ? `url(${p.bgImage})`
-                    : undefined,
+                  ? `url(${p.bgImage})`
+                  : undefined,
 
-                backgroundSize:'cover',
+              backgroundSize:'cover',
 
-                backgroundPosition:'center',
+              backgroundPosition:'center',
 
-                backgroundRepeat:'no-repeat',
+              backgroundRepeat:'no-repeat',
 
-                ...styleObject(s)
+              ...styleObject({
+                ...s,
+                bgImage:null
+              })
             }
-            },
+          },
 
-            renderChildren()
+          [
+
+            h(
+              'div',
+              {
+                style:{
+                  position:'relative',
+                  width:'100%',
+                  height:'100%'
+                }
+              },
+
+              props.element.children?.map(
+                child =>
+                  h(Renderer,{
+                    element:child
+                  })
+              )
+            )
+          ]
         )
-        }
+      }
+
       /*
       |--------------------------------------------------------------------------
       | BOX BANNER
@@ -962,7 +833,8 @@ const Renderer = defineComponent({
       */
 
       if (
-        props.element.type === 'box-banner'
+        props.element.type ===
+        'box-banner'
       ) {
 
         return h(
@@ -970,316 +842,30 @@ const Renderer = defineComponent({
           {
             style:{
               position:'relative',
+              width:'100%',
               overflow:'hidden',
-              width:'100%',
-              ...styleObject({
-                ...s,
-                bgImage:p.bgImage
+
+              backgroundImage:
+                p.bgImage
+                  ? `url(${p.bgImage})`
+                  : undefined,
+
+              backgroundSize:'cover',
+
+              backgroundPosition:'center',
+
+              backgroundRepeat:'no-repeat',
+
+              ...styleObject(s)
+            }
+          },
+
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
               })
-            }
-          },
-
-          renderChildren()
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | DATA FORM
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type === 'data-form'
-      ) {
-
-        return h(
-          'div',
-          {
-            style:{
-              width:'100%',
-              ...styleObject(s)
-            }
-          },
-
-          renderChildren()
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | TEXT
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type === 'text'
-      ) {
-
-        return h(
-          'div',
-          {
-            style:{
-              boxSizing:'border-box',
-              ...styleObject(s)
-            }
-          },
-
-          p.value || ''
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | IMAGE
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type === 'image'
-      ) {
-
-        return h(
-          'img',
-          {
-            src:p.url,
-
-            style:{
-              width:'100%',
-              display:'block',
-              objectFit:'cover',
-              ...styleObject(s)
-            }
-          }
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | IMAGE PICKER
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type ===
-        'image-picker'
-      ) {
-
-        return h(
-          'label',
-          {
-            style:{
-              display:'block',
-              cursor:'pointer'
-            }
-          },
-
-          [
-
-            h(
-              'input',
-              {
-                type:'file',
-                accept:'image/*',
-
-                style:{
-                  display:'none'
-                },
-
-                onChange:e=>{
-
-                  const file =
-                    e.target.files[0]
-
-                  if (!file)
-                    return
-
-                  localForm[p.name] =
-                    URL.createObjectURL(file)
-                }
-              }
-            ),
-
-            localForm[p.name]
-
-              ? h(
-                  'img',
-                  {
-                    src:
-                      localForm[p.name],
-
-                    style:{
-                      width:'100%',
-                      height:'200px',
-                      objectFit:'cover',
-                      borderRadius:'12px'
-                    }
-                  }
-                )
-
-              : h(
-                  'div',
-                  {
-                    style:{
-                      height:'200px',
-                      border:'2px dashed #CBD5E1',
-                      borderRadius:'12px',
-                      display:'flex',
-                      alignItems:'center',
-                      justifyContent:'center'
-                    }
-                  },
-
-                  'Tap to upload'
-                )
-          ]
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | INPUT
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type === 'input'
-      ) {
-
-        return h(
-          'input',
-          {
-
-            type:
-              p.keyboardType ===
-              'password'
-                ? 'password'
-                : 'text',
-
-            value:
-              localForm[p.name]
-              || p.value
-              || '',
-
-            placeholder:
-              p.placeholder || '',
-
-            onInput:e=>{
-
-              localForm[p.name] =
-                e.target.value
-            },
-
-            style:{
-              border:'none',
-              outline:'none',
-              width:'100%',
-              boxSizing:'border-box',
-              ...styleObject(s)
-            }
-          }
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | BUTTON
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type ===
-        'button'
-      ) {
-
-        return h(
-          'button',
-          {
-
-            style:{
-              border:'none',
-              cursor:'pointer',
-              ...styleObject(s)
-            },
-
-            onClick:()=>{
-
-              /*
-              |--------------------------------------------------------------------------
-              | STATE
-              |--------------------------------------------------------------------------
-              */
-
-              if (
-                p.state_key
-              ) {
-
-                localForm[
-                  p.state_key
-                ] = p.set_value
-              }
-
-              /*
-              |--------------------------------------------------------------------------
-              | ACTION
-              |--------------------------------------------------------------------------
-              */
-
-              if (
-                props.element.action
-                  ?.target
-              ) {
-
-                alert(
-                  'Navigate : '
-                  +
-                  props.element.action
-                    .target
-                )
-              }
-            }
-          },
-
-          p.value || 'Button'
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | ICON
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type ===
-        'icon'
-      ) {
-
-        return h(
-          'span',
-          {
-            class:
-              'material-symbols-outlined',
-
-            style:{
-              fontSize:
-                (
-                  s.size || 24
-                ) + 'px',
-
-              display:'flex',
-              alignItems:'center',
-              justifyContent:'center',
-
-              ...styleObject(s)
-            }
-          },
-
-          iconMap[
-            (
-              p.name || ''
-            ).toLowerCase()
-          ] || 'flash_on'
+          )
         )
       }
 
@@ -1306,18 +892,246 @@ const Renderer = defineComponent({
               display:'grid',
 
               gridTemplateColumns:
-                `repeat(${columns},minmax(0,1fr))`,
+                `repeat(${columns}, minmax(0,1fr))`,
 
               gap:
-                (
-                  s.gapV || 8
-                ) + 'px',
+                (s.gapV || 8) + 'px',
 
-              width:'100%'
+              width:'100%',
+
+              ...styleObject(s)
             }
           },
 
-          renderChildren()
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | TEXT
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'text'
+      ) {
+
+        return h(
+          'div',
+          {
+            style:{
+              ...styleObject(s)
+            }
+          },
+
+          p.value || ''
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | INPUT
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'input'
+      ) {
+
+        return h(
+          'input',
+          {
+
+            type:
+              p.keyboardType ===
+              'password'
+                ? 'password'
+                : 'text',
+
+            value:
+              formValues[
+                p.name
+              ] || '',
+
+            placeholder:
+              p.placeholder || '',
+
+            onInput:e=>{
+
+              formValues[
+                p.name
+              ] = e.target.value
+            },
+
+            style:{
+
+              border:'none',
+              outline:'none',
+
+              ...styleObject(s)
+            }
+          }
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | BUTTON
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'button'
+      ) {
+
+        return h(
+          'button',
+          {
+
+            style:{
+
+              border:'none',
+              cursor:'pointer',
+
+              ...styleObject(s)
+            }
+          },
+
+          p.value || 'Button'
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | IMAGE
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'image'
+      ) {
+
+        return h(
+          'img',
+          {
+
+            src:p.url,
+
+            style:{
+
+              width:'100%',
+              objectFit:'cover',
+              display:'block',
+
+              ...styleObject(s)
+            }
+          }
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | ICON
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'icon'
+      ) {
+
+        return h(
+          'span',
+          {
+
+            class:
+              'material-symbols-outlined',
+
+            style:{
+
+              fontSize:
+                (
+                  s.size || 24
+                ) + 'px',
+
+              ...styleObject(s)
+            }
+          },
+
+          iconMap[
+            (
+              p.name || ''
+            ).toLowerCase()
+          ] || 'flash_on'
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | CARD
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'card'
+      ) {
+
+        return h(
+          'div',
+          {
+            style:{
+              width:'100%',
+              ...styleObject(s)
+            }
+          },
+
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | ITEMS SCROLLER H
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'items-scroller-h'
+      ) {
+
+        return h(
+          'div',
+          {
+            style:{
+              display:'flex',
+              overflowX:'auto',
+              overflowY:'hidden',
+              width:'100%',
+              ...styleObject(s)
+            }
+          },
+
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
         )
       }
 
@@ -1344,59 +1158,6 @@ const Renderer = defineComponent({
 
       /*
       |--------------------------------------------------------------------------
-      | CARD
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type ===
-        'card'
-      ) {
-
-        return h(
-          'div',
-          {
-            style:{
-              width:'100%',
-              boxSizing:'border-box',
-              ...styleObject(s)
-            }
-          },
-
-          renderChildren()
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
-      | ITEMS SCROLLER H
-      |--------------------------------------------------------------------------
-      */
-
-      if (
-        props.element.type ===
-        'items-scroller-h'
-      ) {
-
-        return h(
-          'div',
-          {
-            style:{
-              display:'flex',
-              overflowX:'auto',
-              overflowY:'hidden',
-              width:'100%',
-              boxSizing:'border-box',
-              ...styleObject(s)
-            }
-          },
-
-          renderChildren()
-        )
-      }
-
-      /*
-      |--------------------------------------------------------------------------
       | GESTURE
       |--------------------------------------------------------------------------
       */
@@ -1412,7 +1173,7 @@ const Renderer = defineComponent({
 
             style:{
               cursor:'pointer',
-              position:'relative'
+              width:'100%'
             },
 
             onClick:()=>{
@@ -1421,14 +1182,19 @@ const Renderer = defineComponent({
                 p.state_key
               ) {
 
-                localForm[
+                formValues[
                   p.state_key
                 ] = p.set_value
               }
             }
           },
 
-          renderChildren()
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
         )
       }
 
@@ -1452,10 +1218,6 @@ const Renderer = defineComponent({
 
           globalStates[stateKey] =
             p.initial_tab
-
-          applyControlElements(
-            p.initial_tab
-          )
         }
 
         return h(
@@ -1468,7 +1230,7 @@ const Renderer = defineComponent({
             }
           },
 
-          props.element.children.map(
+          props.element.children?.map(
             child=>{
 
               const tabId =
@@ -1488,28 +1250,19 @@ const Renderer = defineComponent({
                     globalStates[
                       stateKey
                     ] = tabId
-
-                    applyControlElements(
-                      tabId
-                    )
                   }
                 },
 
                 [
 
-                  h(
-                    Renderer,
-                    {
-                      element:child,
-                      form:localForm,
-                      overrides:localOverride,
+                  h(Renderer,{
+                    element:child,
 
-                      parentActive:
-                        globalStates[
-                          stateKey
-                        ] === tabId
-                    }
-                  )
+                    parentActive:
+                      globalStates[
+                        stateKey
+                      ] === tabId
+                  })
                 ]
               )
             }
@@ -1529,7 +1282,7 @@ const Renderer = defineComponent({
       ) {
 
         const isOpen =
-          localForm[
+          formValues[
             p.state_key
           ] === 'true'
 
@@ -1546,8 +1299,10 @@ const Renderer = defineComponent({
               bottom:0,
               zIndex:999,
               background:'#FFF',
+
               borderTopLeftRadius:'24px',
               borderTopRightRadius:'24px',
+
               boxShadow:
                 '0 -10px 40px rgba(0,0,0,0.2)',
 
@@ -1555,7 +1310,12 @@ const Renderer = defineComponent({
             }
           },
 
-          renderChildren()
+          props.element.children?.map(
+            child =>
+              h(Renderer,{
+                element:child
+              })
+          )
         )
       }
 
@@ -1570,8 +1330,8 @@ const Renderer = defineComponent({
         {
           style:{
             color:'red',
-            fontSize:'12px',
-            padding:'4px'
+            padding:'6px',
+            fontSize:'12px'
           }
         },
 
@@ -1583,180 +1343,167 @@ const Renderer = defineComponent({
 </script>
 
 <style scoped>
-* {
-  box-sizing: border-box;
+*{
+  box-sizing:border-box;
 }
 
-body {
-  margin: 0;
+body{
+  margin:0;
 }
 
-.app {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  background: #0f172a;
-  font-family: Inter, sans-serif;
+.app{
+  width:100%;
+  height:100vh;
+  display:flex;
+  overflow:hidden;
+  background:#0F172A;
 }
 
-.editor-panel {
-  width: 50%;
-  height: 100%;
-  border-right: 1px solid #1e293b;
-  display: flex;
-  flex-direction: column;
-  background: #020617;
+.editor-panel{
+  width:50%;
+  height:100%;
+  background:#020617;
+  border-right:1px solid #1E293B;
+  display:flex;
+  flex-direction:column;
 }
 
-.toolbar {
-  height: 60px;
-  min-height: 60px;
-  border-bottom: 1px solid #1e293b;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  color: white;
+.toolbar{
+  height:60px;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  border-bottom:1px solid #1E293B;
+  color:white;
 }
 
-.toolbar button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 10px;
-  cursor: pointer;
+.toolbar button{
+  height:38px;
+  border:none;
+  background:#2563EB;
+  color:white;
+  border-radius:10px;
+  padding:0 16px;
+  cursor:pointer;
 }
 
-.json-editor {
-  flex: 1;
-  width: 100%;
-  background: #020617;
-  color: #e2e8f0;
-  border: none;
-  outline: none;
-  resize: none;
-  padding: 20px;
-  font-size: 13px;
-  font-family: monospace;
-  line-height: 1.6;
+.json-editor{
+  flex:1;
+  width:100%;
+  resize:none;
+  border:none;
+  outline:none;
+  background:#020617;
+  color:#E2E8F0;
+  padding:20px;
+  font-size:13px;
+  line-height:1.6;
+  font-family:monospace;
 }
 
-.preview-panel {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: auto;
+.preview-panel{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 
   background:
     radial-gradient(
       circle at top,
-      #1e3a8a,
-      #0f172a
+      #1E3A8A,
+      #0F172A
     );
 }
 
-.phone-frame {
-  width: 390px;
-  height: 844px;
-  background: black;
-  border-radius: 40px;
-  padding: 12px;
+.phone-frame{
+  width:390px;
+  height:844px;
+  background:black;
+  border-radius:40px;
+  padding:12px;
 
   box-shadow:
     0 20px 80px rgba(0,0,0,0.5);
 }
 
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  border-radius: 32px;
-  overflow: hidden;
-  position: relative;
+.phone-screen{
+  width:100%;
+  height:100%;
+  border-radius:32px;
+  overflow:hidden;
+  position:relative;
 }
 
-.screen-scroll {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-  position: relative;
-  z-index: 1;
+.layer-background{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  width:100%;
+  height:100%;
 }
 
-.layer-background {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
+.layer-background > *{
+  width:100%;
+  height:100%;
 }
 
-.layer-root {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
+.screen-scroll{
+  position:relative;
+  z-index:1;
+
+  width:100%;
+  height:100%;
+
+  overflow-y:auto;
+  overflow-x:hidden;
 }
 
-.layer-root > * {
-  pointer-events: auto;
+.layer-root{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
 }
 
-.layer-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 10;
+.layer-root > *{
+  pointer-events:auto;
 }
 
-.layer-floating {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
+.layer-header{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  z-index:10;
 }
 
-.layer-floating > * {
-  pointer-events: auto;
+.layer-floating{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
 }
 
-.layer-footer {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  z-index: 15;
+.layer-floating > *{
+  pointer-events:auto;
 }
 
-.invalid-json {
-  color: red;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  height: 100%;
+.layer-footer{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  z-index:15;
 }
 
-.material-symbols-outlined {
-  user-select: none;
-  flex-shrink: 0;
+.material-symbols-outlined{
+  user-select:none;
 }
 
-.screen-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-@keyframes drawerUp {
-
-  from {
-    transform: translateY(100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
+.screen-scroll::-webkit-scrollbar{
+  display:none;
 }
 </style>
