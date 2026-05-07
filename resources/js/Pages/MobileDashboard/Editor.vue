@@ -573,7 +573,8 @@ function styleObject(styles = {}) {
 
   if (styles.alpha)
     obj.opacity = styles.alpha
-
+  if (styles.z)
+    obj.zIndex = styles.z
   /*
   |--------------------------------------------------------------------------
   | SCROLLABLE
@@ -833,81 +834,119 @@ const Renderer = defineComponent({
       }
 
       /*
-      |--------------------------------------------------------------------------
-      | BOX V
-      |--------------------------------------------------------------------------
-      */
+|--------------------------------------------------------------------------
+| BOX V
+|--------------------------------------------------------------------------
+*/
 
-      if (
-        props.element.type === 'box-v'
-      ) {
+if (
+  props.element.type === 'box-v'
+) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | DATA SOURCE
-        |--------------------------------------------------------------------------
-        */
+  /*
+  |--------------------------------------------------------------------------
+  | DATA SOURCE
+  |--------------------------------------------------------------------------
+  */
 
-        if (
-          props.element['data-source']
-          &&
-          props.element['data-container']
-        ) {
+  if (
+    props.element['data-source']
+    &&
+    props.element['data-container']
+  ) {
+
+    return h(
+      'div',
+      {
+        style:{
+          display:'flex',
+          flexDirection:'column',
+
+          width:
+            s.w === 'fill'
+              ? '100%'
+              : undefined,
+
+          height:
+            s.h === 'fill'
+              ? '100%'
+              : undefined,
+
+          minHeight:
+            s.h === 'fill'
+              ? '100%'
+              : undefined,
+
+          boxSizing:'border-box',
+
+          ...styleObject(s)
+        }
+      },
+
+      dynamicItems.value.map(
+        item => {
+
+          const cloned =
+            JSON.parse(
+              JSON.stringify(
+                props.element['data-container']
+              )
+            )
+
+          injectData(
+            cloned,
+            item
+          )
 
           return h(
-            'div',
+            Renderer,
             {
-              style:{
-                display:'flex',
-                flexDirection:'column',
-                width:'100%',
-                ...styleObject(s)
-              }
-            },
-
-            dynamicItems.value.map(
-              item => {
-
-                const cloned =
-                  JSON.parse(
-                    JSON.stringify(
-                      props.element['data-container']
-                    )
-                  )
-
-                injectData(
-                  cloned,
-                  item
-                )
-
-                return h(
-                  Renderer,
-                  {
-                    element:cloned,
-                    form:localForm,
-                    overrides:localOverride
-                  }
-                )
-              }
-            )
+              element:cloned,
+              form:localForm,
+              overrides:localOverride
+            }
           )
         }
+      )
+    )
+  }
 
-        return h(
-          'div',
-          {
-            style:{
-              display:'flex',
-              flexDirection:'column',
-              width:'100%',
-              boxSizing:'border-box',
-              ...styleObject(s)
-            }
-          },
+  return h(
+    'div',
+    {
+      style:{
+        display:'flex',
+        flexDirection:'column',
 
-          renderChildren()
-        )
+        width:
+          s.w === 'fill'
+            ? '100%'
+            : undefined,
+
+        height:
+          s.h === 'fill'
+            ? '100%'
+            : undefined,
+
+        minHeight:
+          s.h === 'fill'
+            ? '100%'
+            : undefined,
+
+        boxSizing:'border-box',
+
+        position:
+          s.absolute === 'true'
+            ? 'absolute'
+            : 'relative',
+
+        ...styleObject(s)
       }
+    },
+
+    renderChildren()
+  )
+}
 
       /*
 |--------------------------------------------------------------------------
@@ -1727,18 +1766,23 @@ body {
   border-radius: 32px;
   overflow: hidden;
   position: relative;
+  isolation: isolate;
 }
 
+
 .screen-scroll {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow-y: auto;
-  position: relative;
-  z-index: 1;
+  overflow-x: auto;
+  z-index: 2;
 }
 
 .layer-background {
   position: absolute;
+
   inset: 0;
 
   width: 100%;
@@ -1746,7 +1790,7 @@ body {
 
   overflow: hidden;
 
-  z-index: 1;
+  z-index: 0;
 }
 
 .layer-background > * {
