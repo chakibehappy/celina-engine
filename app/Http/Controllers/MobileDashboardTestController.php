@@ -79,6 +79,11 @@ class MobileDashboardTestController extends Controller
         ]);
     }
 
+    public function editor()
+    {
+        return Inertia::render('MobileDashboard/Editor');
+    }
+
     // --- NAVIGATION CRUD ---
     public function storeNavigation(Request $request)
     {

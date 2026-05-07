@@ -38,6 +38,8 @@ Route::get('/test-create', function (\App\Services\ProjectGenerator $gen) {
 Route::prefix('test-dashboard')->group(function () {
     Route::get('/', [MobileDashboardTestController::class, 'index'])->name('test-dashboard.index');
     
+    Route::get('/editor', [MobileDashboardTestController::class, 'editor'])->name('test-dashboard.editor');
+    
     // --- Specific Routes (Nav & Screen) ---
     Route::post('/nav', [MobileDashboardTestController::class, 'storeNavigation'])->name('test-dashboard.nav.store');
     Route::post('/screen', [MobileDashboardTestController::class, 'storeScreen'])->name('test-dashboard.screen.store');
