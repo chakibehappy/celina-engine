@@ -1746,7 +1746,7 @@ body {
 
   overflow: hidden;
 
-  z-index: 0;
+  z-index: 1;
 }
 
 .layer-background > * {
