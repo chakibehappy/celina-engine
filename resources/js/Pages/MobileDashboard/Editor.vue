@@ -910,30 +910,51 @@ const Renderer = defineComponent({
       }
 
       /*
-      |--------------------------------------------------------------------------
-      | BOX STACK
-      |--------------------------------------------------------------------------
-      */
+        |--------------------------------------------------------------------------
+        | BOX STACK
+        |--------------------------------------------------------------------------
+        */
 
-      if (
+        if (
         props.element.type === 'box-stack'
-      ) {
+        ) {
 
         return h(
-          'div',
-          {
+            'div',
+            {
             style:{
-              position:'relative',
-              width:'100%',
-              overflow:'hidden',
-              ...styleObject(s)
+
+                position:'relative',
+
+                width:'100%',
+                height:'100%',
+
+                overflow:'hidden',
+
+                /*
+                |--------------------------------------------------------------------------
+                | BG IMAGE
+                |--------------------------------------------------------------------------
+                */
+
+                backgroundImage:
+                p.bgImage
+                    ? `url(${p.bgImage})`
+                    : undefined,
+
+                backgroundSize:'cover',
+
+                backgroundPosition:'center',
+
+                backgroundRepeat:'no-repeat',
+
+                ...styleObject(s)
             }
-          },
+            },
 
-          renderChildren()
+            renderChildren()
         )
-      }
-
+        }
       /*
       |--------------------------------------------------------------------------
       | BOX BANNER
