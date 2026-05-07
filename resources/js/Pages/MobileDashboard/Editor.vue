@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+
     <div class="editor-panel">
 
       <div class="toolbar">
@@ -30,6 +31,22 @@
 
           <template v-if="parsedData">
 
+            <!-- BACKGROUND -->
+            <div class="layer-background">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'bg-'+index"
+              >
+                <Renderer
+                  v-if="getLayer(getElement(item)) === 'background'"
+                  :element="getElement(item)"
+                />
+              </template>
+
+            </div>
+
+            <!-- MAIN CONTENT -->
             <div class="screen-scroll">
 
               <template
@@ -37,6 +54,67 @@
                 :key="'main-'+index"
               >
                 <Renderer
+                  v-if="getLayer(getElement(item)) == null"
+                  :element="getElement(item)"
+                />
+              </template>
+
+            </div>
+
+            <!-- ROOT -->
+            <div class="layer-root">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'root-'+index"
+              >
+                <Renderer
+                  v-if="getLayer(getElement(item)) === 'root'"
+                  :element="getElement(item)"
+                />
+              </template>
+
+            </div>
+
+            <!-- HEADER -->
+            <div class="layer-header">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'header-'+index"
+              >
+                <Renderer
+                  v-if="getLayer(getElement(item)) === 'header'"
+                  :element="getElement(item)"
+                />
+              </template>
+
+            </div>
+
+            <!-- FLOATING -->
+            <div class="layer-floating">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'floating-'+index"
+              >
+                <Renderer
+                  v-if="getLayer(getElement(item)) === 'floating'"
+                  :element="getElement(item)"
+                />
+              </template>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="layer-footer">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'footer-'+index"
+              >
+                <Renderer
+                  v-if="getLayer(getElement(item)) === 'footer'"
                   :element="getElement(item)"
                 />
               </template>
@@ -57,6 +135,7 @@
       </div>
 
     </div>
+
   </div>
 </template>
 
@@ -81,13 +160,12 @@ const globalStates = reactive({})
 
 /*
 |--------------------------------------------------------------------------
-| ICON MAPPER
+| ICONS
 |--------------------------------------------------------------------------
 */
 
 const iconMap = {
 
-  // NAVIGATION
   home: 'home',
   chat: 'chat',
   person: 'person',
@@ -97,7 +175,6 @@ const iconMap = {
   chevron_right: 'chevron_right',
   expand_more: 'expand_more',
 
-  // POS
   qr: 'qr_code_scanner',
   wallet: 'account_balance_wallet',
   cart: 'shopping_cart',
@@ -112,7 +189,6 @@ const iconMap = {
   smartphone: 'smartphone',
   badge: 'badge',
 
-  // DASHBOARD
   notifications: 'notifications',
   search: 'search',
   edit_note: 'edit_note',
@@ -128,18 +204,14 @@ const iconMap = {
   article: 'article',
   help: 'help',
 
-  // CATEGORY
   shopping_bag: 'shopping_bag',
   add_box: 'add_box',
   confirmation_number: 'confirmation_number',
-  account_balance_wallet: 'account_balance_wallet',
 
-  // ACTIONS
   add_circle: 'add_circle',
   delete: 'delete',
   close: 'close',
 
-  // PAYMENTS
   tunai: 'payments',
   qr_code: 'qr_code',
   account_balance: 'account_balance',
@@ -182,6 +254,10 @@ function loadExample() {
 
 function getElement(item) {
   return item.portrait || item
+}
+
+function getLayer(element) {
+  return element.props?.layer || null
 }
 
 /*
@@ -277,6 +353,7 @@ function styleObject(styles = {}) {
   if (styles.maxLines) {
 
     obj.display = '-webkit-box'
+
     obj.webkitLineClamp =
       styles.maxLines
 
@@ -373,7 +450,7 @@ function styleObject(styles = {}) {
 
   /*
   |--------------------------------------------------------------------------
-  | ALIGN ITEMS
+  | ALIGN
   |--------------------------------------------------------------------------
   */
 
@@ -463,12 +540,6 @@ const Renderer = defineComponent({
 
   setup(props) {
 
-    /*
-    |--------------------------------------------------------------------------
-    | MERGED PROPS
-    |--------------------------------------------------------------------------
-    */
-
     function getMergedProps() {
 
       const name =
@@ -484,12 +555,6 @@ const Renderer = defineComponent({
         ...(override?.props || {})
       }
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | MERGED STYLES
-    |--------------------------------------------------------------------------
-    */
 
     function getMergedStyles() {
 
@@ -507,12 +572,6 @@ const Renderer = defineComponent({
       }
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CHILDREN
-    |--------------------------------------------------------------------------
-    */
-
     function renderChildren() {
 
       if (!props.element.children)
@@ -526,12 +585,6 @@ const Renderer = defineComponent({
           })
       )
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | CONTROL ELEMENTS
-    |--------------------------------------------------------------------------
-    */
 
     function applyControlElements(tabId) {
 
@@ -554,12 +607,6 @@ const Renderer = defineComponent({
         }
       })
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | RENDER
-    |--------------------------------------------------------------------------
-    */
 
     return () => {
 
@@ -708,6 +755,7 @@ const Renderer = defineComponent({
               width: '100%',
               objectFit: 'cover',
               display: 'block',
+
               ...styleObject(
                 mergedStyles
               )
@@ -753,8 +801,6 @@ const Renderer = defineComponent({
           {
             style: {
               boxSizing: 'border-box',
-              boxShadow:
-                '0 2px 10px rgba(0,0,0,0.04)',
 
               ...styleObject(
                 mergedStyles
@@ -931,6 +977,7 @@ const Renderer = defineComponent({
               overflowY: 'hidden',
               width: '100%',
               boxSizing: 'border-box',
+
               scrollbarWidth: 'none',
 
               ...styleObject(
@@ -1003,6 +1050,7 @@ const Renderer = defineComponent({
                 `url(${mergedProps.bgImage})`,
 
               backgroundSize: 'cover',
+
               backgroundPosition:
                 'center',
 
@@ -1131,11 +1179,15 @@ const Renderer = defineComponent({
           'div',
           {
             style: {
-              position: 'fixed',
+
+              position: 'absolute',
+
               left: 0,
               right: 0,
               bottom: 0,
-              background: '#FFFFFF',
+
+              background:
+                mergedStyles.bg || '#FFFFFF',
 
               borderTopLeftRadius:
                 '24px',
@@ -1147,8 +1199,13 @@ const Renderer = defineComponent({
                 '0 -10px 40px rgba(0,0,0,0.15)',
 
               zIndex: 999,
-              maxHeight: '70%',
-              overflowY: 'auto'
+
+              maxHeight: '75%',
+
+              overflowY: 'auto',
+
+              animation:
+                'drawerUp .25s ease'
             }
           },
 
@@ -1279,6 +1336,52 @@ body {
   width: 100%;
   height: 100%;
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.layer-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.layer-root {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.layer-root > * {
+  pointer-events: auto;
+}
+
+.layer-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+.layer-floating {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.layer-floating > * {
+  pointer-events: auto;
+}
+
+.layer-footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 15;
 }
 
 .invalid-json {
@@ -1296,8 +1399,18 @@ body {
   flex-shrink: 0;
 }
 
-.screen-scroll::-webkit-scrollbar,
-.items-scroll::-webkit-scrollbar {
+.screen-scroll::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes drawerUp {
+
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 </style>
