@@ -910,101 +910,29 @@ const Renderer = defineComponent({
       }
 
       /*
-|--------------------------------------------------------------------------
-| BOX STACK
-|--------------------------------------------------------------------------
-*/
+      |--------------------------------------------------------------------------
+      | BOX STACK
+      |--------------------------------------------------------------------------
+      */
 
-if (
-  props.element.type === 'box-stack'
-) {
+      if (
+        props.element.type === 'box-stack'
+      ) {
 
-  const isBackgroundLayer =
-    p.layer === 'background'
+        return h(
+          'div',
+          {
+            style:{
+              position:'relative',
+              width:'100%',
+              overflow:'hidden',
+              ...styleObject(s)
+            }
+          },
 
-  return h(
-    'div',
-    {
-      style:{
-
-        /*
-        |--------------------------------------------------------------------------
-        | COMPOSE-LIKE STACK
-        |--------------------------------------------------------------------------
-        */
-
-        position:'relative',
-
-        display:'flex',
-        flexDirection:'column',
-
-        /*
-        |--------------------------------------------------------------------------
-        | IMPORTANT FIX
-        |--------------------------------------------------------------------------
-        */
-
-        width:
-          isBackgroundLayer
-            ? '100%'
-            : (
-                s.w === 'fill'
-                  ? '100%'
-                  : undefined
-              ),
-
-        height:
-          isBackgroundLayer
-            ? '100%'
-            : (
-                s.h === 'fill'
-                  ? '100%'
-                  : undefined
-              ),
-
-        minHeight:
-          isBackgroundLayer
-            ? '100%'
-            : (
-                s.h === 'fill'
-                  ? '100%'
-                  : undefined
-              ),
-
-        /*
-        |--------------------------------------------------------------------------
-        | BG IMAGE
-        |--------------------------------------------------------------------------
-        */
-
-        backgroundImage:
-          p.bgImage
-            ? `url(${p.bgImage})`
-            : undefined,
-
-        backgroundSize:'cover',
-        backgroundPosition:'center',
-        backgroundRepeat:'no-repeat',
-
-        overflow:'hidden',
-
-        ...styleObject({
-          ...s,
-
-          /*
-          |--------------------------------------------------------------------------
-          | PREVENT DUPLICATE BG IMAGE
-          |--------------------------------------------------------------------------
-          */
-
-          bgImage:null
-        })
+          renderChildren()
+        )
       }
-    },
-
-    renderChildren()
-  )
-}
 
       /*
       |--------------------------------------------------------------------------
@@ -1740,18 +1668,7 @@ body {
 .layer-background {
   position: absolute;
   inset: 0;
-
-  width: 100%;
-  height: 100%;
-
-  overflow: hidden;
-
-  z-index: 1;
-}
-
-.layer-background > * {
-  width: 100%;
-  height: 100%;
+  z-index: 0;
 }
 
 .layer-root {
