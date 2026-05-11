@@ -23,6 +23,7 @@ Route::post('/app/login', [MobileAppController::class, 'login']);
 Route::post('/app/google-login', [MobileAppController::class, 'googleLogin']);
 Route::get('/app/screen/{route}/{app_id}', [MobileAppController::class, 'getPublicScreenData']);
 Route::get('/app/get-screen-details/{screen_id}/{app_id}', [MobileAppController::class, 'getPublicScreenContentData']);
+Route::get('/app/navigation/{app_id}', [MobileAppController::class, 'getPublicNavigation']);
 
 // Protected routes (Requires Bearer Token)
 Route::middleware('auth:sanctum')->group(function () {

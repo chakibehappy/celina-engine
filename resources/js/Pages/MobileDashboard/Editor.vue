@@ -1658,11 +1658,7 @@ if (
       return h(
         'div',
         {
-          style:{
-            color:'red',
-            fontSize:'12px',
-            padding:'4px'
-          }
+          style:{ color:'red', fontSize:'12px', padding:'4px'}
         },
 
         `UNKNOWN TYPE : ${props.element.type}`

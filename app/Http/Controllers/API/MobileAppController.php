@@ -99,7 +99,32 @@ class MobileAppController extends Controller
             ], 500);
         }
     }
-    
+    public function getPublicNavigation(Request $request, $app_id)
+    {
+        $navs = AppNavigation::with(['screen', 'icon']) 
+                ->where('app_id', $app_id)
+                ->orderBy('order')
+                ->get();
+
+        $formattedNavs = $navs->map(function($nav) use ($platform) {
+            // Use your existing resolveIcon helper
+            $iconData = $this->resolveIcon($nav->icon, $platform);
+            
+            return [
+                'screen_id'    => (string)$nav->screen_id,
+                'label'        => $nav->label,
+                'icon'         => $iconData['value'], // This sends "home", "person", etc.
+                'route'        => $nav->screen->route ?? 'home_screen',
+                'icon_size'    => (string)($nav->icon_size ?? '24'),
+                'show_label'   => $nav->show_label ? 'true' : 'false',
+                'content_data' => ($nav->screen && $nav->screen->type === 'custom') 
+                                ? $nav->screen->content_data : ''
+            ];
+        });
+
+        return response()->json($formattedNavs);
+    }
+
     public function getNavigation(Request $request)
     {
         try {
