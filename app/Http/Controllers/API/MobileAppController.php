@@ -101,6 +101,7 @@ class MobileAppController extends Controller
     }
     public function getPublicNavigation(Request $request, $app_id)
     {
+        $platform = 'kotlin';
         $navs = AppNavigation::with(['screen', 'icon']) 
                 ->where('app_id', $app_id)
                 ->orderBy('order')
