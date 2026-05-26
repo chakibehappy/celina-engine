@@ -2,15 +2,6 @@
 <script setup>
 import { ref, computed, defineAsyncComponent } from 'vue';
 
-// Auto-register components from the elements folder
-const components = {
-  'text': defineAsyncComponent(() => import('./elements/TextElement.vue')),
-  'data-table': defineAsyncComponent(() => import(props.mode === 'build' ?  './elements/DataTableBuild.vue' : './elements/DataTableElement.vue')),
-//   'data-table': defineAsyncComponent(() => import('./elements/DataTableElement.vue')),
-  'container-v': defineAsyncComponent(() => import('./elements/ContainerElement.vue')),
-  'container-h': defineAsyncComponent(() => import('./elements/ContainerElement.vue')),
-};
-
 const props = defineProps({
   element: Object,
   selectedId: [String, Number],
@@ -18,6 +9,13 @@ const props = defineProps({
   database: Array,
   mode: String,
 });
+
+const components = {
+  'text': defineAsyncComponent(() => import('./elements/TextElement.vue')),
+  'data-table': defineAsyncComponent(() => import(props.mode === 'build' ? './elements/DataTableBuild.vue' : './elements/DataTableElement.vue')),
+  'container-v': defineAsyncComponent(() => import('./elements/ContainerElement.vue')),
+  'container-h': defineAsyncComponent(() => import('./elements/ContainerElement.vue')),
+};
 
 const emit = defineEmits(['select', 'updateTree', 'updateData']);
 
@@ -82,7 +80,12 @@ const handleDrop = (e) => {
     @dragover.prevent
     @drop="handleDrop"
     :class="[
-      'relative min-h-[20px] transition-all border',
+      'relative transition-all border',
+      element.props?.style?.height === '100%' || element.props?.style?.minHeight === '100%'
+        ? 'min-h-full h-full w-full max-w-full self-stretch'
+        : element.type?.includes('container')
+          ? 'w-full max-w-full shrink-0'
+          : 'min-h-[20px] w-full max-w-full',
       isSelected ? 'border-blue-500 ring-1 ring-blue-500/20' : 'border-transparent hover:border-blue-500/30',
       isDragging ? 'opacity-0 scale-0' : 'opacity-100' 
     ]"
@@ -98,6 +101,7 @@ const handleDrop = (e) => {
       :selectedId="selectedId"
       :activePage="activePage"
       :database="database"
+      :mode="mode"
       @select="id => emit('select', id)"
       @updateTree="emit('updateTree')"
       @updateData="emit('updateData')"

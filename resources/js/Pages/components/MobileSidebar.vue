@@ -15,7 +15,8 @@ const elementGroups = {
   ],
   "Widgets": [
     { type: 'data-table', label: 'Data Table', icon: 'DT' },
-    { type: 'chart', label: 'Chart', icon: 'C' }, 
+    { type: 'chart', label: 'Chart', icon: 'C' },
+    { type: 'banner', label: 'Box Banner', icon: 'BB' },
   ]
 };
 
@@ -30,11 +31,10 @@ const handleDragStart = (e, item) => {
 
 <template>
   <aside class="w-64 border-r border-gray-800 bg-[#14171c] flex flex-col z-20">
-    
-    <!-- TOP HALF (UNCHANGED) -->
+
     <div class="h-1/2 flex flex-col border-b border-gray-800">
       <div class="p-3 bg-[#1a1d23] border-b border-gray-800 flex justify-between items-center shrink-0">
-        <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Layout Template</h3>
+        <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Mobile Layout Template</h3>
       </div>
 
       <div class="p-3 border-t border-gray-800 bg-[#0d0f14]">
@@ -45,7 +45,7 @@ const handleDragStart = (e, item) => {
       </div>
 
       <div class="p-2 bg-[#1a1d23] border-b border-gray-800 flex justify-between items-center shrink-0">
-        <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500">App Navigation</h3>
+        <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Mobile Navigation</h3>
         <button @click="emit('addPage')" class="text-blue-500 hover:text-blue-400 font-bold">+</button>
       </div>
 
@@ -53,7 +53,7 @@ const handleDragStart = (e, item) => {
         <div class="space-y-0.5">
           <div v-for="node in pages" :key="node.id">
             <div @click="emit('update:activePageId', node.id)"
-              :class="['group flex items-center justify-between p-1.5 rounded cursor-pointer transition-all border border-transparent', 
+              :class="['group flex items-center justify-between p-1.5 rounded cursor-pointer transition-all border border-transparent',
                        activePageId === node.id ? 'bg-blue-600/20 text-blue-400 border-blue-500/30' : 'hover:bg-gray-800 text-gray-400']">
 
               <div class="flex items-center space-x-2">
@@ -75,7 +75,7 @@ const handleDragStart = (e, item) => {
               <div v-for="child in node.children" :key="child.id">
 
                 <div @click.stop="emit('update:activePageId', child.id)"
-                     :class="['group flex items-center justify-between p-1.5 pl-3 rounded cursor-pointer border border-transparent', 
+                     :class="['group flex items-center justify-between p-1.5 pl-3 rounded cursor-pointer border border-transparent',
                               activePageId === child.id ? 'bg-blue-600/15 text-blue-400 border-blue-500/20' : 'hover:bg-gray-800 text-gray-500']">
 
                   <div class="flex items-center space-x-2">
@@ -106,10 +106,9 @@ const handleDragStart = (e, item) => {
       </div>
     </div>
 
-    <!-- BOTTOM HALF (ELEMENTS) -->
     <div class="h-1/2 flex flex-col">
       <div class="p-3 bg-[#1a1d23] border-b border-gray-800 shrink-0">
-        <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Forge Elements</h3>
+        <h3 class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Mobile Elements</h3>
       </div>
 
       <div class="flex-grow overflow-y-auto p-3 space-y-4 custom-scrollbar">

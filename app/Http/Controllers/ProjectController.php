@@ -110,6 +110,18 @@ class ProjectController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Dashboard updated']);
     }
 
+    public function saveMobileForge(Request $request, string $project_id)
+    {
+        $project = Project::where('project_id', $project_id)->firstOrFail();
+        $currentData = $project->data ?? [];
+        $newData = $request->input('data');
+        $mergedData = array_replace_recursive($currentData, $newData);
+        $project->update([
+            'data' => $mergedData
+        ]);
+        return response()->json(['status' => 'success', 'message' => 'MobileForge updated']);
+    }
+
     public function show(string $project_id)
     {
         $project = Project::where('project_id', $project_id)->first();

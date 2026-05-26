@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 import DatabaseCreator from './DatabaseCreator.vue';
 import DashboardForge from './DashboardForge.vue';
+import MobileForge from './MobileForge.vue';
 
 const currentView = ref('db');
 const toolsOpen = ref(false);
@@ -174,6 +175,9 @@ function setView(view) {
                             <div @click="setView('dashboard')" class="px-4 py-2 hover:bg-blue-600 hover:text-white cursor-pointer flex items-center justify-between" :class="{'text-blue-400': currentView === 'dashboard'}">
                                 <span>Dashboard Forge</span>
                             </div>
+                            <div @click="setView('mobileforge')" class="px-4 py-2 hover:bg-blue-600 hover:text-white cursor-pointer flex items-center justify-between" :class="{'text-blue-400': currentView === 'mobileforge'}">
+                                <span>MobileForge</span>
+                            </div>
                         </div>
                     </div>
                 </nav>
@@ -218,6 +222,9 @@ function setView(view) {
             </div>
             <div v-if="currentView === 'dashboard'" class="h-full">
                 <DashboardForge :projectKey="projectKey" :key="pageKey" />
+            </div>
+            <div v-if="currentView === 'mobileforge'" class="h-full">
+                <MobileForge :projectKey="projectKey" :key="`${pageKey}-mobile`" />
             </div>
         </main>
     </div>

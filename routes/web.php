@@ -16,6 +16,7 @@ Route::get('/', function () {
 Route::post('/projects', [ProjectController::class, 'store']);
 Route::post('/create-project', [ProjectController::class, 'createProject']);
 Route::post('/projects-dashboard/{project_id}', [ProjectController::class, 'saveDashboard']);
+Route::post('/projects-mobileforge/{project_id}', [ProjectController::class, 'saveMobileForge']);
 Route::post('/projects-database/{project_id}', [ProjectController::class, 'saveDatabase']);
 Route::get('/projects/{project_id}', [ProjectController::class, 'show']);
 Route::get('/get-active-project', [ProjectController::class, 'getActiveProjectState']);
