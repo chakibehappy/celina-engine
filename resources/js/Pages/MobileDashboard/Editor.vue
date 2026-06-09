@@ -489,6 +489,7 @@ provide('treeDragDropContext', {
         elementToInsert = extractElementByPath(mutableContent, context.path)
         mutableContent = clearElementByPath(mutableContent, context.path)
 
+        // Adjust tracking index shifting inside the same exact array branch hierarchy
         if (context.path.length === destinationPath.length) {
           const matchingHierarchy = context.path.slice(0, -1).join(',') === destinationPath.slice(0, -1).join(',')
           if (matchingHierarchy && context.path[context.path.length - 1] < destinationPath[destinationPath.length - 1]) {
@@ -506,6 +507,11 @@ provide('treeDragDropContext', {
           }
         } else if (layoutContext === 'INSERT_BEFORE') {
           mutableContent = insertElementByPath(mutableContent, destinationPath, elementToInsert)
+        } else if (layoutContext === 'INSERT_AFTER') {
+          // Calculate destination path target position for dropping item right beneath target node
+          const afterPath = [...destinationPath]
+          afterPath[afterPath.length - 1]++
+          mutableContent = insertElementByPath(mutableContent, afterPath, elementToInsert)
         }
         syncJsonTree(mutableContent)
       }
@@ -1051,13 +1057,19 @@ const Renderer = defineComponent({
             const pointerY = e.clientY - boundingBox.top
             
             if (isStructureContainer) {
-              if (pointerY > boundingBox.height * 0.25 && pointerY < boundingBox.height * 0.75) {
+              if (pointerY < boundingBox.height * 0.25) {
+                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_BEFORE')
+              } else if (pointerY > boundingBox.height * 0.75) {
+                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_AFTER')
+              } else {
                 props.treeDragDropContext.triggerNodeDrop(e, props.path, 'APPEND_INSIDE')
+              }
+            } else {
+              if (pointerY > boundingBox.height * 0.5) {
+                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_AFTER')
               } else {
                 props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_BEFORE')
               }
-            } else {
-              props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_BEFORE')
             }
           }
         },
