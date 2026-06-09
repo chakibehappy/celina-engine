@@ -355,18 +355,9 @@ const jsonText = ref(`{
   "content": [
     {
       "type": "box-v",
-      "props": { "layer": "header" },
+      "props": { },
       "styles": { "bg": "#11111b", "p": "16", "w": "fill" },
-      "children": [
-        { "type": "text", "props": { "value": "Celina Engine Workspace" }, "styles": { "color": "#cdd6f4", "bold": "true", "fontSize": "18" } }
-      ]
-    },
-    {
-      "type": "box-v",
-      "styles": { "p": "16", "gap": "12", "w": "fill" },
-      "children": [
-        { "type": "text", "props": { "value": "Drop elements inside this scrollable viewport..." }, "styles": { "color": "#a6adc8", "fontSize": "14" } }
-      ]
+      "children": []
     }
   ]
 }`)
