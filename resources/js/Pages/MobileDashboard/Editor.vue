@@ -1,28 +1,7 @@
 <template>
   <div class="app">
 
-    <div class="palette-panel">
-      <div class="palette-header">
-        <h3>Components</h3>
-        <span>Drag into preview or layout containers</span>
-      </div>
-      <div class="palette-list">
-        <div 
-          v-for="comp in paletteComponents" 
-          :key="comp.type"
-          class="palette-item"
-          draggable="true"
-          @dragstart="onPaletteDragStart($event, comp.type)"
-        >
-          <span class="material-symbols-outlined palette-icon">{{ comp.icon }}</span>
-          <div class="palette-item-info">
-            <span class="palette-item-name">{{ comp.label }}</span>
-            <span class="palette-item-desc">{{ comp.desc }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
+    <!-- LEFT -->
     <div class="editor-panel">
 
       <div class="toolbar">
@@ -40,6 +19,7 @@
 
     </div>
 
+    <!-- RIGHT -->
     <div class="preview-panel">
 
       <div class="phone-frame">
@@ -55,11 +35,8 @@
 
           <template v-if="parsedData">
 
-            <div 
-              class="layer-background"
-              @dragover.prevent
-              @drop.stop="onRootLayerDrop($event, 'background')"
-            >
+            <!-- BACKGROUND -->
+            <div class="layer-background">
 
               <template
                 v-for="(item,index) in parsedData.content"
@@ -72,18 +49,13 @@
                     ) === 'background'
                   "
                   :element="getElement(item)"
-                  :path="[index]"
-                  @update-tree="syncJsonTree"
                 />
               </template>
 
             </div>
 
-            <div 
-              class="screen-scroll"
-              @dragover.prevent
-              @drop.stop="onRootLayerDrop($event, null)"
-            >
+            <!-- MAIN -->
+            <div class="screen-scroll">
 
               <template
                 v-for="(item,index) in parsedData.content"
@@ -96,18 +68,13 @@
                     ) == null
                   "
                   :element="getElement(item)"
-                  :path="[index]"
-                  @update-tree="syncJsonTree"
                 />
               </template>
 
             </div>
 
-            <div 
-              class="layer-root"
-              @dragover.prevent
-              @drop.stop="onRootLayerDrop($event, 'root')"
-            >
+            <!-- ROOT -->
+            <div class="layer-root">
 
               <template
                 v-for="(item,index) in parsedData.content"
@@ -120,18 +87,13 @@
                     ) === 'root'
                   "
                   :element="getElement(item)"
-                  :path="[index]"
-                  @update-tree="syncJsonTree"
                 />
               </template>
 
             </div>
 
-            <div 
-              class="layer-header"
-              @dragover.prevent
-              @drop.stop="onRootLayerDrop($event, 'header')"
-            >
+            <!-- HEADER -->
+            <div class="layer-header">
 
               <template
                 v-for="(item,index) in parsedData.content"
@@ -144,18 +106,13 @@
                     ) === 'header'
                   "
                   :element="getElement(item)"
-                  :path="[index]"
-                  @update-tree="syncJsonTree"
                 />
               </template>
 
             </div>
 
-            <div 
-              class="layer-floating"
-              @dragover.prevent
-              @drop.stop="onRootLayerDrop($event, 'floating')"
-            >
+            <!-- FLOATING -->
+            <div class="layer-floating">
 
               <template
                 v-for="(item,index) in parsedData.content"
@@ -168,18 +125,13 @@
                     ) === 'floating'
                   "
                   :element="getElement(item)"
-                  :path="[index]"
-                  @update-tree="syncJsonTree"
                 />
               </template>
 
             </div>
 
-            <div 
-              class="layer-footer"
-              @dragover.prevent
-              @drop.stop="onRootLayerDrop($event, 'footer')"
-            >
+            <!-- FOOTER -->
+            <div class="layer-footer">
 
               <template
                 v-for="(item,index) in parsedData.content"
@@ -192,8 +144,6 @@
                     ) === 'footer'
                   "
                   :element="getElement(item)"
-                  :path="[index]"
-                  @update-tree="syncJsonTree"
                 />
               </template>
 
@@ -224,59 +174,8 @@ import {
   computed,
   defineComponent,
   h,
-  onMounted,
-  provide
+  onMounted
 } from 'vue'
-
-/*
-|--------------------------------------------------------------------------
-| COMPONENT PALETTE ITEMS
-|--------------------------------------------------------------------------
-*/
-const paletteComponents = [
-  { type: 'box-h', label: 'Box Horizontal', icon: 'view_column', desc: 'Row Container' },
-  { type: 'box-v', label: 'Box Vertical', icon: 'view_stream', desc: 'Column Container' },
-  { type: 'box-stack', label: 'Box Stack', icon: 'layers', desc: 'Stacked Layers' },
-  { type: 'text', label: 'Text', icon: 'text_fields', desc: 'Typography label' },
-  { type: 'image', label: 'Image', icon: 'image', desc: 'Image block frame' },
-  { type: 'button', label: 'Button', icon: 'smart_button', desc: 'Action element' },
-  { type: 'icon', label: 'Icon', icon: 'star', desc: 'Material System symbol' },
-  { type: 'input', label: 'Input Field', icon: 'input', desc: 'Text input capture' },
-  { type: 'spacer', label: 'Spacer', icon: 'space_bar', desc: 'Empty spacing element' }
-]
-
-function generateDefaultNode(type) {
-  const node = { type, props: {}, styles: {} }
-  if (type === 'box-h' || type === 'box-v' || type === 'box-stack') {
-    node.children = []
-    node.styles.p = 12
-    node.styles.gap = 8
-  } else if (type === 'text') {
-    node.props.value = 'New Text Label'
-    node.styles.fontSize = 14
-  } else if (type === 'button') {
-    node.props.value = 'Click Here'
-    node.styles.bg = '#2563eb'
-    node.styles.color = '#ffffff'
-    node.styles.p = 10
-    node.styles.radius = 8
-  } else if (type === 'icon') {
-    node.props.name = 'home'
-    node.styles.size = 24
-  } else if (type === 'image') {
-    node.props.url = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400'
-    node.styles.h = 120
-  } else if (type === 'input') {
-    node.props.placeholder = 'Type something...'
-    node.props.name = 'field_' + Math.random().toString(36).substring(7)
-    node.styles.p = 8
-    node.styles.border = '#CBD5E1'
-    node.styles.radius = 6
-  } else if (type === 'spacer') {
-    node.styles.h = 24
-  }
-  return node
-}
 
 /*
 |--------------------------------------------------------------------------
@@ -376,148 +275,6 @@ const parsedData = computed(() => {
   }
   catch (e) {
     return null
-  }
-})
-
-function syncJsonTree(updatedContent) {
-  if (!parsedData.value) return
-  const fullTree = { ...parsedData.value, content: updatedContent }
-  jsonText.value = JSON.stringify(fullTree, null, 2)
-}
-
-/*
-|--------------------------------------------------------------------------
-| ACTIVE NESTED DRAG AND DROP PIPELINE HANDLERS
-|--------------------------------------------------------------------------
-*/
-function onPaletteDragStart(event, type) {
-  event.dataTransfer.setData('text/plain', JSON.stringify({ operation: 'NEW', type }))
-}
-
-function onRootLayerDrop(event, layerName) {
-  try {
-    const rawData = event.dataTransfer.getData('text/plain')
-    if (!rawData) return
-    const context = JSON.parse(rawData)
-    let mutableContent = JSON.parse(JSON.stringify(parsedData.value.content || []))
-
-    let elementToInsert = null
-    if (context.operation === 'NEW') {
-      elementToInsert = generateDefaultNode(context.type)
-      if (layerName) elementToInsert.props.layer = layerName
-    } else if (context.operation === 'MOVE') {
-      elementToInsert = extractElementByPath(mutableContent, context.path)
-      mutableContent = clearElementByPath(mutableContent, context.path)
-      if (layerName) {
-        elementToInsert.props = elementToInsert.props || {}
-        elementToInsert.props.layer = layerName
-      } else {
-        if (elementToInsert.props?.layer) delete elementToInsert.props.layer
-      }
-    }
-
-    if (elementToInsert) {
-      mutableContent.push(elementToInsert)
-      syncJsonTree(mutableContent)
-    }
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-function extractElementByPath(array, path) {
-  let target = array
-  for (let i = 0; i < path.length; i++) {
-    const idx = path[i]
-    if (i === path.length - 1) return target[idx]
-    target = target[idx].children
-  }
-  return null
-}
-
-function clearElementByPath(array, path) {
-  const root = [...array]
-  let target = root
-  for (let i = 0; i < path.length; i++) {
-    const idx = path[i]
-    if (i === path.length - 1) {
-      target.splice(idx, 1)
-    } else {
-      target[idx].children = [...target[idx].children]
-      target = target[idx].children
-    }
-  }
-  return root
-}
-
-function insertElementByPath(array, path, element) {
-  const root = [...array]
-  let target = root
-  for (let i = 0; i < path.length; i++) {
-    const idx = path[i]
-    if (i === path.length - 1) {
-      target.splice(idx, 0, element)
-    } else {
-      target[idx].children = [...target[idx].children]
-      target = target[idx].children
-    }
-  }
-  return root
-}
-
-provide('treeDragDropContext', {
-  triggerNodeDragStart: (event, path) => {
-    event.dataTransfer.setData('text/plain', JSON.stringify({ operation: 'MOVE', path }))
-  },
-  triggerNodeDrop: (event, destinationPath, layoutContext) => {
-    try {
-      const rawData = event.dataTransfer.getData('text/plain')
-      if (!rawData) return
-      const context = JSON.parse(rawData)
-      let mutableContent = JSON.parse(JSON.stringify(parsedData.value.content || []))
-
-      let elementToInsert = null
-      if (context.operation === 'NEW') {
-        elementToInsert = generateDefaultNode(context.type)
-      } else if (context.operation === 'MOVE') {
-        const sourceStr = JSON.stringify(context.path)
-        const destStr = JSON.stringify(destinationPath)
-        if (destStr.startsWith(sourceStr)) {
-          alert("Invalid Move Placement: Cannot nest a parent container into its own layout branch.")
-          return
-        }
-        elementToInsert = extractElementByPath(mutableContent, context.path)
-        mutableContent = clearElementByPath(mutableContent, context.path)
-
-        // Adjust tracking index shifting inside the same exact array branch hierarchy
-        if (context.path.length === destinationPath.length) {
-          const matchingHierarchy = context.path.slice(0, -1).join(',') === destinationPath.slice(0, -1).join(',')
-          if (matchingHierarchy && context.path[context.path.length - 1] < destinationPath[destinationPath.length - 1]) {
-            destinationPath[destinationPath.length - 1]--
-          }
-        }
-      }
-
-      if (elementToInsert) {
-        if (layoutContext === 'APPEND_INSIDE') {
-          let node = extractElementByPath(mutableContent, destinationPath)
-          if (node) {
-            node.children = node.children || []
-            node.children.push(elementToInsert)
-          }
-        } else if (layoutContext === 'INSERT_BEFORE') {
-          mutableContent = insertElementByPath(mutableContent, destinationPath, elementToInsert)
-        } else if (layoutContext === 'INSERT_AFTER') {
-          // Calculate destination path target position for dropping item right beneath target node
-          const afterPath = [...destinationPath]
-          afterPath[afterPath.length - 1]++
-          mutableContent = insertElementByPath(mutableContent, afterPath, elementToInsert)
-        }
-        syncJsonTree(mutableContent)
-      }
-    } catch (err) {
-      console.error(err)
-    }
   }
 })
 
@@ -890,10 +647,8 @@ const Renderer = defineComponent({
     element: Object,
     form: Object,
     overrides: Object,
-    parentActive: Boolean,
-    path: Array
+    parentActive: Boolean
   },
-  inject: ['treeDragDropContext'],
 
   setup(props) {
 
@@ -969,8 +724,7 @@ const Renderer = defineComponent({
             form:localForm,
             overrides:localOverride,
             parentActive:
-              extra.parentActive,
-            path: [...props.path, index]
+              extra.parentActive
           })
       )
     }
@@ -1034,52 +788,6 @@ const Renderer = defineComponent({
       }
     })
 
-    function injectDragDropZone(type, nodeConfig, nodes) {
-      const isStructureContainer = ['box-v', 'box-h', 'box-stack'].includes(type)
-      return h(
-        'div',
-        {
-          class: `canvas-drag-wrapper ${isStructureContainer ? 'structure-container' : 'structure-leaf'}`,
-          draggable: 'true',
-          style: { position: 'relative' },
-          onDragstart: (e) => {
-            e.stopPropagation()
-            props.treeDragDropContext.triggerNodeDragStart(e, props.path)
-          },
-          onDragover: (e) => {
-            e.preventDefault()
-            e.stopPropagation()
-          },
-          onDrop: (e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            const boundingBox = e.currentTarget.getBoundingClientRect()
-            const pointerY = e.clientY - boundingBox.top
-            
-            if (isStructureContainer) {
-              if (pointerY < boundingBox.height * 0.25) {
-                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_BEFORE')
-              } else if (pointerY > boundingBox.height * 0.75) {
-                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_AFTER')
-              } else {
-                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'APPEND_INSIDE')
-              }
-            } else {
-              if (pointerY > boundingBox.height * 0.5) {
-                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_AFTER')
-              } else {
-                props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_BEFORE')
-              }
-            }
-          }
-        },
-        [
-          h('span', { class: 'canvas-node-indicator' }, type),
-          h(nodeConfig.tag, nodeConfig.attrs, nodes)
-        ]
-      )
-    }
-
     return ()=> {
 
       const p = mergedProps()
@@ -1109,20 +817,20 @@ const Renderer = defineComponent({
         props.element.type === 'box-h'
       ) {
 
-        return injectDragDropZone('box-h', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               display:'flex',
               flexDirection:'row',
               width:'100%',
               boxSizing:'border-box',
-              minHeight:'32px',
-              outline: '1px dashed rgba(37, 99, 235, 0.25)',
               ...styleObject(s)
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1147,9 +855,9 @@ if (
     props.element['data-container']
   ) {
 
-    return injectDragDropZone('box-v', {
-      tag: 'div',
-      attrs: {
+    return h(
+      'div',
+      {
         style:{
           display:'flex',
           flexDirection:'column',
@@ -1167,14 +875,15 @@ if (
           minHeight:
             s.h === 'fill'
               ? '100%'
-              : '32px',
+              : undefined,
 
           boxSizing:'border-box',
 
           ...styleObject(s)
         }
-      }
-    }, dynamicItems.value.map(
+      },
+
+      dynamicItems.value.map(
         item => {
 
           const cloned =
@@ -1194,8 +903,7 @@ if (
             {
               element:cloned,
               form:localForm,
-              overrides:localOverride,
-              path: props.path
+              overrides:localOverride
             }
           )
         }
@@ -1203,9 +911,9 @@ if (
     )
   }
 
-  return injectDragDropZone('box-v', {
-    tag: 'div',
-    attrs: {
+  return h(
+    'div',
+    {
       style:{
         display:'flex',
         flexDirection:'column',
@@ -1223,7 +931,7 @@ if (
         minHeight:
           s.h === 'fill'
             ? '100%'
-            : '32px',
+            : undefined,
 
         boxSizing:'border-box',
 
@@ -1232,11 +940,12 @@ if (
             ? 'absolute'
             : 'relative',
 
-        outline: '1px dashed rgba(37, 99, 235, 0.25)',
         ...styleObject(s)
       }
-    }
-  }, renderChildren())
+    },
+
+    renderChildren()
+  )
 }
 
       /*
@@ -1252,9 +961,9 @@ if (
   const isBackgroundLayer =
     p.layer === 'background'
 
-  return injectDragDropZone('box-stack', {
-    tag: 'div',
-    attrs: {
+  return h(
+    'div',
+    {
       style:{
 
         /*
@@ -1298,7 +1007,7 @@ if (
             : (
                 s.h === 'fill'
                   ? '100%'
-                  : '32px'
+                  : undefined
               ),
 
         /*
@@ -1317,7 +1026,6 @@ if (
         backgroundRepeat:'no-repeat',
 
         overflow:'hidden',
-        outline: '1px dashed rgba(168, 85, 247, 0.25)',
 
         ...styleObject({
           ...s,
@@ -1331,8 +1039,10 @@ if (
           bgImage:null
         })
       }
-    }
-  }, renderChildren())
+    },
+
+    renderChildren()
+  )
 }
 
       /*
@@ -1345,9 +1055,9 @@ if (
         props.element.type === 'box-banner'
       ) {
 
-        return injectDragDropZone('box-banner', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               position:'relative',
               overflow:'hidden',
@@ -1357,8 +1067,10 @@ if (
                 bgImage:p.bgImage
               })
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1371,15 +1083,17 @@ if (
         props.element.type === 'data-form'
       ) {
 
-        return injectDragDropZone('data-form', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               width:'100%',
               ...styleObject(s)
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1392,15 +1106,17 @@ if (
         props.element.type === 'text'
       ) {
 
-        return injectDragDropZone('text', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               boxSizing:'border-box',
               ...styleObject(s)
             }
-          }
-        }, p.value || '')
+          },
+
+          p.value || ''
+        )
       }
 
       /*
@@ -1413,20 +1129,19 @@ if (
         props.element.type === 'image'
       ) {
 
-        return injectDragDropZone('image', {
-          tag: 'img',
-          attrs: {
+        return h(
+          'img',
+          {
             src:p.url,
 
             style:{
               width:'100%',
               display:'block',
               objectFit:'cover',
-              minHeight:'20px',
               ...styleObject(s)
             }
           }
-        }, null)
+        )
       }
 
       /*
@@ -1440,15 +1155,16 @@ if (
         'image-picker'
       ) {
 
-        return injectDragDropZone('image-picker', {
-          tag: 'label',
-          attrs: {
+        return h(
+          'label',
+          {
             style:{
               display:'block',
               cursor:'pointer'
             }
-          }
-        }, [
+          },
+
+          [
 
             h(
               'input',
@@ -1520,9 +1236,10 @@ if (
         props.element.type === 'input'
       ) {
 
-        return injectDragDropZone('input', {
-          tag: 'input',
-          attrs: {
+        return h(
+          'input',
+          {
+
             type:
               p.keyboardType ===
               'password'
@@ -1551,7 +1268,7 @@ if (
               ...styleObject(s)
             }
           }
-        }, null)
+        )
       }
 
       /*
@@ -1565,9 +1282,10 @@ if (
         'button'
       ) {
 
-        return injectDragDropZone('button', {
-          tag: 'button',
-          attrs: {
+        return h(
+          'button',
+          {
+
             style:{
               border:'none',
               cursor:'pointer',
@@ -1610,8 +1328,10 @@ if (
                 )
               }
             }
-          }
-        }, p.value || 'Button')
+          },
+
+          p.value || 'Button'
+        )
       }
 
       /*
@@ -1625,9 +1345,9 @@ if (
         'icon'
       ) {
 
-        return injectDragDropZone('icon', {
-          tag: 'span',
-          attrs: {
+        return h(
+          'span',
+          {
             class:
               'material-symbols-outlined',
 
@@ -1643,12 +1363,14 @@ if (
 
               ...styleObject(s)
             }
-          }
-        }, iconMap[
+          },
+
+          iconMap[
             (
               p.name || ''
             ).toLowerCase()
-          ] || 'flash_on')
+          ] || 'flash_on'
+        )
       }
 
       /*
@@ -1667,9 +1389,9 @@ if (
             s.columns || 2
           )
 
-        return injectDragDropZone('grid', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               display:'grid',
 
@@ -1683,8 +1405,10 @@ if (
 
               width:'100%'
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1698,15 +1422,14 @@ if (
         'spacer'
       ) {
 
-        return injectDragDropZone('spacer', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
-              minHeight:'8px',
               ...styleObject(s)
             }
           }
-        }, null)
+        )
       }
 
       /*
@@ -1720,16 +1443,18 @@ if (
         'card'
       ) {
 
-        return injectDragDropZone('card', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               width:'100%',
               boxSizing:'border-box',
               ...styleObject(s)
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1743,9 +1468,9 @@ if (
         'items-scroller-h'
       ) {
 
-        return injectDragDropZone('items-scroller-h', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               display:'flex',
               overflowX:'auto',
@@ -1754,8 +1479,10 @@ if (
               boxSizing:'border-box',
               ...styleObject(s)
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1769,9 +1496,10 @@ if (
         'gesture'
       ) {
 
-        return injectDragDropZone('gesture', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
+
             style:{
               cursor:'pointer',
               position:'relative'
@@ -1788,8 +1516,10 @@ if (
                 ] = p.set_value
               }
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1818,16 +1548,17 @@ if (
           )
         }
 
-        return injectDragDropZone('tab-menu', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               display:'flex',
               width:'100%',
               ...styleObject(s)
             }
-          }
-        }, props.element.children.map(
+          },
+
+          props.element.children.map(
             child=>{
 
               const tabId =
@@ -1862,7 +1593,6 @@ if (
                       element:child,
                       form:localForm,
                       overrides:localOverride,
-                      path: props.path,
 
                       parentActive:
                         globalStates[
@@ -1896,9 +1626,9 @@ if (
         if (!isOpen)
           return null
 
-        return injectDragDropZone('bottom-drawer', {
-          tag: 'div',
-          attrs: {
+        return h(
+          'div',
+          {
             style:{
               position:'absolute',
               left:0,
@@ -1913,8 +1643,10 @@ if (
 
               ...styleObject(s)
             }
-          }
-        }, renderChildren())
+          },
+
+          renderChildren()
+        )
       }
 
       /*
@@ -1954,97 +1686,8 @@ body {
   font-family: Inter, sans-serif;
 }
 
-/* |--------------------------------------------------------------------------
-| NEW LAYOUT COMPONENT: PALETTE PANEL
-|--------------------------------------------------------------------------
-*/
-.palette-panel {
-  width: 240px;
-  min-width: 240px;
-  background: #090d16;
-  border-right: 1px solid #1e293b;
-  display: flex;
-  flex-direction: column;
-}
-
-.palette-header {
-  padding: 16px;
-  border-bottom: 1px solid #1e293b;
-}
-
-.palette-header h3 {
-  margin: 0;
-  color: #f1f5f9;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.palette-header span {
-  font-size: 11px;
-  color: #64748b;
-  margin-top: 4px;
-  display: block;
-}
-
-.palette-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.palette-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  cursor: grab;
-  user-select: none;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.palette-item:hover {
-  background: #273549;
-  border-color: #3b82f6;
-}
-
-.palette-item:active {
-  cursor: grabbing;
-}
-
-.palette-icon {
-  color: #3b82f6;
-  font-size: 18px;
-}
-
-.palette-item-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.palette-item-name {
-  color: #e2e8f0;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.palette-item-desc {
-  color: #64748b;
-  font-size: 10px;
-}
-
-/* |--------------------------------------------------------------------------
-| ADJUSTED MODIFIED PANEL WIDTHS (Editor-panel decreased from 50% to 30%)
-|--------------------------------------------------------------------------
-*/
 .editor-panel {
-  width: 30%;
-  min-width: 300px;
+  width: 50%;
   height: 100%;
   border-right: 1px solid #1e293b;
   display: flex;
@@ -2063,24 +1706,14 @@ body {
   color: white;
 }
 
-.toolbar h2 {
-  font-size: 13px;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .toolbar button {
   background: #2563eb;
   color: white;
   border: none;
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
 }
 
 .json-editor {
@@ -2132,37 +1765,6 @@ body {
   isolation: isolate;
 }
 
-/* |--------------------------------------------------------------------------
-| CANVAS DRAG OVERLAY HOVER SELECTORS
-|--------------------------------------------------------------------------
-*/
-:deep(.canvas-drag-wrapper:hover > .canvas-node-indicator) {
-  display: inline-block;
-}
-
-:deep(.canvas-node-indicator) {
-  display: none;
-  position: absolute;
-  top: -2px;
-  left: 2px;
-  background: #2563eb;
-  color: #ffffff;
-  font-family: monospace;
-  font-size: 8px;
-  padding: 1px 3px;
-  border-radius: 3px;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-:deep(.structure-container:hover) {
-  outline: 1px dashed #3b82f6 !important;
-  background: rgba(59, 130, 246, 0.04);
-}
-
-:deep(.structure-leaf:hover) {
-  outline: 1px dashed #10b981 !important;
-}
 
 .screen-scroll {
   position: absolute;
