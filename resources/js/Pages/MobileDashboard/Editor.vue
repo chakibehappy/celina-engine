@@ -24,23 +24,35 @@
     </div>
 
     <div class="editor-panel">
+
       <div class="toolbar">
         <h2>Celina Engine Vue Runtime</h2>
-        <button @click="reloadRuntime">Reload</button>
+
+        <button @click="reloadRuntime">
+          Reload
+        </button>
       </div>
+
       <textarea
         v-model="jsonText"
         class="json-editor"
-        spellcheck="false"
       />
+
     </div>
 
     <div class="preview-panel">
+
       <div class="phone-frame">
+
         <div
           class="phone-screen"
-          :style="{ background: parsedData?.theme?.bg || '#FFFFFF' }"
+          :style="{
+            background:
+              parsedData?.theme?.bg
+              || '#FFFFFF'
+          }"
         >
+
           <template v-if="parsedData">
 
             <div 
@@ -48,14 +60,23 @@
               @dragover.prevent
               @drop.stop="onRootLayerDrop($event, 'background')"
             >
-              <template v-for="(item, index) in parsedData.content" :key="'bg-' + index">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'bg-'+index"
+              >
                 <Renderer
-                  v-if="getLayer(getElement(item)) === 'background'"
+                  v-if="
+                    getLayer(
+                      getElement(item)
+                    ) === 'background'
+                  "
                   :element="getElement(item)"
                   :path="[index]"
                   @update-tree="syncJsonTree"
                 />
               </template>
+
             </div>
 
             <div 
@@ -63,14 +84,23 @@
               @dragover.prevent
               @drop.stop="onRootLayerDrop($event, null)"
             >
-              <template v-for="(item, index) in parsedData.content" :key="'main-' + index">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'main-'+index"
+              >
                 <Renderer
-                  v-if="getLayer(getElement(item)) == null"
+                  v-if="
+                    getLayer(
+                      getElement(item)
+                    ) == null
+                  "
                   :element="getElement(item)"
                   :path="[index]"
                   @update-tree="syncJsonTree"
                 />
               </template>
+
             </div>
 
             <div 
@@ -78,14 +108,23 @@
               @dragover.prevent
               @drop.stop="onRootLayerDrop($event, 'root')"
             >
-              <template v-for="(item, index) in parsedData.content" :key="'root-' + index">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'root-'+index"
+              >
                 <Renderer
-                  v-if="getLayer(getElement(item)) === 'root'"
+                  v-if="
+                    getLayer(
+                      getElement(item)
+                    ) === 'root'
+                  "
                   :element="getElement(item)"
                   :path="[index]"
                   @update-tree="syncJsonTree"
                 />
               </template>
+
             </div>
 
             <div 
@@ -93,14 +132,23 @@
               @dragover.prevent
               @drop.stop="onRootLayerDrop($event, 'header')"
             >
-              <template v-for="(item, index) in parsedData.content" :key="'header-' + index">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'header-'+index"
+              >
                 <Renderer
-                  v-if="getLayer(getElement(item)) === 'header'"
+                  v-if="
+                    getLayer(
+                      getElement(item)
+                    ) === 'header'
+                  "
                   :element="getElement(item)"
                   :path="[index]"
                   @update-tree="syncJsonTree"
                 />
               </template>
+
             </div>
 
             <div 
@@ -108,14 +156,23 @@
               @dragover.prevent
               @drop.stop="onRootLayerDrop($event, 'floating')"
             >
-              <template v-for="(item, index) in parsedData.content" :key="'floating-' + index">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'floating-'+index"
+              >
                 <Renderer
-                  v-if="getLayer(getElement(item)) === 'floating'"
+                  v-if="
+                    getLayer(
+                      getElement(item)
+                    ) === 'floating'
+                  "
                   :element="getElement(item)"
                   :path="[index]"
                   @update-tree="syncJsonTree"
                 />
               </template>
+
             </div>
 
             <div 
@@ -123,23 +180,38 @@
               @dragover.prevent
               @drop.stop="onRootLayerDrop($event, 'footer')"
             >
-              <template v-for="(item, index) in parsedData.content" :key="'footer-' + index">
+
+              <template
+                v-for="(item,index) in parsedData.content"
+                :key="'footer-'+index"
+              >
                 <Renderer
-                  v-if="getLayer(getElement(item)) === 'footer'"
+                  v-if="
+                    getLayer(
+                      getElement(item)
+                    ) === 'footer'
+                  "
                   :element="getElement(item)"
                   :path="[index]"
                   @update-tree="syncJsonTree"
                 />
               </template>
+
             </div>
 
           </template>
 
-          <div v-else class="invalid-json">
+          <div
+            v-else
+            class="invalid-json"
+          >
             Invalid JSON
           </div>
+
         </div>
+
       </div>
+
     </div>
 
   </div>
@@ -211,6 +283,7 @@ function generateDefaultNode(type) {
 | GLOBAL STATES
 |--------------------------------------------------------------------------
 */
+
 const formValues = reactive({})
 const overrideMap = reactive({})
 const globalStates = reactive({})
@@ -220,7 +293,9 @@ const globalStates = reactive({})
 | ICON MAP
 |--------------------------------------------------------------------------
 */
+
 const iconMap = {
+
   home: 'home',
   chat: 'chat',
   person: 'person',
@@ -229,6 +304,7 @@ const iconMap = {
   back: 'arrow_back',
   chevron_right: 'chevron_right',
   expand_more: 'expand_more',
+
   qr: 'qr_code_scanner',
   wallet: 'account_balance_wallet',
   cart: 'shopping_cart',
@@ -242,6 +318,7 @@ const iconMap = {
   payments: 'payments',
   smartphone: 'smartphone',
   badge: 'badge',
+
   notifications: 'notifications',
   search: 'search',
   edit_note: 'edit_note',
@@ -256,76 +333,48 @@ const iconMap = {
   settings: 'settings',
   article: 'article',
   help: 'help',
+
   shopping_bag: 'shopping_bag',
   add_box: 'add_box',
   confirmation_number: 'confirmation_number',
+
   add_circle: 'add_circle',
   delete: 'delete',
   close: 'close',
+
   tunai: 'payments',
   qr_code: 'qr_code',
   account_balance: 'account_balance',
   more_horiz: 'more_horiz',
+
   image: 'image'
 }
 
 /*
 |--------------------------------------------------------------------------
-| WORKING DEFAULT INITIAL SCHEMAS FOR VALID DRAG EXPERIENCES
+| JSON
 |--------------------------------------------------------------------------
 */
+
 const jsonText = ref(`{
   "theme": {
-    "bg": "#0f172a"
+    "bg": "#FFFFFF"
   },
-  "content": [
-    {
-      "type": "box-v",
-      "styles": {
-        "p": 16,
-        "gap": 12,
-        "bg": "#1e293b",
-        "radius": 12,
-        "mt": 20,
-        "ml": 16,
-        "mr": 16
-      },
-      "children": [
-        {
-          "type": "text",
-          "props": {
-            "value": "Welcome Workspace Container"
-          },
-          "styles": {
-            "color": "#ffffff",
-            "fontSize": 18,
-            "bold": "true"
-          }
-        },
-        {
-          "type": "text",
-          "props": {
-            "value": "Drag components from the left side and hover closely to append inside or rearrange nodes cleanly."
-          },
-          "styles": {
-            "color": "#94a3b8",
-            "fontSize": 12
-          }
-        }
-      ]
-    }
-  ]
+  "content": []
 }`)
 
 /*
 |--------------------------------------------------------------------------
-| TREE PARSING ENGINE
+| PARSED
 |--------------------------------------------------------------------------
 */
+
 const parsedData = computed(() => {
+
   try {
     return JSON.parse(jsonText.value)
-  } catch (e) {
+  }
+  catch (e) {
     return null
   }
 })
@@ -338,50 +387,7 @@ function syncJsonTree(updatedContent) {
 
 /*
 |--------------------------------------------------------------------------
-| RECURSIVE ADAPTIVE NODE MUTATOR PIPELINE
-|--------------------------------------------------------------------------
-*/
-function extractElementByPath(array, path) {
-  let target = array
-  for (let i = 0; i < path.length; i++) {
-    const idx = path[i]
-    if (i === path.length - 1) return target[idx]
-    target = target[idx].children
-  }
-  return null
-}
-
-function clearElementByPath(array, path) {
-  const root = JSON.parse(JSON.stringify(array))
-  let target = root
-  for (let i = 0; i < path.length; i++) {
-    const idx = path[i]
-    if (i === path.length - 1) {
-      target.splice(idx, 1)
-    } else {
-      target = target[idx].children
-    }
-  }
-  return root
-}
-
-function insertElementByPath(array, path, element) {
-  const root = JSON.parse(JSON.stringify(array))
-  let target = root
-  for (let i = 0; i < path.length; i++) {
-    const idx = path[i]
-    if (i === path.length - 1) {
-      target.splice(idx, 0, element)
-    } else {
-      target = target[idx].children
-    }
-  }
-  return root
-}
-
-/*
-|--------------------------------------------------------------------------
-| DRAG START / DROPPING OVER EMPTY BASE LAYERS
+| ACTIVE NESTED DRAG AND DROP PIPELINE HANDLERS
 |--------------------------------------------------------------------------
 */
 function onPaletteDragStart(event, type) {
@@ -419,11 +425,46 @@ function onRootLayerDrop(event, layerName) {
   }
 }
 
-/*
-|--------------------------------------------------------------------------
-| PROVIDE GLOBAL NESTED INTER-ACTION DISPATCHERS
-|--------------------------------------------------------------------------
-*/
+function extractElementByPath(array, path) {
+  let target = array
+  for (let i = 0; i < path.length; i++) {
+    const idx = path[i]
+    if (i === path.length - 1) return target[idx]
+    target = target[idx].children
+  }
+  return null
+}
+
+function clearElementByPath(array, path) {
+  const root = [...array]
+  let target = root
+  for (let i = 0; i < path.length; i++) {
+    const idx = path[i]
+    if (i === path.length - 1) {
+      target.splice(idx, 1)
+    } else {
+      target[idx].children = [...target[idx].children]
+      target = target[idx].children
+    }
+  }
+  return root
+}
+
+function insertElementByPath(array, path, element) {
+  const root = [...array]
+  let target = root
+  for (let i = 0; i < path.length; i++) {
+    const idx = path[i]
+    if (i === path.length - 1) {
+      target.splice(idx, 0, element)
+    } else {
+      target[idx].children = [...target[idx].children]
+      target = target[idx].children
+    }
+  }
+  return root
+}
+
 provide('treeDragDropContext', {
   triggerNodeDragStart: (event, path) => {
     event.dataTransfer.setData('text/plain', JSON.stringify({ operation: 'MOVE', path }))
@@ -432,32 +473,26 @@ provide('treeDragDropContext', {
     try {
       const rawData = event.dataTransfer.getData('text/plain')
       if (!rawData) return
-      
       const context = JSON.parse(rawData)
       let mutableContent = JSON.parse(JSON.stringify(parsedData.value.content || []))
-      let elementToInsert = null
 
+      let elementToInsert = null
       if (context.operation === 'NEW') {
         elementToInsert = generateDefaultNode(context.type)
       } else if (context.operation === 'MOVE') {
         const sourceStr = JSON.stringify(context.path)
         const destStr = JSON.stringify(destinationPath)
-        
-        if (destStr.startsWith(sourceStr.slice(0, -1))) {
-          // Check circular loop containment chains
-          if (destStr === sourceStr || destStr.startsWith(sourceStr.replace(']', '') + ',')) {
-            alert("Invalid Move Placement: Cannot nest a parent container into its own layout branch.")
-            return
-          }
+        if (destStr.startsWith(sourceStr)) {
+          alert("Invalid Move Placement: Cannot nest a parent container into its own layout branch.")
+          return
         }
-
         elementToInsert = extractElementByPath(mutableContent, context.path)
         mutableContent = clearElementByPath(mutableContent, context.path)
 
-        // Adjust positioning if moving shifts source indices higher up within the same parent node array scope
+        // Adjust tracking index shifting inside the same exact array branch hierarchy
         if (context.path.length === destinationPath.length) {
-          const sameParent = context.path.slice(0, -1).join(',') === destinationPath.slice(0, -1).join(',')
-          if (sameParent && context.path[context.path.length - 1] < destinationPath[destinationPath.length - 1]) {
+          const matchingHierarchy = context.path.slice(0, -1).join(',') === destinationPath.slice(0, -1).join(',')
+          if (matchingHierarchy && context.path[context.path.length - 1] < destinationPath[destinationPath.length - 1]) {
             destinationPath[destinationPath.length - 1]--
           }
         }
@@ -473,6 +508,7 @@ provide('treeDragDropContext', {
         } else if (layoutContext === 'INSERT_BEFORE') {
           mutableContent = insertElementByPath(mutableContent, destinationPath, elementToInsert)
         } else if (layoutContext === 'INSERT_AFTER') {
+          // Calculate destination path target position for dropping item right beneath target node
           const afterPath = [...destinationPath]
           afterPath[afterPath.length - 1]++
           mutableContent = insertElementByPath(mutableContent, afterPath, elementToInsert)
@@ -490,6 +526,7 @@ provide('treeDragDropContext', {
 | HELPERS
 |--------------------------------------------------------------------------
 */
+
 function reloadRuntime() {
   jsonText.value = jsonText.value
 }
@@ -502,102 +539,338 @@ function getLayer(element) {
   return element?.props?.layer || null
 }
 
-function injectData(node, data) {
-  if (!node) return
+/*
+|--------------------------------------------------------------------------
+| DATA PLACEHOLDER
+|--------------------------------------------------------------------------
+*/
+
+function injectData(node,data) {
+
+  if (!node)
+    return
+
   if (node.props) {
-    Object.keys(node.props).forEach(key => {
-      node.props[key] = String(node.props[key]).replace(/\{\{(.*?)\}\}/g, (_, k) => data[k.trim()] || '')
-    })
+
+    Object.keys(node.props)
+      .forEach(key => {
+
+        node.props[key] =
+          String(node.props[key])
+          .replace(
+            /\{\{(.*?)\}\}/g,
+            (_,k)=> data[k.trim()] || ''
+          )
+      })
   }
+
   if (node.children) {
-    node.children.forEach(child => injectData(child, data))
+
+    node.children.forEach(
+      child => injectData(child,data)
+    )
   }
 }
 
 /*
 |--------------------------------------------------------------------------
-| RUNTIME PARSED OBJECT STYLES GENERATOR
+| STYLE ENGINE
 |--------------------------------------------------------------------------
 */
+
 function styleObject(styles = {}) {
+
   const obj = {}
-  
+
+  /*
+  |--------------------------------------------------------------------------
+  | SIZE
+  |--------------------------------------------------------------------------
+  */
+
   if (styles.w) {
-    if (styles.w === 'fill') obj.width = '100%'
-    else if (String(styles.w).includes('%')) obj.width = styles.w
-    else obj.width = styles.w + 'px'
-  }
-  if (styles.h) {
-    if (styles.h === 'fill') obj.height = '100%'
-    else if (String(styles.h).includes('%')) obj.height = styles.h
-    else obj.height = styles.h + 'px'
+
+    if (styles.w === 'fill') {
+      obj.width = '100%'
+    }
+    else if (
+      String(styles.w).includes('%')
+    ) {
+      obj.width = styles.w
+    }
+    else {
+      obj.width = styles.w + 'px'
+    }
   }
 
-  if (styles.bg) obj.background = styles.bg
+  if (styles.h) {
+
+    if (styles.h === 'fill') {
+      obj.height = '100%'
+    }
+    else if (
+      String(styles.h).includes('%')
+    ) {
+      obj.height = styles.h
+    }
+    else {
+      obj.height = styles.h + 'px'
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | BG
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.bg)
+    obj.background = styles.bg
+
   if (styles.bgImage) {
-    obj.backgroundImage = `url(${styles.bgImage})`
+
+    obj.backgroundImage =
+      `url(${styles.bgImage})`
+
     obj.backgroundSize = 'cover'
     obj.backgroundPosition = 'center'
   }
 
-  if (styles.color) obj.color = styles.color
-  if (styles.fontSize) obj.fontSize = styles.fontSize + 'px'
-  if (styles.bold === 'true') obj.fontWeight = '700'
-  if (styles.lineHeight) obj.lineHeight = styles.lineHeight + 'px'
+  /*
+  |--------------------------------------------------------------------------
+  | TEXT
+  |--------------------------------------------------------------------------
+  */
 
-  if (styles.align === 'center') { obj.alignItems = 'center'; obj.textAlign = 'center' }
-  if (styles.align === 'right') { obj.alignItems = 'flex-end'; obj.textAlign = 'right' }
-  if (styles.align === 'left') { obj.alignItems = 'flex-start'; obj.textAlign = 'left' }
+  if (styles.color)
+    obj.color = styles.color
 
-  if (styles.arrangement === 'center') obj.justifyContent = 'center'
-  if (styles.arrangement === 'between') obj.justifyContent = 'space-between'
-  if (styles.arrangement === 'around') obj.justifyContent = 'space-around'
-  if (styles.arrangement === 'evenly') obj.justifyContent = 'space-evenly'
+  if (styles.fontSize)
+    obj.fontSize =
+      styles.fontSize + 'px'
 
-  if (styles.p) obj.padding = styles.p + 'px'
-  if (styles.pt) obj.paddingTop = styles.pt + 'px'
-  if (styles.pb) obj.paddingBottom = styles.pb + 'px'
-  if (styles.pl) obj.paddingLeft = styles.pl + 'px'
-  if (styles.pr) obj.paddingRight = styles.pr + 'px'
+  if (styles.bold === 'true')
+    obj.fontWeight = '700'
 
-  if (styles.mt) obj.marginTop = styles.mt + 'px'
-  if (styles.mb) obj.marginBottom = styles.mb + 'px'
-  if (styles.ml) obj.marginLeft = styles.ml + 'px'
-  if (styles.mr) obj.marginRight = styles.mr + 'px'
+  if (styles.lineHeight)
+    obj.lineHeight =
+      styles.lineHeight + 'px'
 
-  if (styles.gap) obj.gap = styles.gap + 'px'
-  if (styles.radius) obj.borderRadius = styles.radius + 'px'
-  if (styles.border) obj.border = '1px solid ' + styles.border
-  if (styles.weight) obj.flex = styles.weight
+  /*
+  |--------------------------------------------------------------------------
+  | ALIGN
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.align === 'center') {
+    obj.alignItems = 'center'
+    obj.textAlign = 'center'
+  }
+
+  if (styles.align === 'right') {
+    obj.alignItems = 'flex-end'
+    obj.textAlign = 'right'
+  }
+
+  if (styles.align === 'left') {
+    obj.alignItems = 'flex-start'
+    obj.textAlign = 'left'
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | ARRANGEMENT
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.arrangement === 'center')
+    obj.justifyContent = 'center'
+
+  if (styles.arrangement === 'between')
+    obj.justifyContent = 'space-between'
+
+  if (styles.arrangement === 'around')
+    obj.justifyContent = 'space-around'
+
+  if (styles.arrangement === 'evenly')
+    obj.justifyContent = 'space-evenly'
+
+  /*
+  |--------------------------------------------------------------------------
+  | PADDING
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.p)
+    obj.padding = styles.p + 'px'
+
+  if (styles.pt)
+    obj.paddingTop = styles.pt + 'px'
+
+  if (styles.pb)
+    obj.paddingBottom = styles.pb + 'px'
+
+  if (styles.pl)
+    obj.paddingLeft = styles.pl + 'px'
+
+  if (styles.pr)
+    obj.paddingRight = styles.pr + 'px'
+
+  /*
+  |--------------------------------------------------------------------------
+  | MARGIN
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.mt)
+    obj.marginTop = styles.mt + 'px'
+
+  if (styles.mb)
+    obj.marginBottom = styles.mb + 'px'
+
+  if (styles.ml)
+    obj.marginLeft = styles.ml + 'px'
+
+  if (styles.mr)
+    obj.marginRight = styles.mr + 'px'
+
+  /*
+  |--------------------------------------------------------------------------
+  | GAP
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.gap)
+    obj.gap = styles.gap + 'px'
+
+  /*
+  |--------------------------------------------------------------------------
+  | RADIUS
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.radius)
+    obj.borderRadius =
+      styles.radius + 'px'
+
+  /*
+  |--------------------------------------------------------------------------
+  | BORDER
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.border)
+    obj.border =
+      '1px solid ' + styles.border
+
+  /*
+  |--------------------------------------------------------------------------
+  | FLEX
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.weight)
+    obj.flex = styles.weight
+
+  /*
+  |--------------------------------------------------------------------------
+  | SHADOW
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.elevation) {
-    const elevation = Number(styles.elevation)
-    obj.boxShadow = `0 ${elevation * 2}px ${elevation * 8}px rgba(0,0,0,0.12)`
+
+    const elevation =
+      Number(styles.elevation)
+
+    obj.boxShadow =
+      `0 ${elevation * 2}px ${elevation * 8}px rgba(0,0,0,0.12)`
   }
 
-  if (styles.offsetX || styles.offsetY) {
-    const x = styles.offsetX || 0
-    const y = styles.offsetY || 0
-    obj.transform = `translate(${x}px,${y}px)`
+  /*
+  |--------------------------------------------------------------------------
+  | OFFSET
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    styles.offsetX ||
+    styles.offsetY
+  ) {
+
+    const x =
+      styles.offsetX || 0
+
+    const y =
+      styles.offsetY || 0
+
+    obj.transform =
+      `translate(${x}px,${y}px)`
   }
 
-  if (styles.alpha) obj.opacity = styles.alpha
-  if (styles.z) obj.zIndex = styles.z
-  if (styles.scrollable === 'true') obj.overflowY = 'auto'
+  /*
+  |--------------------------------------------------------------------------
+  | ALPHA
+  |--------------------------------------------------------------------------
+  */
+
+  if (styles.alpha)
+    obj.opacity = styles.alpha
+  if (styles.z)
+    obj.zIndex = styles.z
+  /*
+  |--------------------------------------------------------------------------
+  | SCROLLABLE
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    styles.scrollable === 'true'
+  ) {
+
+    obj.overflowY = 'auto'
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | MAXLINES
+  |--------------------------------------------------------------------------
+  */
 
   if (styles.maxLines) {
+
     obj.display = '-webkit-box'
-    obj.webkitLineClamp = styles.maxLines
-    obj.webkitBoxOrient = 'vertical'
+
+    obj.webkitLineClamp =
+      styles.maxLines
+
+    obj.webkitBoxOrient =
+      'vertical'
+
     obj.overflow = 'hidden'
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | POSITION
+  |--------------------------------------------------------------------------
+  */
+
   if (styles.absolute === 'true') {
+
     obj.position = 'absolute'
-    if (styles.top != null) obj.top = styles.top + 'px'
-    if (styles.left != null) obj.left = styles.left + 'px'
-    if (styles.right != null) obj.right = styles.right + 'px'
-    if (styles.bottom != null) obj.bottom = styles.bottom + 'px'
+
+    if (styles.top != null)
+      obj.top = styles.top + 'px'
+
+    if (styles.left != null)
+      obj.left = styles.left + 'px'
+
+    if (styles.right != null)
+      obj.right = styles.right + 'px'
+
+    if (styles.bottom != null)
+      obj.bottom = styles.bottom + 'px'
   }
 
   return obj
@@ -605,11 +878,14 @@ function styleObject(styles = {}) {
 
 /*
 |--------------------------------------------------------------------------
-| RECURSIVE LAYOUT SYSTEM CORE COMPONENT (RENDERER)
+| RENDERER
 |--------------------------------------------------------------------------
 */
+
 const Renderer = defineComponent({
+
   name: 'Renderer',
+
   props: {
     element: Object,
     form: Object,
@@ -618,67 +894,146 @@ const Renderer = defineComponent({
     path: Array
   },
   inject: ['treeDragDropContext'],
+
   setup(props) {
-    const localForm = props.form || formValues
-    const localOverride = props.overrides || overrideMap
+
+    const localForm =
+      props.form || formValues
+
+    const localOverride =
+      props.overrides || overrideMap
+
+    /*
+    |--------------------------------------------------------------------------
+    | MERGED
+    |--------------------------------------------------------------------------
+    */
 
     function mergedProps() {
-      const name = props.element.props?.name
-      const override = name ? localOverride[name] : null
-      return { ...(props.element.props || {}), ...(override?.props || {}) }
+
+      const name =
+        props.element.props?.name
+
+      const override =
+        name
+          ? localOverride[name]
+          : null
+
+      return {
+        ...(props.element.props || {}),
+        ...(override?.props || {})
+      }
     }
 
     function mergedStyles() {
-      const name = props.element.props?.name
-      const override = name ? localOverride[name] : null
+
+      const name =
+        props.element.props?.name
+
+      const override =
+        name
+          ? localOverride[name]
+          : null
+
       return {
+
         ...(props.element.styles || {}),
-        ...(props.parentActive ? props.element.activeStyles || {} : {}),
+
+        ...(props.parentActive
+          ? props.element.activeStyles || {}
+          : {}
+        ),
+
         ...(override?.styles || {})
       }
     }
 
-    function renderChildren(extra = {}) {
-      if (!props.element.children) return null
-      return props.element.children.map((child, index) =>
-        h(Renderer, {
-          key: index,
-          element: child,
-          form: localForm,
-          overrides: localOverride,
-          parentActive: extra.parentActive,
-          path: [...props.path, index]
-        })
+    /*
+    |--------------------------------------------------------------------------
+    | CHILDREN
+    |--------------------------------------------------------------------------
+    */
+
+    function renderChildren(
+      extra={}
+    ) {
+
+      if (!props.element.children)
+        return null
+
+      return props.element.children.map(
+        (child,index)=>
+          h(Renderer,{
+            key:index,
+            element:child,
+            form:localForm,
+            overrides:localOverride,
+            parentActive:
+              extra.parentActive,
+            path: [...props.path, index]
+          })
       )
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | CONTROL ELEMENT
+    |--------------------------------------------------------------------------
+    */
+
     function applyControlElements(tabId) {
-      const controls = props.element['control-elements']
-      if (!controls) return
-      controls.forEach(control => {
-        const target = control['target-name']
-        const config = control['on-values']?.[tabId]
-        if (config) { localOverride[target] = config }
+
+      const controls =
+        props.element['control-elements']
+
+      if (!controls)
+        return
+
+      controls.forEach(control=>{
+
+        const target =
+          control['target-name']
+
+        const config =
+          control['on-values']?.[tabId]
+
+        if (config) {
+          localOverride[target] =
+            config
+        }
       })
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | DATA SOURCE
+    |--------------------------------------------------------------------------
+    */
+
     const dynamicItems = ref([])
-    onMounted(async () => {
-      if (props.element['data-source']) {
+
+    onMounted(async()=>{
+
+      if (
+        props.element['data-source']
+      ) {
+
         try {
-          const response = await fetch(props.element['data-source'])
-          dynamicItems.value = await response.json()
-        } catch (e) {
+
+          const response =
+            await fetch(
+              props.element['data-source']
+            )
+
+          dynamicItems.value =
+            await response.json()
+        }
+        catch(e){
           console.log(e)
         }
       }
     })
 
-    /*
-    |--------------------------------------------------------------------------
-    | INJECT NATIVE ZONE CALCULATIONS (DRAG OVER / HOVER SPLITTING)
-    |--------------------------------------------------------------------------
-    */
     function injectDragDropZone(type, nodeConfig, nodes) {
       const isStructureContainer = ['box-v', 'box-h', 'box-stack'].includes(type)
       return h(
@@ -698,15 +1053,13 @@ const Renderer = defineComponent({
           onDrop: (e) => {
             e.stopPropagation()
             e.preventDefault()
-            
             const boundingBox = e.currentTarget.getBoundingClientRect()
             const pointerY = e.clientY - boundingBox.top
             
-            // Nested structural container bounding box heuristics split drops into inside/above/below targets
             if (isStructureContainer) {
-              if (pointerY < boundingBox.height * 0.20) {
+              if (pointerY < boundingBox.height * 0.25) {
                 props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_BEFORE')
-              } else if (pointerY > boundingBox.height * 0.80) {
+              } else if (pointerY > boundingBox.height * 0.75) {
                 props.treeDragDropContext.triggerNodeDrop(e, props.path, 'INSERT_AFTER')
               } else {
                 props.treeDragDropContext.triggerNodeDrop(e, props.path, 'APPEND_INSIDE')
@@ -727,269 +1080,857 @@ const Renderer = defineComponent({
       )
     }
 
-    return () => {
+    return ()=> {
+
       const p = mergedProps()
       const s = mergedStyles()
 
-      if (p.visibility === 'off' || p.visibility === 'false') {
+      /*
+      |--------------------------------------------------------------------------
+      | VISIBILITY
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        p.visibility === 'off'
+        ||
+        p.visibility === 'false'
+      ) {
         return null
       }
 
-      // Horizontal container row system
-      if (props.element.type === 'box-h') {
+      /*
+      |--------------------------------------------------------------------------
+      | BOX H
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'box-h'
+      ) {
+
         return injectDragDropZone('box-h', {
           tag: 'div',
           attrs: {
-            style: {
-              display: 'flex',
-              flexDirection: 'row',
-              width: '100%',
-              boxSizing: 'border-box',
-              minHeight: '45px',
-              outline: '1px dashed rgba(37, 99, 235, 0.3)',
+            style:{
+              display:'flex',
+              flexDirection:'row',
+              width:'100%',
+              boxSizing:'border-box',
+              minHeight:'32px',
+              outline: '1px dashed rgba(37, 99, 235, 0.25)',
               ...styleObject(s)
             }
           }
         }, renderChildren())
       }
 
-      // Vertical container system
-      if (props.element.type === 'box-v') {
-        if (props.element['data-source'] && props.element['data-container']) {
-          return injectDragDropZone('box-v', {
-            tag: 'div',
-            attrs: {
-              style: {
-                display: 'flex',
-                flexDirection: 'column',
-                width: s.w === 'fill' ? '100%' : undefined,
-                height: s.h === 'fill' ? '100%' : undefined,
-                minHeight: s.h === 'fill' ? '100%' : '45px',
-                boxSizing: 'border-box',
-                ...styleObject(s)
-              }
-            }
-          }, dynamicItems.value.map(item => {
-            const cloned = JSON.parse(JSON.stringify(props.element['data-container']))
-            injectData(cloned, item)
-            return h(Renderer, { element: cloned, form: localForm, overrides: localOverride, path: props.path })
-          }))
+      /*
+|--------------------------------------------------------------------------
+| BOX V
+|--------------------------------------------------------------------------
+*/
+
+if (
+  props.element.type === 'box-v'
+) {
+
+  /*
+  |--------------------------------------------------------------------------
+  | DATA SOURCE
+  |--------------------------------------------------------------------------
+  */
+
+  if (
+    props.element['data-source']
+    &&
+    props.element['data-container']
+  ) {
+
+    return injectDragDropZone('box-v', {
+      tag: 'div',
+      attrs: {
+        style:{
+          display:'flex',
+          flexDirection:'column',
+
+          width:
+            s.w === 'fill'
+              ? '100%'
+              : undefined,
+
+          height:
+            s.h === 'fill'
+              ? '100%'
+              : undefined,
+
+          minHeight:
+            s.h === 'fill'
+              ? '100%'
+              : '32px',
+
+          boxSizing:'border-box',
+
+          ...styleObject(s)
         }
-
-        return injectDragDropZone('box-v', {
-          tag: 'div',
-          attrs: {
-            style: {
-              display: 'flex',
-              flexDirection: 'column',
-              width: s.w === 'fill' ? '100%' : undefined,
-              height: s.h === 'fill' ? '100%' : undefined,
-              minHeight: s.h === 'fill' ? '100%' : '45px',
-              boxSizing: 'border-box',
-              position: s.absolute === 'true' ? 'absolute' : 'relative',
-              outline: '1px dashed rgba(37, 99, 235, 0.3)',
-              ...styleObject(s)
-            }
-          }
-        }, renderChildren())
       }
+    }, dynamicItems.value.map(
+        item => {
 
-      // Stack Container system
-      if (props.element.type === 'box-stack') {
-        const isBackgroundLayer = p.layer === 'background'
-        return injectDragDropZone('box-stack', {
-          tag: 'div',
-          attrs: {
-            style: {
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              width: isBackgroundLayer ? '100%' : (s.w === 'fill' ? '100%' : undefined),
-              height: isBackgroundLayer ? '100%' : (s.h === 'fill' ? '100%' : undefined),
-              minHeight: isBackgroundLayer ? '100%' : (s.h === 'fill' ? '100%' : '45px'),
-              backgroundImage: p.bgImage ? `url(${p.bgImage})` : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              overflow: 'hidden',
-              outline: '1px dashed rgba(168, 85, 247, 0.3)',
-              ...styleObject({ ...s, bgImage: null })
+          const cloned =
+            JSON.parse(
+              JSON.stringify(
+                props.element['data-container']
+              )
+            )
+
+          injectData(
+            cloned,
+            item
+          )
+
+          return h(
+            Renderer,
+            {
+              element:cloned,
+              form:localForm,
+              overrides:localOverride,
+              path: props.path
             }
-          }
-        }, renderChildren())
-      }
+          )
+        }
+      )
+    )
+  }
 
-      if (props.element.type === 'box-banner') {
+  return injectDragDropZone('box-v', {
+    tag: 'div',
+    attrs: {
+      style:{
+        display:'flex',
+        flexDirection:'column',
+
+        width:
+          s.w === 'fill'
+            ? '100%'
+            : undefined,
+
+        height:
+          s.h === 'fill'
+            ? '100%'
+            : undefined,
+
+        minHeight:
+          s.h === 'fill'
+            ? '100%'
+            : '32px',
+
+        boxSizing:'border-box',
+
+        position:
+          s.absolute === 'true'
+            ? 'absolute'
+            : 'relative',
+
+        outline: '1px dashed rgba(37, 99, 235, 0.25)',
+        ...styleObject(s)
+      }
+    }
+  }, renderChildren())
+}
+
+      /*
+|--------------------------------------------------------------------------
+| BOX STACK
+|--------------------------------------------------------------------------
+*/
+
+if (
+  props.element.type === 'box-stack'
+) {
+
+  const isBackgroundLayer =
+    p.layer === 'background'
+
+  return injectDragDropZone('box-stack', {
+    tag: 'div',
+    attrs: {
+      style:{
+
+        /*
+        |--------------------------------------------------------------------------
+        | COMPOSE-LIKE STACK
+        |--------------------------------------------------------------------------
+        */
+
+        position:'relative',
+
+        display:'flex',
+        flexDirection:'column',
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMPORTANT FIX
+        |--------------------------------------------------------------------------
+        */
+
+        width:
+          isBackgroundLayer
+            ? '100%'
+            : (
+                s.w === 'fill'
+                  ? '100%'
+                  : undefined
+              ),
+
+        height:
+          isBackgroundLayer
+            ? '100%'
+            : (
+                s.h === 'fill'
+                  ? '100%'
+                  : undefined
+              ),
+
+        minHeight:
+          isBackgroundLayer
+            ? '100%'
+            : (
+                s.h === 'fill'
+                  ? '100%'
+                  : '32px'
+              ),
+
+        /*
+        |--------------------------------------------------------------------------
+        | BG IMAGE
+        |--------------------------------------------------------------------------
+        */
+
+        backgroundImage:
+          p.bgImage
+            ? `url(${p.bgImage})`
+            : undefined,
+
+        backgroundSize:'cover',
+        backgroundPosition:'center',
+        backgroundRepeat:'no-repeat',
+
+        overflow:'hidden',
+        outline: '1px dashed rgba(168, 85, 247, 0.25)',
+
+        ...styleObject({
+          ...s,
+
+          /*
+          |--------------------------------------------------------------------------
+          | PREVENT DUPLICATE BG IMAGE
+          |--------------------------------------------------------------------------
+          */
+
+          bgImage:null
+        })
+      }
+    }
+  }, renderChildren())
+}
+
+      /*
+      |--------------------------------------------------------------------------
+      | BOX BANNER
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'box-banner'
+      ) {
+
         return injectDragDropZone('box-banner', {
           tag: 'div',
-          attrs: { style: { position: 'relative', overflow: 'hidden', width: '100%', ...styleObject({ ...s, bgImage: p.bgImage }) } }
+          attrs: {
+            style:{
+              position:'relative',
+              overflow:'hidden',
+              width:'100%',
+              ...styleObject({
+                ...s,
+                bgImage:p.bgImage
+              })
+            }
+          }
         }, renderChildren())
       }
 
-      if (props.element.type === 'data-form') {
+      /*
+      |--------------------------------------------------------------------------
+      | DATA FORM
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'data-form'
+      ) {
+
         return injectDragDropZone('data-form', {
           tag: 'div',
-          attrs: { style: { width: '100%', ...styleObject(s) } }
+          attrs: {
+            style:{
+              width:'100%',
+              ...styleObject(s)
+            }
+          }
         }, renderChildren())
       }
 
-      if (props.element.type === 'text') {
+      /*
+      |--------------------------------------------------------------------------
+      | TEXT
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'text'
+      ) {
+
         return injectDragDropZone('text', {
           tag: 'div',
-          attrs: { style: { boxSizing: 'border-box', minHeight: '18px', ...styleObject(s) } }
+          attrs: {
+            style:{
+              boxSizing:'border-box',
+              ...styleObject(s)
+            }
+          }
         }, p.value || '')
       }
 
-      if (props.element.type === 'image') {
+      /*
+      |--------------------------------------------------------------------------
+      | IMAGE
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'image'
+      ) {
+
         return injectDragDropZone('image', {
           tag: 'img',
-          attrs: { src: p.url, style: { width: '100%', display: 'block', objectFit: 'cover', minHeight: '35px', ...styleObject(s) } }
-        }, null)
-      }
-
-      if (props.element.type === 'image-picker') {
-        return injectDragDropZone('image-picker', {
-          tag: 'label',
-          attrs: { style: { display: 'block', cursor: 'pointer' } }
-        }, [
-          h('input', {
-            type: 'file',
-            accept: 'image/*',
-            style: { display: 'none' },
-            onChange: e => {
-              const file = e.target.files[0]
-              if (!file) return
-              localForm[p.name] = URL.createObjectURL(file)
-            }
-          }),
-          localForm[p.name]
-            ? h('img', { src: localForm[p.name], style: { width: '100%', height: '200px', objectFit: 'cover', borderRadius: '12px' } })
-            : h('div', { style: { height: '200px', border: '2px dashed #CBD5E1', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' } }, 'Tap to upload')
-        ])
-      }
-
-      if (props.element.type === 'input') {
-        return injectDragDropZone('input', {
-          tag: 'input',
           attrs: {
-            type: p.keyboardType === 'password' ? 'password' : 'text',
-            value: localForm[p.name] || p.value || '',
-            placeholder: p.placeholder || '',
-            onInput: e => { localForm[p.name] = e.target.value },
-            style: { border: 'none', outline: 'none', width: '100%', boxSizing: 'border-box', ...styleObject(s) }
+            src:p.url,
+
+            style:{
+              width:'100%',
+              display:'block',
+              objectFit:'cover',
+              minHeight:'20px',
+              ...styleObject(s)
+            }
           }
         }, null)
       }
 
-      if (props.element.type === 'button') {
+      /*
+      |--------------------------------------------------------------------------
+      | IMAGE PICKER
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'image-picker'
+      ) {
+
+        return injectDragDropZone('image-picker', {
+          tag: 'label',
+          attrs: {
+            style:{
+              display:'block',
+              cursor:'pointer'
+            }
+          }
+        }, [
+
+            h(
+              'input',
+              {
+                type:'file',
+                accept:'image/*',
+
+                style:{
+                  display:'none'
+                },
+
+                onChange:e=>{
+
+                  const file =
+                    e.target.files[0]
+
+                  if (!file)
+                    return
+
+                  localForm[p.name] =
+                    URL.createObjectURL(file)
+                }
+              }
+            ),
+
+            localForm[p.name]
+
+              ? h(
+                  'img',
+                  {
+                    src:
+                      localForm[p.name],
+
+                    style:{
+                      width:'100%',
+                      height:'200px',
+                      objectFit:'cover',
+                      borderRadius:'12px'
+                    }
+                  }
+                )
+
+              : h(
+                  'div',
+                  {
+                    style:{
+                      height:'200px',
+                      border:'2px dashed #CBD5E1',
+                      borderRadius:'12px',
+                      display:'flex',
+                      alignItems:'center',
+                      justifyContent:'center'
+                    }
+                  },
+
+                  'Tap to upload'
+                )
+          ]
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | INPUT
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type === 'input'
+      ) {
+
+        return injectDragDropZone('input', {
+          tag: 'input',
+          attrs: {
+            type:
+              p.keyboardType ===
+              'password'
+                ? 'password'
+                : 'text',
+
+            value:
+              localForm[p.name]
+              || p.value
+              || '',
+
+            placeholder:
+              p.placeholder || '',
+
+            onInput:e=>{
+
+              localForm[p.name] =
+                e.target.value
+            },
+
+            style:{
+              border:'none',
+              outline:'none',
+              width:'100%',
+              boxSizing:'border-box',
+              ...styleObject(s)
+            }
+          }
+        }, null)
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | BUTTON
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'button'
+      ) {
+
         return injectDragDropZone('button', {
           tag: 'button',
           attrs: {
-            style: { border: 'none', cursor: 'pointer', ...styleObject(s) },
-            onClick: () => {
-              if (p.state_key) { localForm[p.state_key] = p.set_value }
-              if (props.element.action?.target) { alert('Navigate : ' + props.element.action.target) }
+            style:{
+              border:'none',
+              cursor:'pointer',
+              ...styleObject(s)
+            },
+
+            onClick:()=>{
+
+              /*
+              |--------------------------------------------------------------------------
+              | STATE
+              |--------------------------------------------------------------------------
+              */
+
+              if (
+                p.state_key
+              ) {
+
+                localForm[
+                  p.state_key
+                ] = p.set_value
+              }
+
+              /*
+              |--------------------------------------------------------------------------
+              | ACTION
+              |--------------------------------------------------------------------------
+              */
+
+              if (
+                props.element.action
+                  ?.target
+              ) {
+
+                alert(
+                  'Navigate : '
+                  +
+                  props.element.action
+                    .target
+                )
+              }
             }
           }
         }, p.value || 'Button')
       }
 
-      if (props.element.type === 'icon') {
+      /*
+      |--------------------------------------------------------------------------
+      | ICON
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'icon'
+      ) {
+
         return injectDragDropZone('icon', {
           tag: 'span',
           attrs: {
-            class: 'material-symbols-outlined',
-            style: { fontSize: (s.size || 24) + 'px', display: 'flex', alignItems: 'center', justifyContent: 'center', ...styleObject(s) }
+            class:
+              'material-symbols-outlined',
+
+            style:{
+              fontSize:
+                (
+                  s.size || 24
+                ) + 'px',
+
+              display:'flex',
+              alignItems:'center',
+              justifyContent:'center',
+
+              ...styleObject(s)
+            }
           }
-        }, iconMap[(p.name || '').toLowerCase()] || 'flash_on')
+        }, iconMap[
+            (
+              p.name || ''
+            ).toLowerCase()
+          ] || 'flash_on')
       }
 
-      if (props.element.type === 'grid') {
-        const columns = Number(s.columns || 2)
+      /*
+      |--------------------------------------------------------------------------
+      | GRID
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'grid'
+      ) {
+
+        const columns =
+          Number(
+            s.columns || 2
+          )
+
         return injectDragDropZone('grid', {
           tag: 'div',
-          attrs: { style: { display: 'grid', gridTemplateColumns: `repeat(${columns},minmax(0,1fr))`, gap: (s.gapV || 8) + 'px', width: '100%' } }
+          attrs: {
+            style:{
+              display:'grid',
+
+              gridTemplateColumns:
+                `repeat(${columns},minmax(0,1fr))`,
+
+              gap:
+                (
+                  s.gapV || 8
+                ) + 'px',
+
+              width:'100%'
+            }
+          }
         }, renderChildren())
       }
 
-      if (props.element.type === 'spacer') {
+      /*
+      |--------------------------------------------------------------------------
+      | SPACER
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'spacer'
+      ) {
+
         return injectDragDropZone('spacer', {
           tag: 'div',
-          attrs: { style: { minHeight: '8px', ...styleObject(s) } }
+          attrs: {
+            style:{
+              minHeight:'8px',
+              ...styleObject(s)
+            }
+          }
         }, null)
       }
 
-      if (props.element.type === 'card') {
+      /*
+      |--------------------------------------------------------------------------
+      | CARD
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'card'
+      ) {
+
         return injectDragDropZone('card', {
           tag: 'div',
-          attrs: { style: { width: '100%', boxSizing: 'border-box', ...styleObject(s) } }
-        }, renderChildren())
-      }
-
-      if (props.element.type === 'items-scroller-h') {
-        return injectDragDropZone('items-scroller-h', {
-          tag: 'div',
-          attrs: { style: { display: 'flex', overflowX: 'auto', overflowY: 'hidden', width: '100%', boxSizing: 'border-box', ...styleObject(s) } }
-        }, renderChildren())
-      }
-
-      if (props.element.type === 'gesture') {
-        return injectDragDropZone('gesture', {
-          tag: 'div',
           attrs: {
-            style: { cursor: 'pointer', position: 'relative' },
-            onClick: () => { if (p.state_key) { localForm[p.state_key] = p.set_value } }
-          }
-        }, renderChildren())
-      }
-
-      if (props.element.type === 'tab-menu') {
-        const stateKey = p.state_key || 'tab'
-        if (!globalStates[stateKey]) {
-          globalStates[stateKey] = p.initial_tab
-          applyControlElements(p.initial_tab)
-        }
-
-        return injectDragDropZone('tab-menu', {
-          tag: 'div',
-          attrs: { style: { display: 'flex', width: '100%', ...styleObject(s) } }
-        }, props.element.children.map(child => {
-          const tabId = child.props?.tab_id
-          return h('div', {
-            style: { flex: 1, cursor: 'pointer' },
-            onClick: () => {
-              globalStates[stateKey] = tabId
-              applyControlElements(tabId)
-            }
-          }, [
-            h(Renderer, { element: child, form: localForm, overrides: localOverride, path: props.path, parentActive: globalStates[stateKey] === tabId })
-          ])
-        }))
-      }
-
-      if (props.element.type === 'bottom-drawer') {
-        const isOpen = localForm[p.state_key] === 'true'
-        if (!isOpen) return null
-        return injectDragDropZone('bottom-drawer', {
-          tag: 'div',
-          attrs: {
-            style: {
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 999,
-              background: '#FFF',
-              borderTopLeftRadius: '24px',
-              borderTopRightRadius: '24px',
-              boxShadow: '0 -10px 40px rgba(0,0,0,0.2)',
+            style:{
+              width:'100%',
+              boxSizing:'border-box',
               ...styleObject(s)
             }
           }
         }, renderChildren())
       }
 
-      return h('div', { style: { color: 'red', fontSize: '12px', padding: '4px' } }, `UNKNOWN TYPE : ${props.element.type}`)
+      /*
+      |--------------------------------------------------------------------------
+      | ITEMS SCROLLER H
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'items-scroller-h'
+      ) {
+
+        return injectDragDropZone('items-scroller-h', {
+          tag: 'div',
+          attrs: {
+            style:{
+              display:'flex',
+              overflowX:'auto',
+              overflowY:'hidden',
+              width:'100%',
+              boxSizing:'border-box',
+              ...styleObject(s)
+            }
+          }
+        }, renderChildren())
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | GESTURE
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'gesture'
+      ) {
+
+        return injectDragDropZone('gesture', {
+          tag: 'div',
+          attrs: {
+            style:{
+              cursor:'pointer',
+              position:'relative'
+            },
+
+            onClick:()=>{
+
+              if (
+                p.state_key
+              ) {
+
+                localForm[
+                  p.state_key
+                ] = p.set_value
+              }
+            }
+          }
+        }, renderChildren())
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | TAB MENU
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'tab-menu'
+      ) {
+
+        const stateKey =
+          p.state_key || 'tab'
+
+        if (
+          !globalStates[stateKey]
+        ) {
+
+          globalStates[stateKey] =
+            p.initial_tab
+
+          applyControlElements(
+            p.initial_tab
+          )
+        }
+
+        return injectDragDropZone('tab-menu', {
+          tag: 'div',
+          attrs: {
+            style:{
+              display:'flex',
+              width:'100%',
+              ...styleObject(s)
+            }
+          }
+        }, props.element.children.map(
+            child=>{
+
+              const tabId =
+                child.props?.tab_id
+
+              return h(
+                'div',
+                {
+
+                  style:{
+                    flex:1,
+                    cursor:'pointer'
+                  },
+
+                  onClick:()=>{
+
+                    globalStates[
+                      stateKey
+                    ] = tabId
+
+                    applyControlElements(
+                      tabId
+                    )
+                  }
+                },
+
+                [
+
+                  h(
+                    Renderer,
+                    {
+                      element:child,
+                      form:localForm,
+                      overrides:localOverride,
+                      path: props.path,
+
+                      parentActive:
+                        globalStates[
+                          stateKey
+                        ] === tabId
+                    }
+                  )
+                ]
+              )
+            }
+          )
+        )
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | BOTTOM DRAWER
+      |--------------------------------------------------------------------------
+      */
+
+      if (
+        props.element.type ===
+        'bottom-drawer'
+      ) {
+
+        const isOpen =
+          localForm[
+            p.state_key
+          ] === 'true'
+
+        if (!isOpen)
+          return null
+
+        return injectDragDropZone('bottom-drawer', {
+          tag: 'div',
+          attrs: {
+            style:{
+              position:'absolute',
+              left:0,
+              right:0,
+              bottom:0,
+              zIndex:999,
+              background:'#FFF',
+              borderTopLeftRadius:'24px',
+              borderTopRightRadius:'24px',
+              boxShadow:
+                '0 -10px 40px rgba(0,0,0,0.2)',
+
+              ...styleObject(s)
+            }
+          }
+        }, renderChildren())
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | UNKNOWN
+      |--------------------------------------------------------------------------
+      */
+
+      return h(
+        'div',
+        {
+          style:{ color:'red', fontSize:'12px', padding:'4px'}
+        },
+
+        `UNKNOWN TYPE : ${props.element.type}`
+      )
     }
   }
 })
@@ -1013,9 +1954,13 @@ body {
   font-family: Inter, sans-serif;
 }
 
+/* |--------------------------------------------------------------------------
+| NEW LAYOUT COMPONENT: PALETTE PANEL
+|--------------------------------------------------------------------------
+*/
 .palette-panel {
-  width: 260px;
-  min-width: 260px;
+  width: 240px;
+  min-width: 240px;
   background: #090d16;
   border-right: 1px solid #1e293b;
   display: flex;
@@ -1054,7 +1999,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   background: #1e293b;
   border: 1px solid #334155;
   border-radius: 8px;
@@ -1093,9 +2038,13 @@ body {
   font-size: 10px;
 }
 
+/* |--------------------------------------------------------------------------
+| ADJUSTED MODIFIED PANEL WIDTHS (Editor-panel decreased from 50% to 30%)
+|--------------------------------------------------------------------------
+*/
 .editor-panel {
-  width: 32%;
-  min-width: 320px;
+  width: 30%;
+  min-width: 300px;
   height: 100%;
   border-right: 1px solid #1e293b;
   display: flex;
@@ -1154,7 +2103,13 @@ body {
   justify-content: center;
   align-items: center;
   overflow: auto;
-  background: radial-gradient(circle at top, #1e3a8a, #0f172a);
+
+  background:
+    radial-gradient(
+      circle at top,
+      #1e3a8a,
+      #0f172a
+    );
 }
 
 .phone-frame {
@@ -1163,7 +2118,9 @@ body {
   background: black;
   border-radius: 40px;
   padding: 12px;
-  box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+
+  box-shadow:
+    0 20px 80px rgba(0,0,0,0.5);
 }
 
 .phone-screen {
@@ -1176,13 +2133,9 @@ body {
 }
 
 /* |--------------------------------------------------------------------------
-| CANVAS DRAG HOVER TARGET SELECTORS
+| CANVAS DRAG OVERLAY HOVER SELECTORS
 |--------------------------------------------------------------------------
 */
-:deep(.canvas-drag-wrapper) {
-  transition: padding 0.1s ease-in-out;
-}
-
 :deep(.canvas-drag-wrapper:hover > .canvas-node-indicator) {
   display: inline-block;
 }
@@ -1190,26 +2143,25 @@ body {
 :deep(.canvas-node-indicator) {
   display: none;
   position: absolute;
-  top: -6px;
-  left: 6px;
+  top: -2px;
+  left: 2px;
   background: #2563eb;
   color: #ffffff;
   font-family: monospace;
-  font-size: 9px;
-  padding: 1px 5px;
+  font-size: 8px;
+  padding: 1px 3px;
   border-radius: 3px;
   z-index: 9999;
   pointer-events: none;
 }
 
 :deep(.structure-container:hover) {
-  outline: 2px dashed #3b82f6 !important;
-  background: rgba(59, 130, 246, 0.08) !important;
-  padding: 4px;
+  outline: 1px dashed #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.04);
 }
 
 :deep(.structure-leaf:hover) {
-  outline: 2px dashed #10b981 !important;
+  outline: 1px dashed #10b981 !important;
 }
 
 .screen-scroll {
@@ -1220,15 +2172,18 @@ body {
   overflow-y: auto;
   overflow-x: auto;
   z-index: 2;
-  padding: 10px;
 }
 
 .layer-background {
   position: absolute;
+
   inset: 0;
+
   width: 100%;
   height: 100%;
+
   overflow: hidden;
+
   z-index: 0;
 }
 
@@ -1276,12 +2231,13 @@ body {
 }
 
 .invalid-json {
-  color: #ef4444;
+  color: red;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   height: 100%;
-  font-weight: 500;
 }
 
 .material-symbols-outlined {
@@ -1294,7 +2250,13 @@ body {
 }
 
 @keyframes drawerUp {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
 }
 </style>
